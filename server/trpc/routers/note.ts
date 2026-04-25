@@ -1,9 +1,15 @@
 import { TRPCError, router, publicProcedure } from '../init'
 import { z } from 'zod'
-import { noteIdInput, noteListItemSchema, noteWithLoreSchema, urlKeyInput } from '@/lib/validators/note'
+import {
+  localeInput,
+  noteIdInput,
+  noteListItemSchema,
+  noteWithLoreSchema,
+  urlKeyInput,
+} from '@/lib/validators/note'
 
 const listOutput = z.array(noteListItemSchema)
-const byIdInput = z.object({ id: noteIdInput })
+const byIdInput = z.object({ id: noteIdInput, locale: localeInput })
 const byUrlKeyInput = z.object({ urlKey: urlKeyInput })
 
 export const noteRouter = router({
@@ -16,23 +22,44 @@ export const noteRouter = router({
     .input(byIdInput)
     .output(noteWithLoreSchema)
     .query(async ({ ctx, input }) => {
+      const locale = input.locale ?? 'en'
       const n = await ctx.db.note.findUnique({ where: { id: input.id } })
       if (!n) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Note not found' })
       }
-      const [fr, caps] = await Promise.all([
+      const [fr, caps, emotion] = await Promise.all([
         ctx.db.loreFragment.findMany({
           where: { noteId: input.id },
           orderBy: { orderIndex: 'asc' },
           select: { body: true },
         }),
         ctx.db.noteCaption.findMany({
-          where: { noteId: input.id },
+          where: { noteId: input.id, locale },
           orderBy: { orderIndex: 'asc' },
           select: { body: true },
         }),
+        n.emotionId
+          ? ctx.db.emotion.findUnique({ where: { id: n.emotionId } })
+          : Promise.resolve(null),
       ])
-      return { ...n, loreFragments: fr.map((f) => f.body), captions: caps }
+      const fallbackCaps =
+        caps.length === 0
+          ? await ctx.db.noteCaption.findMany({
+              where: { noteId: input.id, locale: 'en' },
+              orderBy: { orderIndex: 'asc' },
+              select: { body: true },
+            })
+          : caps
+      const emotionName =
+        locale.startsWith('pl')
+          ? (emotion?.namePl ?? null)
+          : (emotion?.nameEn ?? emotion?.namePl ?? null)
+      return {
+        ...n,
+        emotionName,
+        loreFragments: fr.map((f) => f.body),
+        captions: fallbackCaps,
+      }
     }),
 
   getByUrlKey: publicProcedure

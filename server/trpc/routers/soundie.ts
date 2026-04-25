@@ -4,16 +4,59 @@ import {
   completeSessionInput,
   soundieRowSchema,
 } from '@/lib/validators/soundie'
-import {
-  levelFromTotalListenSeconds,
-  loreUnlockedFromTotalListenSeconds,
-} from '@/lib/progress'
 import { noteIdInput } from '@/lib/validators/note'
 
 const playerNoteInput = z.object({
   playerId: z.string().cuid(),
   noteId: noteIdInput,
 })
+
+const LORE_THRESHOLDS_MINUTES = [0, 15, 30, 60, 120] as const
+
+const NOTE_UNLOCK_REQUIREMENTS: Record<number, number> = {
+  2: 15,
+  3: 30,
+  4: 30,
+  5: 60,
+  6: 60,
+  7: 60,
+  8: 120,
+  9: 120,
+  10: 120,
+  11: 120,
+  12: 120,
+}
+
+function calcLoreUnlocked(totalMinutes: number): number {
+  return LORE_THRESHOLDS_MINUTES.filter((m) => totalMinutes >= m).length
+}
+
+function calcLevel(totalMinutes: number): number {
+  return Math.min(5, Math.floor(totalMinutes / 15) + 1)
+}
+
+function getNewlyUnlockedFragments(previousLoreUnlocked: number, newLoreUnlocked: number) {
+  if (newLoreUnlocked <= previousLoreUnlocked) return []
+  const out: number[] = []
+  for (let i = previousLoreUnlocked + 1; i <= newLoreUnlocked; i++) out.push(i)
+  return out
+}
+
+export function calcProgressToNextFragment(totalMinutes: number): {
+  current: number
+  next: number | null
+  percent: number
+} {
+  for (let i = 0; i < LORE_THRESHOLDS_MINUTES.length - 1; i++) {
+    const current = LORE_THRESHOLDS_MINUTES[i]!
+    const next = LORE_THRESHOLDS_MINUTES[i + 1]!
+    if (totalMinutes < next) {
+      const percent = Math.round(((totalMinutes - current) / (next - current)) * 100)
+      return { current, next, percent: Math.min(100, Math.max(0, percent)) }
+    }
+  }
+  return { current: 120, next: null, percent: 100 }
+}
 
 const sessionItemSchema = z.object({
   id: z.string(),
@@ -27,7 +70,62 @@ const sessionsOutputSchema = z.object({
   totalSeconds: z.number().int(),
 })
 
+const getOneOutputSchema = soundieRowSchema.extend({
+  totalMinutes: z.number().int().nonnegative(),
+  progressToNextFragment: z.object({
+    current: z.number().int().nonnegative(),
+    next: z.number().int().nonnegative().nullable(),
+    percent: z.number().int().min(0).max(100),
+  }),
+  availableFragments: z.array(
+    z.object({
+      fragment: z.number().int().min(1).max(5),
+      unlocked: z.boolean(),
+      minutesRequired: z.number().int().nonnegative(),
+      minutesListened: z.number().int().nonnegative(),
+    })
+  ),
+})
+
+const completeSessionOutputSchema = z.object({
+  soundie: soundieRowSchema,
+  session: z.object({
+    id: z.string(),
+    duration: z.number().int().positive(),
+    completedAt: z.coerce.date(),
+  }),
+  diff: z.object({
+    previousLoreLevel: z.number().int().min(0).max(5),
+    newLoreLevel: z.number().int().min(0).max(5),
+    newlyUnlockedFragments: z.array(z.number().int().min(1).max(5)),
+    leveledUp: z.boolean(),
+    newLevel: z.number().int().min(1).max(5),
+    unlockedNextNote: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+        order: z.number().int().positive(),
+      })
+      .nullable(),
+  }),
+})
+
+const unlockNoteOutputSchema = z.object({
+  soundie: soundieRowSchema,
+  alreadyUnlocked: z.boolean(),
+})
+
 export const soundieRouter = router({
+  getAll: publicProcedure
+    .input(z.object({ playerId: z.string().cuid() }))
+    .output(z.array(soundieRowSchema))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.soundie.findMany({
+        where: { playerId: input.playerId },
+        orderBy: { note: { sortOrder: 'asc' } },
+      })
+    }),
+
   getProgress: publicProcedure
     .input(playerNoteInput)
     .output(soundieRowSchema.nullable())
@@ -70,9 +168,80 @@ export const soundieRouter = router({
       }
     }),
 
+  getOne: publicProcedure
+    .input(playerNoteInput)
+    .output(getOneOutputSchema)
+    .query(async ({ ctx, input }) => {
+      const soundie = await ctx.db.soundie.findUnique({
+        where: {
+          playerId_noteId: {
+            playerId: input.playerId,
+            noteId: input.noteId,
+          },
+        },
+      })
+      if (!soundie) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Note ${input.noteId} is not yet unlocked`,
+        })
+      }
+
+      const totalMinutes = Math.floor(soundie.totalListenTime / 60)
+      const availableFragments = LORE_THRESHOLDS_MINUTES.map((threshold, idx) => ({
+        fragment: idx + 1,
+        unlocked: totalMinutes >= threshold,
+        minutesRequired: threshold,
+        minutesListened: totalMinutes,
+      }))
+
+      return {
+        ...soundie,
+        totalMinutes,
+        availableFragments,
+        progressToNextFragment: calcProgressToNextFragment(totalMinutes),
+      }
+    }),
+
+  getSessionHistory: publicProcedure
+    .input(
+      z.object({
+        playerId: z.string().cuid(),
+        noteId: noteIdInput.optional(),
+        limit: z.number().int().min(1).max(100).default(20),
+      })
+    )
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          duration: z.number().int(),
+          completedAt: z.coerce.date(),
+          soundieId: z.string(),
+        })
+      )
+    )
+    .query(async ({ ctx, input }) => {
+      const sessions = await ctx.db.listenSession.findMany({
+        where: {
+          playerId: input.playerId,
+          ...(input.noteId
+            ? {
+                soundie: {
+                  noteId: input.noteId,
+                },
+              }
+            : {}),
+        },
+        orderBy: { completedAt: 'desc' },
+        take: input.limit,
+      })
+      return sessions
+    }),
+
   completeSession: publicProcedure
     .input(completeSessionInput)
-    .output(soundieRowSchema)
+    .output(completeSessionOutputSchema)
     .mutation(async ({ ctx, input }) => {
       const player = await ctx.db.player.findUnique({
         where: { id: input.playerId },
@@ -87,47 +256,180 @@ export const soundieRouter = router({
       }
 
       const updated = await ctx.db.$transaction(async (tx) => {
-        const row = await tx.soundie.upsert({
+        const current = await tx.soundie.findUnique({
           where: {
             playerId_noteId: {
               playerId: input.playerId,
               noteId: input.noteId,
             },
           },
-          create: {
-            playerId: input.playerId,
-            noteId: input.noteId,
-            totalListenTime: input.durationSeconds,
-            level: levelFromTotalListenSeconds(input.durationSeconds),
-            loreUnlocked: loreUnlockedFromTotalListenSeconds(
-              input.durationSeconds
-            ),
-          },
-          update: {
-            totalListenTime: { increment: input.durationSeconds },
-          },
+          include: { note: true },
         })
+        if (!current) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `Soundie for note ${input.noteId} not found. Unlock it first.`,
+          })
+        }
 
-        const total = row.totalListenTime
-        const level = levelFromTotalListenSeconds(total)
-        const loreUnlocked = loreUnlockedFromTotalListenSeconds(total)
+        const prevTotalMinutes = Math.floor(current.totalListenTime / 60)
+        const newTotalSeconds = current.totalListenTime + input.durationSeconds
+        const newTotalMinutes = Math.floor(newTotalSeconds / 60)
+        const previousLoreLevel = current.loreUnlocked
+        const newLoreLevel = calcLoreUnlocked(newTotalMinutes)
+        const newLevel = calcLevel(newTotalMinutes)
 
         const soundie = await tx.soundie.update({
-          where: { id: row.id },
-          data: { level, loreUnlocked, lastSeenAt: new Date() },
+          where: { id: current.id },
+          data: {
+            totalListenTime: newTotalSeconds,
+            level: newLevel,
+            loreUnlocked: Math.min(5, newLoreLevel),
+            lastSeenAt: new Date(),
+          },
         })
 
-        await tx.listenSession.create({
+        const session = await tx.listenSession.create({
           data: {
             playerId: input.playerId,
-            soundieId: soundie.id,
+            soundieId: current.id,
             duration: input.durationSeconds,
           },
         })
 
-        return soundie
+        let unlockedNextNote: { id: string; name: string; order: number } | null = null
+        const nextNote = await tx.note.findFirst({
+          where: { sortOrder: current.note.sortOrder + 1 },
+        })
+        if (nextNote) {
+          const nextOrder = nextNote.sortOrder + 1
+          const requiredMinutes = NOTE_UNLOCK_REQUIREMENTS[nextOrder] ?? 120
+          const existingNext = await tx.soundie.findUnique({
+            where: {
+              playerId_noteId: {
+                playerId: input.playerId,
+                noteId: nextNote.id,
+              },
+            },
+          })
+          const crossedThreshold =
+            prevTotalMinutes < requiredMinutes && newTotalMinutes >= requiredMinutes
+          if (crossedThreshold && !existingNext) {
+            await tx.soundie.create({
+              data: {
+                playerId: input.playerId,
+                noteId: nextNote.id,
+                level: 1,
+                loreUnlocked: 0,
+                totalListenTime: 0,
+              },
+            })
+            unlockedNextNote = {
+              id: nextNote.id,
+              name: nextNote.name,
+              order: nextOrder,
+            }
+          }
+        }
+
+        return {
+          soundie,
+          session: {
+            id: session.id,
+            duration: session.duration,
+            completedAt: session.completedAt,
+          },
+          diff: {
+            previousLoreLevel,
+            newLoreLevel: Math.min(5, newLoreLevel),
+            newlyUnlockedFragments: getNewlyUnlockedFragments(
+              previousLoreLevel,
+              Math.min(5, newLoreLevel)
+            ),
+            leveledUp: newLevel > current.level,
+            newLevel,
+            unlockedNextNote,
+          },
+        }
       })
 
       return updated
     }),
+
+  unlockNote: publicProcedure
+    .input(playerNoteInput)
+    .output(unlockNoteOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const targetNote = await ctx.db.note.findUnique({ where: { id: input.noteId } })
+      if (!targetNote) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: `Note ${input.noteId} not found` })
+      }
+      if (targetNote.sortOrder === 0) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Note C is always unlocked' })
+      }
+
+      const previousNote = await ctx.db.note.findFirst({
+        where: { sortOrder: targetNote.sortOrder - 1 },
+      })
+      if (!previousNote) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Previous note missing' })
+      }
+
+      const previousSoundie = await ctx.db.soundie.findUnique({
+        where: {
+          playerId_noteId: {
+            playerId: input.playerId,
+            noteId: previousNote.id,
+          },
+        },
+      })
+      if (!previousSoundie) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `You have not started listening to ${previousNote.id} yet`,
+        })
+      }
+
+      const totalMinutes = Math.floor(previousSoundie.totalListenTime / 60)
+      const requiredMinutes = NOTE_UNLOCK_REQUIREMENTS[targetNote.sortOrder + 1] ?? 120
+      if (totalMinutes < requiredMinutes) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: `You need ${requiredMinutes} minutes on ${previousNote.id}. You have ${totalMinutes}.`,
+        })
+      }
+
+      const existing = await ctx.db.soundie.findUnique({
+        where: {
+          playerId_noteId: {
+            playerId: input.playerId,
+            noteId: input.noteId,
+          },
+        },
+      })
+
+      const soundie = await ctx.db.soundie.upsert({
+        where: {
+          playerId_noteId: {
+            playerId: input.playerId,
+            noteId: input.noteId,
+          },
+        },
+        create: {
+          playerId: input.playerId,
+          noteId: input.noteId,
+          level: 1,
+          loreUnlocked: 0,
+          totalListenTime: 0,
+        },
+        update: {},
+      })
+
+      return {
+        soundie,
+        alreadyUnlocked: !!existing,
+      }
+    }),
 })
+
+export { LORE_THRESHOLDS_MINUTES, NOTE_UNLOCK_REQUIREMENTS, calcLoreUnlocked }

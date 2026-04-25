@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const noteIdInput = z.string().min(1).max(4)
 
 export const urlKeyInput = z.string().min(1).max(8)
+export const localeInput = z.string().min(2).max(8).optional()
 
 const captionItemSchema = z.object({ body: z.string() })
 
@@ -21,6 +22,7 @@ export const noteBaseSchema = z.object({
   sortOrder: z.number().int().min(0),
   emotionId: z.string().nullable(),
   healingStyle: z.string().nullable(),
+  emotionName: z.string().nullable().optional(),
 })
 
 export const noteWithLoreSchema = noteBaseSchema.extend({

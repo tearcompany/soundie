@@ -5,6 +5,7 @@ import { useSoundieStore } from '@/lib/soundie-store'
 import { trpc } from '@/lib/trpc/react'
 
 export function SoundiePlayerBridge() {
+  const hasHydrated = useSoundieStore((s) => s.hasHydrated)
   const playerId = useSoundieStore((s) => s.playerId)
   const activeNoteId = useSoundieStore((s) => s.activeNoteId)
   const setPlayerId = useSoundieStore((s) => s.setPlayerId)
@@ -18,15 +19,17 @@ export function SoundiePlayerBridge() {
   )
 
   useEffect(() => {
+    if (!hasHydrated) return
     if (playerId) return
     if (ensureRan.current) return
     ensureRan.current = true
     ensure.mutate(undefined, {
       onSuccess: (data) => setPlayerId(data.id),
     })
-  }, [playerId, ensure, setPlayerId])
+  }, [hasHydrated, playerId, ensure, setPlayerId])
 
   useEffect(() => {
+    if (!hasHydrated) return
     if (!progressQuery.isSuccess) return
     if (!progressQuery.data) {
       syncFromRemote(null)
@@ -37,7 +40,7 @@ export function SoundiePlayerBridge() {
       level: progressQuery.data.level,
       loreUnlocked: progressQuery.data.loreUnlocked,
     })
-  }, [progressQuery.isSuccess, progressQuery.data, syncFromRemote])
+  }, [hasHydrated, progressQuery.isSuccess, progressQuery.data, syncFromRemote])
 
   return null
 }

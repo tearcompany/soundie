@@ -26,13 +26,19 @@ const SoundieStateSchema = z.object({
   playerId: z.string().cuid().nullable(),
   progress: ProgressSchema,
   currentSession: SessionSchema,
+  teardropShelfOpen: z.boolean(),
 })
 
 export type Progress = z.infer<typeof ProgressSchema>
 export type Session = z.infer<typeof SessionSchema>
 export type SoundieState = z.infer<typeof SoundieStateSchema>
+type PersistedSoundieState = Pick<
+  SoundieState,
+  'activeNoteId' | 'playerId' | 'progress' | 'currentSession' | 'teardropShelfOpen'
+>
 
 interface SoundieStore extends SoundieState {
+  hasHydrated: boolean
   startSession: (durationSeconds?: number) => void
   stopSession: () => void
   updateSessionElapsed: (elapsed: number) => void
@@ -40,6 +46,8 @@ interface SoundieStore extends SoundieState {
   unlockLore: () => void
   setActiveNote: (id: string) => void
   setPlayerId: (id: string | null) => void
+  setTeardropShelfOpen: (open: boolean) => void
+  markHydrated: () => void
   syncFromRemote: (row: { totalListenTime: number; level: number; loreUnlocked: number } | null) => void
   reset: () => void
 }
@@ -59,6 +67,7 @@ const INITIAL_STATE: SoundieState = {
     duration: 300,
     elapsed: 0,
   },
+  teardropShelfOpen: false,
 }
 
 type V1StateSlice = {
@@ -76,6 +85,7 @@ export const useSoundieStore = create<SoundieStore>()(
   persist(
     (set, get) => ({
       ...INITIAL_STATE,
+      hasHydrated: false,
 
       setActiveNote: (id: string) => {
         if (!isValidNoteId(id)) return
@@ -84,6 +94,14 @@ export const useSoundieStore = create<SoundieStore>()(
 
       setPlayerId: (id: string | null) => {
         set({ playerId: id })
+      },
+
+      setTeardropShelfOpen: (open: boolean) => {
+        set({ teardropShelfOpen: open })
+      },
+
+      markHydrated: () => {
+        set({ hasHydrated: true })
       },
 
       startSession: (durationSeconds = 300) => {
@@ -177,7 +195,22 @@ export const useSoundieStore = create<SoundieStore>()(
     }),
     {
       name: 'soundie-storage',
-      version: 3,
+      version: 4,
+      partialize: (state): PersistedSoundieState => ({
+        activeNoteId: state.activeNoteId,
+        playerId: state.playerId,
+        progress: state.progress,
+        currentSession: state.currentSession,
+        teardropShelfOpen: state.teardropShelfOpen,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.markHydrated()
+        if (!state?.currentSession?.active) return
+        const now = Date.now()
+        const elapsed = Math.floor((now - state.currentSession.startedAt) / 1000)
+        const clamped = Math.min(elapsed, state.currentSession.duration)
+        state.updateSessionElapsed(clamped)
+      },
       migrate: (persisted, version) => {
         if (version < 2) {
           const p = persisted as V1StateSlice
@@ -199,7 +232,11 @@ export const useSoundieStore = create<SoundieStore>()(
         }
         if (version < 3) {
           const p = persisted as SoundieState & { playerId?: string | null }
-          return { ...p, playerId: p.playerId ?? null }
+          return { ...p, playerId: p.playerId ?? null, teardropShelfOpen: false }
+        }
+        if (version < 4) {
+          const p = persisted as SoundieState & { teardropShelfOpen?: boolean }
+          return { ...p, teardropShelfOpen: p.teardropShelfOpen ?? false }
         }
         return persisted as SoundieState
       },

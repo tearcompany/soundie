@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -51,8 +52,81 @@ model ListenSession {
 model Emotion {
   id          String  @id
   namePl      String
+  nameEn      String?
   descriptionPl String
+  descriptionEn String?
   notes       Note[]
+  teardropCards TeardropCard[]
+}
+
+model TeardropDeck {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  version   String
+  source    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cards     TeardropCard[]
+}
+
+model TeardropCard {
+  id          String   @id @default(cuid())
+  deckId      String
+  slug        String
+  name        String
+  phase       String?
+  phaseOrder  Int?
+  arcanaType  String
+  suit        String?
+  cardNumber  Int?
+  sourcePath  String
+  isTemplate  Boolean  @default(false)
+  emotionId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deck        TeardropDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  emotion     Emotion?     @relation(fields: [emotionId], references: [id], onDelete: SetNull)
+  texts       TeardropCardText[]
+  noteLinks   NoteTeardropCard[]
+  outgoing    TeardropCardRelation[] @relation("TeardropOutgoing")
+  incoming    TeardropCardRelation[] @relation("TeardropIncoming")
+
+  @@unique([deckId, slug])
+  @@index([emotionId])
+  @@index([slug])
+  @@index([phase, phaseOrder])
+}
+
+model TeardropCardText {
+  id        String   @id @default(cuid())
+  cardId    String
+  locale    String
+  field     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  card      TeardropCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, locale, field])
+  @@index([cardId, locale])
+}
+
+model TeardropCardRelation {
+  id          String @id @default(cuid())
+  fromCardId  String
+  toCardId    String
+  relationType String
+
+  fromCard    TeardropCard @relation("TeardropOutgoing", fields: [fromCardId], references: [id], onDelete: Cascade)
+  toCard      TeardropCard @relation("TeardropIncoming", fields: [toCardId], references: [id], onDelete: Cascade)
+
+  @@unique([fromCardId, toCardId, relationType])
+  @@index([fromCardId])
+  @@index([toCardId])
 }
 
 model Note {
@@ -74,18 +148,34 @@ model Note {
   fragments          LoreFragment[]
   captions           NoteCaption[]
   soundies           Soundie[]
+  teardropCards      NoteTeardropCard[]
 
   @@index([sortOrder])
+}
+
+model NoteTeardropCard {
+  id         String @id @default(cuid())
+  noteId     String
+  cardId     String
+  sortOrder  Int
+  note       Note        @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  card       TeardropCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, cardId])
+  @@unique([noteId, sortOrder])
+  @@index([noteId])
+  @@index([cardId])
 }
 
 model NoteCaption {
   id         String @id @default(cuid())
   noteId     String
+  locale     String @default("en")
   orderIndex Int
   body       String
   note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
-  @@unique([noteId, orderIndex])
+  @@unique([noteId, locale, orderIndex])
   @@index([noteId])
 }
 

@@ -41,19 +41,26 @@ export function NoteCreature() {
     stopSession,
   } = useSoundieStore()
   const noteQuery = trpc.note.getById.useQuery(
-    { id: activeNoteId },
+    { id: activeNoteId, locale: 'en' },
     { retry: false }
   )
   const syncFromRemote = useSoundieStore((s) => s.syncFromRemote)
   const playerId = useSoundieStore((s) => s.playerId)
+  const teardropShelfOpen = useSoundieStore((s) => s.teardropShelfOpen)
+  const setTeardropShelfOpen = useSoundieStore((s) => s.setTeardropShelfOpen)
 
   const sessionsQuery = trpc.soundie.getSessions.useQuery(
     { playerId: playerId!, noteId: activeNoteId },
     { enabled: !!playerId, staleTime: 10_000, retry: false },
   )
+  const teardropPlaylistQuery = trpc.teardrop.getMappedForNote.useQuery(
+    { noteId: activeNoteId, locale: 'pl' },
+    { staleTime: 30_000, retry: false },
+  )
 
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
-    onSuccess: (row) => {
+    onSuccess: (result) => {
+      const row = result.soundie
       syncFromRemote({
         totalListenTime: row.totalListenTime,
         level: row.level,
@@ -68,7 +75,6 @@ export function NoteCreature() {
     noteQuery.isError && !noteQuery.data && !fallbackDef && !noteQuery.isFetching
   if (!def) return null
   const c = def.chromaHex
-  const loreFragments = noteQuery.data?.loreFragments ?? getLoreFragmentsForNote(activeNoteId)
   const captions = useMemo(
     () => noteQuery.data?.captions?.map((f: { body: string }) => f.body) ?? getCaptionsForNote(activeNoteId),
     [noteQuery.data, activeNoteId],
@@ -82,7 +88,11 @@ export function NoteCreature() {
   const healingStyle = noteQuery.data?.healingStyle ?? def.healingStyle
 
   const healingChips: { label: string; key: string }[] = [
-    ...(emotion ? [{ key: 'emotion', label: emotion.namePl }] : []),
+    ...(noteQuery.data?.emotionName
+      ? [{ key: 'emotion', label: noteQuery.data.emotionName }]
+      : emotion
+        ? [{ key: 'emotion', label: emotion.namePl }]
+        : []),
     ...(healingStyle ? [{ key: 'style', label: healingStyle }] : []),
   ]
   const [isPlaying, setIsPlaying] = useState(false)
@@ -96,6 +106,8 @@ export function NoteCreature() {
   const sessionIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const effectiveTotalListenTime =
     progress.totalListenTime + (currentSession.active ? currentSession.elapsed : 0)
+
+  const loreFragments = noteQuery.data?.loreFragments ?? getLoreFragmentsForNote(activeNoteId)
 
   const loreStageTexts = useMemo(() => {
     const out = [...loreFragments]
@@ -333,6 +345,14 @@ export function NoteCreature() {
       </Suspense>
 
       <div className="mt-8 mb-6 text-center">
+        {/* { <h3 className="text-creature-name mb-1" style={{ color: c }}>
+          {def.name}
+        </h3>}
+        <p className="font-mono text-sm" style={{ color: c }}>
+          {def.synestheticTitlePl}
+        </p>
+        <p className="font-mono text-xs text-ink-muted mt-1">{def.frequency} Hz</p> */}
+
         {activeCaption && (
           <p
             key={captionIndex}
@@ -342,13 +362,6 @@ export function NoteCreature() {
             {activeCaption}
           </p>
         )}
-        <h1 className="text-creature-name mb-1" style={{ color: c }}>
-          {def.name}
-        </h1>
-        <p className="font-mono text-sm" style={{ color: c }}>
-          {def.synestheticTitlePl}
-        </p>
-        <p className="font-mono text-xs text-ink-muted mt-1">{def.frequency} Hz</p>
       </div>
 
       <div className="w-full max-w-md flex flex-col gap-4">
@@ -399,7 +412,6 @@ export function NoteCreature() {
             )}
             <div>
               <p className="mb-3 font-mono text-xs text-ink-muted">Lore</p>
-
               <Carousel
                 className="w-full"
                 setApi={setLoreCarouselApi}
@@ -440,7 +452,7 @@ export function NoteCreature() {
                                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                                 </svg>
                                 <p className="font-mono text-[0.65rem] text-ink-muted">
-                                  Fragment {i + 1} / {LORE_STAGES}
+                                  {i + 1} / {LORE_STAGES}
                                 </p>
                                 <p className="font-mono text-[0.65rem] text-ink-muted">
                                   ~{minsLeft} min to unlock
@@ -459,6 +471,44 @@ export function NoteCreature() {
                   />
                 </div>
               </Carousel>
+              {teardropPlaylistQuery.data && teardropPlaylistQuery.data.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setTeardropShelfOpen(!teardropShelfOpen)}
+                    className="font-mono text-[0.65rem] text-ink-muted underline-offset-4 hover:underline"
+                    aria-expanded={teardropShelfOpen}
+                  >
+                    {teardropShelfOpen ? 'close teardrop shelf' : 'open teardrop shelf'}
+                  </button>
+                  <div
+                    className={cn(
+                      'grid transition-all duration-500 ease-out',
+                      teardropShelfOpen
+                        ? 'mt-3 grid-rows-[1fr] opacity-100'
+                        : 'mt-0 grid-rows-[0fr] opacity-0',
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {teardropPlaylistQuery.data.slice(0, 5).map((card, idx) => (
+                          <span
+                            key={card.id}
+                            className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide"
+                            style={{
+                              borderColor: hexToRgba(c, 0.35),
+                              color: c,
+                              backgroundColor: hexToRgba(c, 0.06),
+                            }}
+                          >
+                            {idx + 1}. {card.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>
