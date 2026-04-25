@@ -1,7 +1,25 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useSoundieStore } from '@/lib/soundie-store'
+import { getCaptionsForNote, getEmotionById, getLoreFragmentsForNote, getNoteById } from '@/lib/notes'
+import { hexToRgba } from '@/lib/hex-rgba'
+import { trpc } from '@/lib/trpc/react'
+import { LockedNotes } from '@/components/locked-notes'
+import {
+  MAX_LORE_FRAGMENTS,
+  loreUnlockStatusFromTotalListenSeconds,
+  secondsRequiredForLoreFragment,
+} from '@/lib/progress'
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
+import { cn } from '@/lib/utils'
 
 interface AudioContextType {
   ctx: AudioContext | null
@@ -10,8 +28,63 @@ interface AudioContextType {
   convolver: ConvolverNode | null
 }
 
+const LORE_STAGES = MAX_LORE_FRAGMENTS
+
 export function NoteCreature() {
-  const { note, currentSession, startSession, updateSessionElapsed, completeSession, stopSession } = useSoundieStore()
+  const {
+    activeNoteId,
+    progress,
+    currentSession,
+    startSession,
+    updateSessionElapsed,
+    completeSession,
+    stopSession,
+  } = useSoundieStore()
+  const noteQuery = trpc.note.getById.useQuery(
+    { id: activeNoteId },
+    { retry: false }
+  )
+  const syncFromRemote = useSoundieStore((s) => s.syncFromRemote)
+  const playerId = useSoundieStore((s) => s.playerId)
+
+  const sessionsQuery = trpc.soundie.getSessions.useQuery(
+    { playerId: playerId!, noteId: activeNoteId },
+    { enabled: !!playerId, staleTime: 10_000, retry: false },
+  )
+
+  const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
+    onSuccess: (row) => {
+      syncFromRemote({
+        totalListenTime: row.totalListenTime,
+        level: row.level,
+        loreUnlocked: row.loreUnlocked,
+      })
+      sessionsQuery.refetch()
+    },
+  })
+  const fallbackDef = getNoteById(activeNoteId) ?? getNoteById('C')
+  const def = noteQuery.data ?? fallbackDef
+  const showNoteLoadError =
+    noteQuery.isError && !noteQuery.data && !fallbackDef && !noteQuery.isFetching
+  if (!def) return null
+  const c = def.chromaHex
+  const loreFragments = noteQuery.data?.loreFragments ?? getLoreFragmentsForNote(activeNoteId)
+  const captions = useMemo(
+    () => noteQuery.data?.captions?.map((f: { body: string }) => f.body) ?? getCaptionsForNote(activeNoteId),
+    [noteQuery.data, activeNoteId],
+  )
+  const captionIndex = captions.length > 0
+    ? Math.floor(currentSession.elapsed / 20) % captions.length
+    : 0
+  const activeCaption = captions[captionIndex] ?? null
+
+  const emotion = getEmotionById(noteQuery.data?.emotionId ?? def.emotionId ?? '')
+  const healingStyle = noteQuery.data?.healingStyle ?? def.healingStyle
+
+  const healingChips: { label: string; key: string }[] = [
+    ...(emotion ? [{ key: 'emotion', label: emotion.namePl }] : []),
+    ...(healingStyle ? [{ key: 'style', label: healingStyle }] : []),
+  ]
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<AudioContextType>({
     ctx: null,
@@ -21,25 +94,55 @@ export function NoteCreature() {
   })
   const animationRef = useRef<number | null>(null)
   const sessionIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const effectiveTotalListenTime =
+    progress.totalListenTime + (currentSession.active ? currentSession.elapsed : 0)
 
-  // Calculate creature size based on level and listen time
-  const creatureSize = 160 + (note.level - 1) * 30 + Math.min(note.totalListenTime / 1200, 50)
-  const glowIntensity = currentSession.active ? 0.7 : 0.4
+  const loreStageTexts = useMemo(() => {
+    const out = [...loreFragments]
+    while (out.length < LORE_STAGES) out.push('')
+    return out.slice(0, LORE_STAGES)
+  }, [loreFragments])
 
-  // Lore array
-  const loreFragments = [
-    "In the Pythagorean system, C was considered the first emanation of silence — the moment before music begins.",
-    "Ancient cultures believed C was the frequency of the Earth itself—grounding, stabilizing, returning us home.",
-    "Medieval monks sang C to align the body with the cosmos. Its vibration was said to heal the spine.",
-    "In Ayurvedic medicine, C resonates with the root chakra—the foundation of all energy and stability.",
-    "Modern neuroscience shows C-frequency sounds reduce cortisol and activate the parasympathetic nervous system.",
-  ]
+  const [loreCarouselApi, setLoreCarouselApi] = useState<CarouselApi | null>(null)
+  const [justUnlocked, setJustUnlocked] = useState<number | null>(null)
+  const loreStatus = useMemo(
+    () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
+    [effectiveTotalListenTime]
+  )
+  const prevLoreRef = useRef(loreStatus.unlockedFragments)
 
-  const nextLoreUnlock = (loreUnlocked: number) => {
-    const minutesNeeded = (loreUnlocked + 1) * 15
-    const minutesHad = Math.floor(note.totalListenTime / 60)
-    return Math.max(0, minutesNeeded - minutesHad)
+  const loreStageUnlocked = (index: number) => index < loreStatus.unlockedFragments
+
+  const minutesToUnlockFragment = (index: number) => {
+    const requiredSec = secondsRequiredForLoreFragment(index + 1)
+    const remaining = Math.max(0, requiredSec - effectiveTotalListenTime)
+    return Math.ceil(remaining / 60)
   }
+
+  const loreXpPercent = loreStatus.progressWithinCurrentFragmentPercent
+  const minutesToNextLore = Math.ceil(loreStatus.secondsToNextUnlock / 60)
+
+  useEffect(() => {
+    if (!loreCarouselApi) return
+    const idx = Math.max(
+      0,
+      Math.min(LORE_STAGES - 1, loreStatus.unlockedFragments - 1)
+    )
+    queueMicrotask(() => loreCarouselApi.scrollTo(idx, true))
+  }, [loreCarouselApi, activeNoteId, loreStatus.unlockedFragments])
+
+  useEffect(() => {
+    const prev = prevLoreRef.current
+    if (loreStatus.unlockedFragments > prev) {
+      const newIdx = loreStatus.unlockedFragments - 1
+      setJustUnlocked(newIdx)
+      setTimeout(() => setJustUnlocked(null), 3500)
+      if (loreCarouselApi) {
+        queueMicrotask(() => loreCarouselApi.scrollTo(newIdx))
+      }
+    }
+    prevLoreRef.current = loreStatus.unlockedFragments
+  }, [loreStatus.unlockedFragments, loreCarouselApi])
 
   // Initialize Web Audio
   useEffect(() => {
@@ -98,10 +201,20 @@ export function NoteCreature() {
       updateSessionElapsed(elapsed)
 
       if (elapsed >= currentSession.duration) {
+        const credited = Math.min(elapsed, currentSession.duration)
         stopSession()
         completeSession()
         setIsPlaying(false)
         pauseAudio()
+        const pid = useSoundieStore.getState().playerId
+        const nid = useSoundieStore.getState().activeNoteId
+        if (pid && credited > 0) {
+          completeRemoteSession({
+            playerId: pid,
+            noteId: nid,
+            durationSeconds: credited,
+          })
+        }
       }
     }, 100)
 
@@ -111,7 +224,15 @@ export function NoteCreature() {
         sessionIntervalRef.current = null
       }
     }
-  }, [currentSession.active, currentSession.startedAt, currentSession.duration, updateSessionElapsed, stopSession, completeSession])
+  }, [
+    currentSession.active,
+    currentSession.startedAt,
+    currentSession.duration,
+    updateSessionElapsed,
+    stopSession,
+    completeSession,
+    completeRemoteSession,
+  ])
 
   // Play/pause audio
   const toggleAudio = () => {
@@ -134,7 +255,7 @@ export function NoteCreature() {
     // Create new oscillator
     const osc = ctx.createOscillator()
     osc.type = 'sine'
-    osc.frequency.value = note.frequency
+    osc.frequency.value = def.frequency
 
     // Create envelope for smooth start
     const gain = audioRef.current.gain!
@@ -169,6 +290,14 @@ export function NoteCreature() {
     setIsPlaying(false)
   }
 
+  useEffect(() => {
+    const ctx = audioRef.current.ctx
+    const osc = audioRef.current.oscillator
+    if (osc && ctx) {
+      osc.frequency.setValueAtTime(def.frequency, ctx.currentTime)
+    }
+  }, [def.frequency])
+
   // Breathing animation
   useEffect(() => {
     if (!isPlaying && !currentSession.active) return
@@ -192,173 +321,219 @@ export function NoteCreature() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center px-4">
-      {/* Main creature section */}
-      <div className="flex flex-col items-center gap-12 mb-16">
-        {/* Creature visual */}
-        <div className="relative">
-          {/* Glow background */}
-          <div
-            className="absolute inset-0 rounded-full transition-all duration-300"
-            style={{
-              width: creatureSize + 40,
-              height: creatureSize + 40,
-              backgroundColor: `rgba(255, 107, 74, ${glowIntensity * 0.15})`,
-              filter: `blur(${20 + (currentSession.active ? 10 : 0)}px)`,
-              left: -20,
-              top: -20,
-            }}
-          />
+    <div className="flex w-full min-h-0 flex-1 flex-col items-center px-4 pb-8">
+      {showNoteLoadError && (
+        <p className="mb-4 mt-4 max-w-md text-center font-mono text-xs text-coral-dark">
+          Could not load this note. Is the database set up?
+        </p>
+      )}
 
-          {/* Creature blob */}
-          <svg
-            width={creatureSize}
-            height={creatureSize}
-            viewBox="0 0 200 200"
-            className="relative z-10 transition-all duration-300"
-            style={{
-              filter: currentSession.active ? 'drop-shadow(0 0 30px rgba(255, 107, 74, 0.4))' : 'drop-shadow(0 0 15px rgba(255, 107, 74, 0.2))',
-              animation: isPlaying ? 'breathe 4s ease-in-out infinite' : 'none',
-            }}
+      <Suspense fallback={null}>
+        <LockedNotes />
+      </Suspense>
+
+      <div className="mt-8 mb-6 text-center">
+        {activeCaption && (
+          <p
+            key={captionIndex}
+            className="font-mono text-xs italic text-ink-muted mb-3 max-w-xs mx-auto leading-relaxed transition-opacity duration-700"
+            style={{ color: hexToRgba(c, 0.7) }}
           >
-            {/* Organic blob shape */}
-            <path
-              d="M 100 50 C 130 45, 155 65, 160 95 C 165 125, 145 155, 115 160 C 85 165, 50 150, 45 115 C 40 85, 65 45, 100 50 Z"
-              fill="url(#creatureGradient)"
-              opacity={note.level / 5 * 0.8 + 0.3}
-            />
-
-            {/* Gradient definition */}
-            <defs>
-              <radialGradient id="creatureGradient" cx="40%" cy="40%">
-                <stop offset="0%" stopColor="#FF8C6E" />
-                <stop offset="100%" stopColor="#FF6B4A" />
-              </radialGradient>
-            </defs>
-
-            {/* Eyes - more visible at higher levels */}
-            {note.level >= 2 && (
-              <>
-                <circle cx="75" cy="85" r={4 + note.level} fill="rgba(26, 20, 16, 0.5)" />
-                <circle cx="125" cy="85" r={4 + note.level} fill="rgba(26, 20, 16, 0.5)" />
-              </>
-            )}
-
-            {/* Mouth/detail - more visible at higher levels */}
-            {note.level >= 3 && (
-              <path
-                d="M 85 120 Q 100 130, 115 120"
-                stroke="rgba(26, 20, 16, 0.3)"
-                strokeWidth="2"
-                fill="none"
-              />
-            )}
-          </svg>
-        </div>
-
-        {/* Creature name */}
-        <div className="text-center">
-          <h1 className="text-creature-name text-coral mb-2">{note.name}</h1>
-          <p className="text-mono text-ink-muted">{note.frequency} Hz</p>
-        </div>
-
-        {/* Progress section */}
-        {currentSession.active && (
-          <div className="w-full max-w-xs">
-            <div className="mb-4">
-              <p className="text-sm text-ink-muted text-center mb-2 font-mono">
-                Listening Session
-              </p>
-              <div className="bg-pearl-dark rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-full bg-coral transition-all duration-100"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <p className="text-xs text-ink-muted text-center mt-2 font-mono">
-                {formatTime(currentSession.elapsed)} / {formatTime(currentSession.duration)}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* XP/Growth section */}
-        <div className="w-full max-w-xs">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-ink-muted font-mono">Level {note.level}</p>
-            <p className="text-xs text-ink-muted font-mono">
-              {Math.floor(note.totalListenTime / 60)}m {note.totalListenTime % 60}s
-            </p>
-          </div>
-          <div className="bg-pearl-dark rounded-full h-3 overflow-hidden">
-            <div
-              className="h-full bg-coral transition-all duration-500"
-              style={{
-                width: `${((note.totalListenTime % 600) / 600) * 100}%`,
-              }}
-            />
-          </div>
-          <p className="text-xs text-ink-muted text-center mt-2 font-mono">
-            {600 - (note.totalListenTime % 600)}s to level up
+            {activeCaption}
           </p>
-        </div>
-
-        {/* Listen button */}
-        <button
-          onClick={toggleAudio}
-          className={`
-            px-8 py-4 rounded-full font-mono text-sm font-semibold
-            transition-all duration-200 shadow-lg
-            ${
-              isPlaying
-                ? 'bg-coral-dark text-pearl hover:bg-coral glow-coral-intense'
-                : 'bg-coral text-pearl hover:bg-coral-light glow-coral'
-            }
-          `}
-        >
-          {isPlaying ? 'Stop Listening' : 'Listen'}
-        </button>
+        )}
+        <h1 className="text-creature-name mb-1" style={{ color: c }}>
+          {def.name}
+        </h1>
+        <p className="font-mono text-sm" style={{ color: c }}>
+          {def.synestheticTitlePl}
+        </p>
+        <p className="font-mono text-xs text-ink-muted mt-1">{def.frequency} Hz</p>
       </div>
 
-      {/* Lore panel */}
-      <div className="w-full max-w-md px-6 py-8 bg-pearl-dark rounded-2xl border border-pearl-border">
-        <h2 className="text-lora text-lg font-semibold text-ink mb-4">The Foundation</h2>
-
-        <div className="space-y-4 mb-6">
-          <div>
-            <p className="text-xs text-ink-muted font-mono mb-1">Frequency</p>
-            <p className="text-lora text-ink">{note.frequency} Hz</p>
+      <div className="w-full max-w-md flex flex-col gap-4">
+        <div className="lore-card">
+          <div className="mb-5 flex justify-center">
+            <span
+              className="h-12 w-12 rounded-full border-2 border-pearl bg-pearl shadow-sm"
+              style={{ boxShadow: `0 0 0 4px ${hexToRgba(c, 0.2)}` }}
+              aria-hidden
+            >
+              <span
+                className="block h-full w-full rounded-full"
+                style={{ backgroundColor: c }}
+              />
+            </span>
           </div>
-
-          <div>
-            <p className="text-xs text-ink-muted font-mono mb-1">Healing Property</p>
-            <p className="text-lora text-sm text-ink">
-              Grounding. Stability. The note that anchors all others. Ancient cultures used it to calm the nervous system before sleep.
+          <div className="mb-6 text-center">
+            <h2 className="text-lora text-lg font-semibold text-ink">{def.name}</h2>
+            <p className="font-mono text-sm" style={{ color: c }}>
+              {def.synestheticTitlePl} · {def.element}
             </p>
           </div>
 
-          <div>
-            <p className="text-xs text-ink-muted font-mono mb-2">Lore</p>
-            <p className="text-lora text-sm text-ink italic">
-              "{loreFragments[Math.max(0, note.loreUnlocked - 1)]}"
-            </p>
+          <div className="mb-6 space-y-4 text-center">
+            <div>
+              <p className="mb-1 font-mono text-xs text-ink-muted">Frequency</p>
+              <p className="text-lora text-ink">{def.frequency} Hz</p>
+            </div>
+            {healingChips.length > 0 && (
+              <div>
+                <p className="mb-2 font-mono text-xs text-ink-muted">Leczy</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {healingChips.map((chip) => (
+                    <span
+                      key={chip.key}
+                      className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.65rem] tracking-wide lowercase"
+                      style={{
+                        borderColor: hexToRgba(c, 0.35),
+                        color: c,
+                        backgroundColor: hexToRgba(c, 0.07),
+                      }}
+                    >
+                      {chip.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <p className="mb-3 font-mono text-xs text-ink-muted">Lore</p>
+
+              <Carousel
+                className="w-full"
+                setApi={setLoreCarouselApi}
+                opts={{ align: 'start', loop: false }}
+              >
+                <div className="mx-auto flex w-full items-center gap-1 sm:gap-2">
+                  <CarouselPrevious
+                    type="button"
+                    variant="ghost"
+                    className="!static !h-9 !w-9 shrink-0 !-translate-y-0 border-0 text-ink shadow-none focus-visible:ring-0"
+                  />
+                  <div className="min-w-0 flex-1 outline-none [box-shadow:none]">
+                    <CarouselContent className="-ml-2 min-w-0 sm:-ml-3">
+                      {loreStageTexts.map((text, i) => {
+                        const open = loreStageUnlocked(i)
+                        const isNew = justUnlocked === i
+                        const minsLeft = minutesToUnlockFragment(i)
+                        return (
+                          <CarouselItem key={i} className="basis-full pl-2 sm:pl-3">
+                            {open ? (
+                              <div className={cn('text-center', isNew && 'lore-fragment-unlocked')}>
+                                {isNew && (
+                                  <p className="mb-2 font-mono text-[0.65rem] font-semibold tracking-widest uppercase" style={{ color: c }}>
+                                    Fragment unlocked
+                                  </p>
+                                )}
+                                <p className="font-mono text-[0.65rem] text-ink-muted mb-2">
+                                  {i + 1} / {LORE_STAGES}
+                                </p>
+                                <p className="text-lora mx-auto max-w-prose text-sm italic text-ink leading-relaxed">
+                                  &ldquo;{text}&rdquo;
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 py-2 text-center opacity-50">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-ink-muted">
+                                  <rect x="3" y="11" width="18" height="11" rx="2"/>
+                                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <p className="font-mono text-[0.65rem] text-ink-muted">
+                                  Fragment {i + 1} / {LORE_STAGES}
+                                </p>
+                                <p className="font-mono text-[0.65rem] text-ink-muted">
+                                  ~{minsLeft} min to unlock
+                                </p>
+                              </div>
+                            )}
+                          </CarouselItem>
+                        )
+                      })}
+                    </CarouselContent>
+                  </div>
+                  <CarouselNext
+                    type="button"
+                    variant="ghost"
+                    className="!static !h-9 !w-9 shrink-0 !-translate-y-0 border-0 text-ink shadow-none focus-visible:ring-0"
+                  />
+                </div>
+              </Carousel>
+
+            </div>
+          </div>
+
+          <div className="border-t border-pearl-border pt-5 text-center">
+            <p className="font-mono text-xs text-ink-muted mb-3">Listening Session</p>
+            <button
+              onClick={toggleAudio}
+              className={`
+                w-full rounded-full px-8 py-3 font-mono text-sm font-semibold
+                transition-all duration-200 shadow-md
+                ${isPlaying
+                  ? 'bg-coral-dark text-pearl hover:bg-coral'
+                  : 'bg-coral text-pearl hover:bg-coral-light'}
+              `}
+            >
+              {isPlaying ? 'Stop Listening' : 'Start Listening'}
+            </button>
+
+            {currentSession.active && (
+              <div className="mt-3">
+                <div className="bg-pearl rounded-full h-1 overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-100"
+                    style={{ width: `${progressPercent}%`, backgroundColor: c }}
+                  />
+                </div>
+                <p className="text-xs text-ink-muted text-center mt-2 font-mono">
+                  {formatTime(currentSession.elapsed)} / {formatTime(currentSession.duration)}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="border-t border-pearl-border pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs text-ink-muted font-mono">Lore Discovered</p>
-            <p className="text-sm font-mono font-semibold text-coral">
-              {note.loreUnlocked} / 5
-            </p>
+        <div className="rounded-2xl border border-pearl-border bg-pearl-dark px-6 py-5">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="font-mono text-xs text-ink-muted">Journey</p>
           </div>
 
-          {note.loreUnlocked < 5 ? (
-            <p className="text-xs text-ink-muted">
-              Listen for {nextLoreUnlock(note.loreUnlocked)} more minute{nextLoreUnlock(note.loreUnlocked) !== 1 ? 's' : ''} to reveal the next fragment.
-            </p>
-          ) : (
-            <p className="text-xs text-unlocked font-semibold">All lore unlocked!</p>
+          <div className="mb-3 grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-pearl px-3 py-2 text-center">
+              <p className="font-mono text-lg font-bold text-ink">
+                {sessionsQuery.data?.totalCount ?? '—'}
+              </p>
+              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">sessions</p>
+            </div>
+            <div className="rounded-xl bg-pearl px-3 py-2 text-center">
+              <p className="font-mono text-lg font-bold text-ink">
+                {sessionsQuery.data
+                  ? `${Math.floor(sessionsQuery.data.totalSeconds / 60)}m`
+                  : '—'}
+              </p>
+              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">total listened</p>
+            </div>
+          </div>
+
+          {sessionsQuery.data && sessionsQuery.data.sessions.length > 0 && (
+            <div className="mb-3 space-y-1">
+              {sessionsQuery.data.sessions.slice(0, 3).map((s) => (
+                <div key={s.id} className="flex items-center justify-between">
+                  <p className="font-mono text-[0.65rem] text-ink-muted">
+                    {new Date(s.completedAt).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                  <p className="font-mono text-[0.65rem] text-ink-muted">
+                    +{Math.floor(s.duration / 60)}m {s.duration % 60}s
+                  </p>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

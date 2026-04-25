@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Fraunces, Lora, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import { Providers } from './providers'
 
 const _geist = Geist({ subsets: ["latin"], variable: '--font-sans' });
 const _geistMono = Geist_Mono({ subsets: ["latin"], variable: '--font-mono' });
@@ -10,8 +11,9 @@ const _lora = Lora({ subsets: ["latin"], variable: '--font-lora' });
 const _dmMono = DM_Mono({ subsets: ["latin"], weight: "400", variable: '--font-dm-mono' });
 
 export const metadata: Metadata = {
-  title: 'Soundie — Heal with Living Notes',
-  description: 'A meditative Tamagotchi-style healing sound game where musical notes are living creatures.',
+  title: 'Soundie — Presence Pass | Heal with Living Notes',
+  description:
+    'Soundie: a meditative healing-sound Tamagotchi. Presence Pass — a refinement layer that makes sound feel alive. Twelve living notes, lore, and breath.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -44,7 +46,7 @@ export default function RootLayout({
       '--font-dm-mono': _dmMono.style.fontFamily,
     } as React.CSSProperties}>
       <body className="font-sans antialiased bg-pearl">
-        {children}
+        <Providers>{children}</Providers>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

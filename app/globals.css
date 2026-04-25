@@ -140,7 +140,60 @@
   }
 }
 
+@keyframes lore-sheen {
+  0%   { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%)  skewX(-20deg); }
+}
+
+@keyframes lore-unlock {
+  0%   { opacity: 0; transform: scale(0.96) translateY(4px); }
+  60%  { opacity: 1; transform: scale(1.01) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+@keyframes xp-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 @layer utilities {
+  .lore-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid var(--pearl-border);
+    background: linear-gradient(
+      135deg,
+      rgba(245, 240, 235, 0.72) 0%,
+      rgba(232, 224, 216, 0.60) 50%,
+      rgba(245, 240, 235, 0.72) 100%
+    );
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 -1px 0 rgba(0,0,0,0.04) inset,
+      0 8px 32px rgba(26,20,16,0.06),
+      0 2px 8px  rgba(26,20,16,0.04);
+    padding: 1.5rem;
+  }
+
+  .lore-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.38) 50%,
+      transparent 60%
+    );
+    width: 60%;
+    animation: lore-sheen 5s ease-in-out infinite;
+    animation-delay: 1.2s;
+    pointer-events: none;
+  }
+
   .text-creature-name {
     font-family: var(--font-fraunces, serif);
     font-size: 4rem;
@@ -166,6 +219,10 @@
 
   .glow-coral-intense {
     box-shadow: 0 0 40px rgba(255, 107, 74, 0.5);
+  }
+
+  .lore-fragment-unlocked {
+    animation: lore-unlock 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
 

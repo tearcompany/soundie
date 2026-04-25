@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { z } from 'zod'
+import { DEFAULT_NOTE_ID, isValidNoteId } from '@/lib/notes'
+import {
+  levelFromTotalListenSeconds,
+  loreUnlockedFromTotalListenSeconds,
+} from '@/lib/progress'
 
-// Zod schemas for validation
-const NoteSchema = z.object({
-  id: z.literal('C'),
-  name: z.string(),
-  frequency: z.number(),
+const ProgressSchema = z.object({
   level: z.number().int().min(1).max(5),
   totalListenTime: z.number().nonnegative(),
   loreUnlocked: z.number().int().min(0).max(5),
@@ -16,39 +17,37 @@ const NoteSchema = z.object({
 const SessionSchema = z.object({
   active: z.boolean(),
   startedAt: z.number(),
-  duration: z.number().positive(), // target duration in seconds
+  duration: z.number().positive(),
   elapsed: z.number().nonnegative(),
 })
 
 const SoundieStateSchema = z.object({
-  note: NoteSchema,
+  activeNoteId: z.string(),
+  playerId: z.string().cuid().nullable(),
+  progress: ProgressSchema,
   currentSession: SessionSchema,
 })
 
-export type Note = z.infer<typeof NoteSchema>
+export type Progress = z.infer<typeof ProgressSchema>
 export type Session = z.infer<typeof SessionSchema>
 export type SoundieState = z.infer<typeof SoundieStateSchema>
 
-// Store actions
 interface SoundieStore extends SoundieState {
-  // Session actions
   startSession: (durationSeconds?: number) => void
   stopSession: () => void
   updateSessionElapsed: (elapsed: number) => void
-
-  // Growth actions
   completeSession: () => void
   unlockLore: () => void
-
-  // Reset for testing
+  setActiveNote: (id: string) => void
+  setPlayerId: (id: string | null) => void
+  syncFromRemote: (row: { totalListenTime: number; level: number; loreUnlocked: number } | null) => void
   reset: () => void
 }
 
 const INITIAL_STATE: SoundieState = {
-  note: {
-    id: 'C',
-    name: 'The Foundation',
-    frequency: 261.63,
+  activeNoteId: DEFAULT_NOTE_ID,
+  playerId: null,
+  progress: {
     level: 1,
     totalListenTime: 0,
     loreUnlocked: 0,
@@ -57,9 +56,20 @@ const INITIAL_STATE: SoundieState = {
   currentSession: {
     active: false,
     startedAt: 0,
-    duration: 180, // 3 minutes default
+    duration: 300,
     elapsed: 0,
   },
+}
+
+type V1StateSlice = {
+  note?: {
+    id?: string
+    level?: number
+    totalListenTime?: number
+    loreUnlocked?: number
+    lastSeen?: string
+  }
+  currentSession?: Session
 }
 
 export const useSoundieStore = create<SoundieStore>()(
@@ -67,7 +77,16 @@ export const useSoundieStore = create<SoundieStore>()(
     (set, get) => ({
       ...INITIAL_STATE,
 
-      startSession: (durationSeconds = 180) => {
+      setActiveNote: (id: string) => {
+        if (!isValidNoteId(id)) return
+        set({ activeNoteId: id })
+      },
+
+      setPlayerId: (id: string | null) => {
+        set({ playerId: id })
+      },
+
+      startSession: (durationSeconds = 300) => {
         set({
           currentSession: {
             active: true,
@@ -90,18 +109,17 @@ export const useSoundieStore = create<SoundieStore>()(
       updateSessionElapsed: (elapsed: number) => {
         const state = get()
         if (elapsed >= state.currentSession.duration) {
-          // Session completed
-          set((state) => ({
+          set((s) => ({
             currentSession: {
-              ...state.currentSession,
-              elapsed: state.currentSession.duration,
+              ...s.currentSession,
+              elapsed: s.currentSession.duration,
               active: false,
             },
           }))
         } else {
-          set((state) => ({
+          set((s) => ({
             currentSession: {
-              ...state.currentSession,
+              ...s.currentSession,
               elapsed,
             },
           }))
@@ -111,24 +129,13 @@ export const useSoundieStore = create<SoundieStore>()(
       completeSession: () => {
         const state = get()
         const sessionTime = state.currentSession.elapsed
-        const newTotalTime = state.note.totalListenTime + sessionTime
-
-        // Calculate level based on listening time
-        // Level up every 10 minutes (600 seconds)
-        const newLevel = Math.min(
-          5,
-          Math.floor(newTotalTime / 600) + 1
-        )
-
-        // Unlock lore every 15 minutes (900 seconds)
-        const newLoreUnlocked = Math.min(
-          5,
-          Math.floor(newTotalTime / 900)
-        )
+        const newTotalTime = state.progress.totalListenTime + sessionTime
+        const newLevel = levelFromTotalListenSeconds(newTotalTime)
+        const newLoreUnlocked = loreUnlockedFromTotalListenSeconds(newTotalTime)
 
         set({
-          note: {
-            ...state.note,
+          progress: {
+            ...state.progress,
             totalListenTime: newTotalTime,
             level: newLevel,
             loreUnlocked: newLoreUnlocked,
@@ -144,20 +151,58 @@ export const useSoundieStore = create<SoundieStore>()(
 
       unlockLore: () => {
         set((state) => ({
-          note: {
-            ...state.note,
-            loreUnlocked: Math.min(5, state.note.loreUnlocked + 1),
+          progress: {
+            ...state.progress,
+            loreUnlocked: Math.min(5, state.progress.loreUnlocked + 1),
+          },
+        }))
+      },
+
+      syncFromRemote: (row) => {
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            totalListenTime: row?.totalListenTime ?? 0,
+            level: row?.level ?? 1,
+            loreUnlocked: row?.loreUnlocked ?? 0,
+            lastSeen: new Date().toISOString(),
           },
         }))
       },
 
       reset: () => {
-        set(INITIAL_STATE)
+        const pid = get().playerId
+        set({ ...INITIAL_STATE, playerId: pid })
       },
     }),
     {
       name: 'soundie-storage',
-      version: 1,
+      version: 3,
+      migrate: (persisted, version) => {
+        if (version < 2) {
+          const p = persisted as V1StateSlice
+          const n = p?.note
+          return {
+            activeNoteId:
+              n?.id && isValidNoteId(n.id) ? n.id : DEFAULT_NOTE_ID,
+            playerId: null,
+            progress: {
+              level: n?.level ?? 1,
+              totalListenTime: n?.totalListenTime ?? 0,
+              loreUnlocked: n?.loreUnlocked ?? 0,
+              lastSeen: n?.lastSeen ?? new Date().toISOString(),
+            },
+            currentSession: p?.currentSession ?? {
+              ...INITIAL_STATE.currentSession,
+            },
+          }
+        }
+        if (version < 3) {
+          const p = persisted as SoundieState & { playerId?: string | null }
+          return { ...p, playerId: p.playerId ?? null }
+        }
+        return persisted as SoundieState
+      },
     }
   )
 )

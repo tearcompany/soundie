@@ -153,3 +153,354 @@ The app does not demand attention. It rewards stillness. Every interaction shoul
 ---
 
 *Soundie. It heals.*
+
+---
+
+:::writing{variant=“standard” id=“48215”}
+
+SOUNDIE LORE FOUNDATION DOCUMENT
+
+Realistic Fantasy Canon for AI Seed Generation
+
+⸻
+
+CORE PREMISE
+
+Soundie exists in a world almost identical to ours.
+
+Same cities. Same oceans. Same history.
+
+But hidden beneath ordinary civilization is an older layer of reality:
+
+Resonance.
+
+Ancient cultures discovered that tones, intervals, rhythm, and harmonic relationships affect biology, emotion, memory, weathered trauma, social cohesion, and states of consciousness.
+
+Most of this knowledge was fragmented, buried, commercialized, mystified, or forgotten.
+
+Soundie is the rediscovery.
+
+Players do not collect monsters.
+
+They awaken Acoustic Archetypes — living note entities formed where frequency and human attention meet.
+
+⸻
+
+WORLD RULES
+
+1. Notes Are Real Phenomena
+
+Each Soundie corresponds to:
+	•	a real musical pitch
+	•	measurable frequency
+	•	psychoacoustic effect
+	•	emotional tendency
+	•	symbolic personality
+
+They are not imaginary creatures.
+
+They are emergent lifeforms generated through repeated human listening over centuries.
+
+⸻
+
+2. Humanity Accidentally Created Them
+
+Temple chants
+Lullabies
+War drums
+Funeral bells
+Monastic drones
+Folk songs
+Love songs
+Industrial hums
+Synth tones
+
+Whenever humans repeat sound with intention, resonance accumulates.
+
+That accumulation births entities.
+
+⸻
+
+3. They Exist Between Matter and Meaning
+
+They cannot fully live without listeners.
+
+They feed on:
+	•	attention
+	•	stillness
+	•	repetition
+	•	emotional sincerity
+	•	listening time
+
+⸻
+
+4. Modern Science Is Catching Up
+
+Some researchers call them:
+	•	entrainment fields
+	•	memory harmonics
+	•	psychoacoustic signatures
+	•	bio-resonant clusters
+
+Mystics call them spirits.
+
+Both are partially right.
+
+⸻
+
+TONE OF THE WORLD
+
+Use:
+	•	grounded wonder
+	•	believable mystery
+	•	modern realism
+	•	soft sacredness
+	•	subtle fantasy
+	•	emotional intelligence
+
+Avoid:
+	•	cartoon fantasy
+	•	random magic
+	•	cringe destiny language
+	•	fake pseudo-science claims
+	•	childish monster tropes
+
+⸻
+
+NOTE FACTIONS (12 ARCHETYPES)
+
+C — The Foundation
+
+261.63 Hz
+Stability, homeostasis, structure, grounding.
+
+Ancient builders used this resonance in stone halls.
+
+Feels like safety.
+
+⸻
+
+C# — The Threshold
+
+Transition, unease, becoming, doorway states.
+
+Used in rites of passage.
+
+⸻
+
+D — The Walker
+
+Motion, progress, pilgrimage, momentum.
+
+Marches, roads, journeys.
+
+⸻
+
+D# — The Wound
+
+Tension, grief, longing, unresolved beauty.
+
+Common in laments.
+
+⸻
+
+E — The Flame
+
+Vitality, courage, awakening, confidence.
+
+Battle hymns and sunrise songs.
+
+⸻
+
+F — The Keeper
+
+Protection, hearth, family, boundaries.
+
+Domestic songs, lullabies.
+
+⸻
+
+F# — The Mirror
+
+Insight, self-recognition, hidden truth.
+
+Used in trance instruments.
+
+⸻
+
+G — The River
+
+Flow, creativity, language, movement.
+
+Storytelling tones.
+
+⸻
+
+G# — The Crown of Ash
+
+Ambition, cost, sacrifice, transformation.
+
+Royal and tragic scales.
+
+⸻
+
+A — The Beacon
+
+Clarity, alignment, calling, direction.
+
+Tuning standard. Universal anchor.
+
+⸻
+
+A# — The Dreamer
+
+Vision, sleep states, imagination, symbols.
+
+Night chants.
+
+⸻
+
+B — The Veil
+
+Completion, transcendence, dissolution, mystery.
+
+Last step before return to C.
+
+⸻
+
+LORE STRUCTURE PER NOTE
+
+Each note should generate:
+
+1. Core Entry
+
+Who it is in the world.
+
+2. Historical Fragment
+
+A believable story from some culture or era.
+
+3. Scientific Interpretation
+
+Modern explanation attempt.
+
+4. Personal Healing Use
+
+How listening may help emotionally.
+
+5. Secret Myth
+
+Deep hidden truth.
+
+⸻
+
+EXAMPLE ENTRY
+
+C — The Foundation
+
+Core Entry:
+The oldest stable tone known to human settlement patterns.
+
+Historical Fragment:
+Archaeologists found Bronze Age chambers tuned near C resonance through wall spacing and chamber volume.
+
+Scientific Interpretation:
+Low-mid frequency stability may encourage calm breathing regularity.
+
+Healing Use:
+Helpful during anxiety, overwhelm, dissociation.
+
+Secret Myth:
+Cities unconsciously grow around tones they can emotionally survive.
+
+⸻
+
+AI GENERATION RULES
+
+Every lore entry must feel:
+	•	intelligent
+	•	beautiful
+	•	emotionally useful
+	•	semi-believable
+	•	mystical but restrained
+
+Use 70% realism / 30% myth.
+
+⸻
+
+DO NOT CLAIM AS FACT
+
+Use phrases like:
+	•	some traditions suggest
+	•	oral accounts describe
+	•	researchers speculate
+	•	legends say
+	•	practitioners report
+	•	archival fragments imply
+
+Never falsely claim proven medicine.
+
+⸻
+
+OUTPUT FORMAT FOR SEED
+
+Generate JSON:
+
+{
+  "note": "C",
+  "name": "The Foundation",
+  "frequency": 261.63,
+  "color": "#C65A46",
+  "traits": ["grounding","stability","safety"],
+  "lore": {
+    "core": "",
+    "history": "",
+    "science": "",
+    "healing": "",
+    "myth": ""
+  }
+}
+
+
+⸻
+
+MASTER PROMPT FOR AI
+
+Use this document as world canon.
+
+Generate complete lore seed data for all 12 notes in Soundie.
+
+Requirements:
+	•	One JSON object per note
+	•	Respect archetypes
+	•	Realistic fantasy tone
+	•	Beautiful concise writing
+	•	Historically plausible fragments
+	•	No fake medical claims
+	•	Emotional usefulness prioritized
+	•	Each note should feel collectible and alive
+	•	Keep text production-ready for app usage
+
+Return valid JSON array only.
+
+⸻
+
+FUTURE EXPANSION
+
+Later generate:
+	•	chord lore (C+E+G etc.)
+	•	seasonal evolutions
+	•	regional variants
+	•	corrupted notes
+	•	rare harmonic beings
+	•	personalized AI healing journeys
+
+⸻
+
+FINAL DESIGN LAW
+
+The player should feel:
+
+“I am not escaping reality.
+I am discovering the hidden music already inside it.”
+:::

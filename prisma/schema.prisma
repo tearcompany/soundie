@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  soundies  Soundie[]
+  sessions  ListenSession[]
+}
+
+model Soundie {
+  id              String   @id @default(cuid())
+  playerId        String
+  noteId          String
+  level           Int      @default(1)
+  totalListenTime Int      @default(0)
+  loreUnlocked    Int      @default(0)
+  discoveredAt    DateTime @default(now())
+  lastSeenAt      DateTime @updatedAt
+
+  player   Player          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note     Note            @relation(fields: [noteId], references: [id], onDelete: Restrict)
+  sessions ListenSession[]
+
+  @@unique([playerId, noteId])
+  @@index([playerId])
+  @@index([noteId])
+}
+
+model ListenSession {
+  id          String   @id @default(cuid())
+  playerId    String
+  soundieId   String
+  duration    Int
+  completedAt DateTime @default(now())
+
+  player  Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  soundie Soundie @relation(fields: [soundieId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([soundieId])
+}
+
+model Emotion {
+  id          String  @id
+  namePl      String
+  descriptionPl String
+  notes       Note[]
+}
+
+model Note {
+  id                 String         @id
+  short              String
+  name               String
+  frequency          Float
+  urlKey             String         @unique
+  locked             Boolean
+  healing            String
+  chromaHex          String
+  synestheticTitlePl String
+  synestheticLinePl  String
+  element            String
+  sortOrder          Int
+  emotionId          String?
+  healingStyle       String?
+  emotion            Emotion?       @relation(fields: [emotionId], references: [id])
+  fragments          LoreFragment[]
+  captions           NoteCaption[]
+  soundies           Soundie[]
+
+  @@index([sortOrder])
+}
+
+model NoteCaption {
+  id         String @id @default(cuid())
+  noteId     String
+  orderIndex Int
+  body       String
+  note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, orderIndex])
+  @@index([noteId])
+}
+
+model LoreFragment {
+  id         String @id @default(cuid())
+  noteId     String
+  orderIndex Int
+  body       String
+  note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, orderIndex])
+  @@index([noteId])
+}
