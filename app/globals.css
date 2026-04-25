@@ -162,6 +162,11 @@
   100% { transform: scale(1.7); opacity: 0;    }
 }
 
+@keyframes note-pulse-soft {
+  0%, 84%, 100% { transform: scale(1); opacity: 1; }
+  90% { transform: scale(1.035); opacity: 0.94; }
+}
+
 @layer utilities {
   .lore-card {
     position: relative;
@@ -229,6 +234,11 @@
 
   .lore-fragment-unlocked {
     animation: lore-unlock 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .soundie-note-pulse {
+    animation: note-pulse-soft 4s ease-in-out infinite;
+    transform-origin: center;
   }
 }
 

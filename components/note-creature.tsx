@@ -116,7 +116,9 @@ export function NoteCreature() {
   }, [loreFragments])
 
   const [loreCarouselApi, setLoreCarouselApi] = useState<CarouselApi | null>(null)
+  const [selectedLoreIndex, setSelectedLoreIndex] = useState(0)
   const [justUnlocked, setJustUnlocked] = useState<number | null>(null)
+  const [selectedTeardropCardId, setSelectedTeardropCardId] = useState<string | null>(null)
   const loreStatus = useMemo(
     () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
     [effectiveTotalListenTime]
@@ -124,6 +126,27 @@ export function NoteCreature() {
   const prevLoreRef = useRef(loreStatus.unlockedFragments)
 
   const loreStageUnlocked = (index: number) => index < loreStatus.unlockedFragments
+
+  const selectedTeardropCard = useMemo(() => {
+    const cards = teardropPlaylistQuery.data ?? []
+    if (cards.length === 0 || !selectedTeardropCardId) return null
+    return cards.find((card) => card.id === selectedTeardropCardId) ?? null
+  }, [teardropPlaylistQuery.data, selectedTeardropCardId])
+
+  const selectedTeardropTexts = useMemo(() => {
+    if (!selectedTeardropCard) return { affirmation: '', description: '', tagline: '' }
+    const pick = (field: string) =>
+      selectedTeardropCard.texts.find((t) => t.field === field)?.content?.trim() ?? ''
+    return {
+      affirmation: pick('affirmation'),
+      description: pick('description'),
+      tagline: pick('tagline'),
+    }
+  }, [selectedTeardropCard])
+
+  useEffect(() => {
+    setSelectedTeardropCardId(null)
+  }, [activeNoteId])
 
   const minutesToUnlockFragment = (index: number) => {
     const requiredSec = secondsRequiredForLoreFragment(index + 1)
@@ -142,6 +165,16 @@ export function NoteCreature() {
     )
     queueMicrotask(() => loreCarouselApi.scrollTo(idx, true))
   }, [loreCarouselApi, activeNoteId, loreStatus.unlockedFragments])
+
+  useEffect(() => {
+    if (!loreCarouselApi) return
+    const handleSelect = () => setSelectedLoreIndex(loreCarouselApi.selectedScrollSnap())
+    handleSelect()
+    loreCarouselApi.on('select', handleSelect)
+    return () => {
+      loreCarouselApi.off('select', handleSelect)
+    }
+  }, [loreCarouselApi])
 
   useEffect(() => {
     const prev = prevLoreRef.current
@@ -392,7 +425,7 @@ export function NoteCreature() {
             </div>
             {healingChips.length > 0 && (
               <div>
-                <p className="mb-2 font-mono text-xs text-ink-muted">Leczy</p>
+                <p className="mb-2 font-mono text-xs text-ink-muted">Supports</p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {healingChips.map((chip) => (
                     <span
@@ -432,7 +465,13 @@ export function NoteCreature() {
                         return (
                           <CarouselItem key={i} className="basis-full pl-2 sm:pl-3">
                             {open ? (
-                              <div className={cn('text-center', isNew && 'lore-fragment-unlocked')}>
+                              <div
+                                className={cn(
+                                  'text-center transition-opacity duration-300',
+                                  selectedLoreIndex === i ? 'opacity-100' : 'opacity-45',
+                                  isNew && 'lore-fragment-unlocked'
+                                )}
+                              >
                                 {isNew && (
                                   <p className="mb-2 font-mono text-[0.65rem] font-semibold tracking-widest uppercase" style={{ color: c }}>
                                     Fragment unlocked
@@ -492,19 +531,55 @@ export function NoteCreature() {
                     <div className="overflow-hidden">
                       <div className="flex flex-wrap justify-center gap-2">
                         {teardropPlaylistQuery.data.slice(0, 5).map((card, idx) => (
-                          <span
+                          <button
+                            type="button"
                             key={card.id}
-                            className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide"
+                            onClick={() => setSelectedTeardropCardId(card.id)}
+                            className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide transition-all duration-200"
                             style={{
-                              borderColor: hexToRgba(c, 0.35),
+                              borderColor:
+                                selectedTeardropCard?.id === card.id
+                                  ? hexToRgba(c, 0.65)
+                                  : hexToRgba(c, 0.35),
                               color: c,
-                              backgroundColor: hexToRgba(c, 0.06),
+                              backgroundColor:
+                                selectedTeardropCard?.id === card.id
+                                  ? hexToRgba(c, 0.15)
+                                  : hexToRgba(c, 0.06),
                             }}
                           >
                             {idx + 1}. {card.name}
-                          </span>
+                          </button>
                         ))}
                       </div>
+                      {selectedTeardropCard && (
+                        <div
+                          className="mt-4 rounded-xl border px-4 py-3 text-left"
+                          style={{
+                            borderColor: hexToRgba(c, 0.25),
+                            backgroundColor: hexToRgba(c, 0.04),
+                          }}
+                        >
+                          <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
+                            teardrop · {selectedTeardropCard.name}
+                          </p>
+                          {selectedTeardropTexts.affirmation && (
+                            <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
+                              &ldquo;{selectedTeardropTexts.affirmation}&rdquo;
+                            </p>
+                          )}
+                          {!selectedTeardropTexts.affirmation && selectedTeardropTexts.tagline && (
+                            <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
+                              &ldquo;{selectedTeardropTexts.tagline}&rdquo;
+                            </p>
+                          )}
+                          {selectedTeardropTexts.description && (
+                            <p className="mt-2 font-mono text-[0.68rem] leading-relaxed text-ink-muted">
+                              {selectedTeardropTexts.description}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -525,7 +600,7 @@ export function NoteCreature() {
                   : 'bg-coral text-pearl hover:bg-coral-light'}
               `}
             >
-              {isPlaying ? 'Stop Listening' : 'Start Listening'}
+              {isPlaying ? 'Stop Listening' : 'Begin Session'}
             </button>
 
             {currentSession.active && (

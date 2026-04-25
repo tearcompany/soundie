@@ -296,7 +296,7 @@ export function SoundieLanding() {
             href="/play"
             className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-coral px-8 py-4 font-mono text-sm font-semibold text-pearl shadow-md transition-all duration-200 hover:bg-coral-light hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
           >
-            Enter the first note
+            Begin Session
           </Link>
           <p className="font-[family-name:var(--font-lora,serif)] text-xs italic text-ink-muted">
             C · The Foundation · 261.63 Hz

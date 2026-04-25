@@ -256,7 +256,7 @@ export const soundieRouter = router({
       }
 
       const updated = await ctx.db.$transaction(async (tx) => {
-        const current = await tx.soundie.findUnique({
+        let current = await tx.soundie.findUnique({
           where: {
             playerId_noteId: {
               playerId: input.playerId,
@@ -266,10 +266,26 @@ export const soundieRouter = router({
           include: { note: true },
         })
         if (!current) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: `Soundie for note ${input.noteId} not found. Unlock it first.`,
+          const created = await tx.soundie.create({
+            data: {
+              playerId: input.playerId,
+              noteId: input.noteId,
+              level: 1,
+              loreUnlocked: 0,
+              totalListenTime: 0,
+            },
           })
+          const withNote = await tx.soundie.findUnique({
+            where: { id: created.id },
+            include: { note: true },
+          })
+          if (!withNote) {
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'Failed to initialize soundie row for session',
+            })
+          }
+          current = withNote
         }
 
         const prevTotalMinutes = Math.floor(current.totalListenTime / 60)

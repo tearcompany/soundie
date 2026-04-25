@@ -90,6 +90,7 @@ export function LockedNotes() {
                           viewBox="0 0 200 200"
                           className={cn(
                             'h-12 w-12 scale-100 transition-all duration-200',
+                            selected && 'soundie-note-pulse',
                             !selected && 'opacity-40 group-hover:scale-110 group-hover:opacity-100',
                           )}
                           style={{ color: entry.chromaHex }}
