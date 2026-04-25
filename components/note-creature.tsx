@@ -31,6 +31,25 @@ interface AudioContextType {
 const LORE_STAGES = MAX_LORE_FRAGMENTS
 
 export function NoteCreature() {
+  const [locale, setLocale] = useState<'pl' | 'en'>('en')
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setLocale(window.navigator.language.toLowerCase().startsWith('pl') ? 'pl' : 'en')
+  }, [])
+
+  const shelfLabels =
+    locale === 'pl'
+      ? {
+          open: 'pokaż półkę teardrop',
+          close: 'ukryj półkę teardrop',
+          title: 'teardrop',
+        }
+      : {
+          open: 'open teardrop shelf',
+          close: 'close teardrop shelf',
+          title: 'teardrop',
+        }
+
   const {
     activeNoteId,
     progress,
@@ -41,7 +60,7 @@ export function NoteCreature() {
     stopSession,
   } = useSoundieStore()
   const noteQuery = trpc.note.getById.useQuery(
-    { id: activeNoteId, locale: 'en' },
+    { id: activeNoteId, locale },
     { retry: false }
   )
   const syncFromRemote = useSoundieStore((s) => s.syncFromRemote)
@@ -54,7 +73,7 @@ export function NoteCreature() {
     { enabled: !!playerId, staleTime: 10_000, retry: false },
   )
   const teardropPlaylistQuery = trpc.teardrop.getMappedForNote.useQuery(
-    { noteId: activeNoteId, locale: 'pl' },
+    { noteId: activeNoteId, locale },
     { staleTime: 30_000, retry: false },
   )
 
@@ -518,7 +537,7 @@ export function NoteCreature() {
                     className="font-mono text-[0.65rem] text-ink-muted underline-offset-4 hover:underline"
                     aria-expanded={teardropShelfOpen}
                   >
-                    {teardropShelfOpen ? 'close teardrop shelf' : 'open teardrop shelf'}
+                    {teardropShelfOpen ? shelfLabels.close : shelfLabels.open}
                   </button>
                   <div
                     className={cn(
@@ -561,7 +580,7 @@ export function NoteCreature() {
                           }}
                         >
                           <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
-                            teardrop · {selectedTeardropCard.name}
+                            {shelfLabels.title} · {selectedTeardropCard.name}
                           </p>
                           {selectedTeardropTexts.affirmation && (
                             <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
