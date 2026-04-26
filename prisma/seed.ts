@@ -1,7 +1,26 @@
 import { PrismaClient } from '@prisma/client'
-import { NOTE_LIST, EMOTIONS, getLoreFragmentsForNote, type NoteEntry } from '../lib/notes'
+import { NOTE_LIST, EMOTIONS } from '../lib/notes'
+import enMessages from '../messages/en.json'
+import plMessages from '../messages/pl.json'
 
 const prisma = new PrismaClient()
+
+type MessagesShape = {
+  noteCreature: {
+    captions: Record<string, string[]>
+    lore: Record<string, string[]>
+  }
+}
+
+const CAPTIONS_BY_LOCALE = {
+  en: (enMessages as MessagesShape).noteCreature.captions,
+  pl: (plMessages as MessagesShape).noteCreature.captions,
+} as const
+
+const LORE_BY_LOCALE = {
+  en: (enMessages as MessagesShape).noteCreature.lore,
+  pl: (plMessages as MessagesShape).noteCreature.lore,
+} as const
 
 type ParsedCard = {
   slug: string
@@ -445,8 +464,8 @@ const NOTE_TEARDROP_PLAYLIST: Record<string, string[]> = {
   B:   ['the-veil', 'the-pause', 'the-abyss', 'the-return', 'the-teardrop-bearer'],
 }
 
-function buildFragments(note: NoteEntry): string[] {
-  return getLoreFragmentsForNote(note.id)
+function buildFragments(noteId: string, locale: 'en' | 'pl'): string[] {
+  return LORE_BY_LOCALE[locale][noteId] ?? []
 }
 
 async function main() {
@@ -573,7 +592,7 @@ async function main() {
 
   let order = 0
   for (const n of NOTE_LIST) {
-    const fragments = buildFragments(n)
+    const fragments = buildFragments(n.id, 'en')
     const noteData = {
       id: n.id,
       short: n.short,
@@ -605,11 +624,14 @@ async function main() {
     }
 
     await prisma.$executeRaw`DELETE FROM "NoteCaption" WHERE "noteId" = ${n.id}`
-    for (let i = 0; i < n.captions.length; i++) {
-      await prisma.$executeRaw`
-        INSERT INTO "NoteCaption" ("id", "noteId", "locale", "orderIndex", "body")
-        VALUES (gen_random_uuid()::text, ${n.id}, 'en', ${i}, ${n.captions[i]!})
-      `
+    for (const locale of ['en', 'pl'] as const) {
+      const captions = CAPTIONS_BY_LOCALE[locale][n.id] ?? []
+      for (let i = 0; i < captions.length; i++) {
+        await prisma.$executeRaw`
+          INSERT INTO "NoteCaption" ("id", "noteId", "locale", "orderIndex", "body")
+          VALUES (gen_random_uuid()::text, ${n.id}, ${locale}, ${i}, ${captions[i]!})
+        `
+      }
     }
 
     order += 1

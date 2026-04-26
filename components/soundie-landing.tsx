@@ -1,7 +1,9 @@
 'use client'
 
-import Link from 'next/link'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
+import { LanguageSwitcher } from '@/components/language-switcher'
 
 type LandingNote = {
   id: string
@@ -10,23 +12,15 @@ type LandingNote = {
   name: string
 }
 
-const NOTES: LandingNote[] = [
-  { id: 'C',  freq: 261.63, hex: '#6B1D1D', name: 'The Foundation' },
-  { id: 'D',  freq: 293.66, hex: '#B45309', name: 'The Dreamer'   },
-  { id: 'E',  freq: 329.63, hex: '#CA8A04', name: 'The Wound'     },
-  { id: 'F',  freq: 349.23, hex: '#4D7C0F', name: 'The Sanctuary' },
-  { id: 'G',  freq: 392.00, hex: '#047857', name: 'The Traveler'  },
-  { id: 'A',  freq: 440.00, hex: '#0284C7', name: 'The Mirror'    },
-  { id: 'B',  freq: 493.88, hex: '#5B21B6', name: 'The Threshold' },
+const NOTES_BASE: Omit<LandingNote, 'name'>[] = [
+  { id: 'C', freq: 261.63, hex: '#6B1D1D' },
+  { id: 'D', freq: 293.66, hex: '#B45309' },
+  { id: 'E', freq: 329.63, hex: '#CA8A04' },
+  { id: 'F', freq: 349.23, hex: '#4D7C0F' },
+  { id: 'G', freq: 392.0, hex: '#047857' },
+  { id: 'A', freq: 440.0, hex: '#0284C7' },
+  { id: 'B', freq: 493.88, hex: '#5B21B6' },
 ]
-
-const LINES = [
-  'Twelve notes. Each one alive.',
-  'Listen long enough — they grow.',
-  'No scores. No timers.',
-  'Only presence.',
-  'Soundie heals.',
-] as const
 
 const PREVIEW_SECONDS = 4
 
@@ -85,48 +79,57 @@ function useNotePreview() {
       gain.gain.linearRampToValueAtTime(0, now + fadeOut)
       const oscRef = osc
       setTimeout(() => {
-        try { oscRef.stop() } catch {}
+        try {
+          oscRef.stop()
+        } catch {}
       }, fadeOut * 1000 + 30)
-      refs.current.osc = null
     }
+    refs.current.osc = null
     setPlayingId(null)
   }, [])
 
-  const play = useCallback((note: LandingNote) => {
-    if (typeof window === 'undefined') return
-    const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    if (!Ctor) return
+  const play = useCallback(
+    (note: LandingNote) => {
+      if (typeof window === 'undefined') return
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      if (!Ctor) return
 
-    if (refs.current.ctx == null) {
-      refs.current.ctx = new Ctor()
-    }
-    const ctx = refs.current.ctx!
-    if (ctx.state === 'suspended') ctx.resume()
+      if (refs.current.ctx == null) {
+        refs.current.ctx = new Ctor()
+      }
+      const ctx = refs.current.ctx!
+      if (ctx.state === 'suspended') ctx.resume()
 
-    stop(true)
+      stop(true)
 
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.value = note.freq
-    const now = ctx.currentTime
-    gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(0.18, now + 0.4)
-    gain.gain.setValueAtTime(0.18, now + PREVIEW_SECONDS - 0.6)
-    gain.gain.linearRampToValueAtTime(0, now + PREVIEW_SECONDS)
-    osc.connect(gain).connect(ctx.destination)
-    osc.start()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.value = note.freq
+      const now = ctx.currentTime
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.4)
+      gain.gain.setValueAtTime(0.18, now + PREVIEW_SECONDS - 0.6)
+      gain.gain.linearRampToValueAtTime(0, now + PREVIEW_SECONDS)
+      osc.connect(gain).connect(ctx.destination)
+      osc.start()
 
-    refs.current.osc = osc
-    refs.current.gain = gain
-    setPlayingId(note.id)
+      refs.current.osc = osc
+      refs.current.gain = gain
+      setPlayingId(note.id)
 
-    refs.current.stopTimer = setTimeout(() => {
-      try { osc.stop() } catch {}
-      refs.current.osc = null
-      setPlayingId((cur) => (cur === note.id ? null : cur))
-    }, PREVIEW_SECONDS * 1000 + 50)
-  }, [stop])
+      refs.current.stopTimer = setTimeout(() => {
+        try {
+          osc.stop()
+        } catch {}
+        refs.current.osc = null
+        setPlayingId((cur) => (cur === note.id ? null : cur))
+      }, PREVIEW_SECONDS * 1000 + 50)
+    },
+    [stop],
+  )
 
   useEffect(() => () => stop(true), [stop])
 
@@ -168,11 +171,21 @@ function NoteOrb({
 }
 
 export function SoundieLanding() {
+  const t = useTranslations('landing')
+  const lines = t.raw('lines') as string[]
+  const notes: LandingNote[] = useMemo(
+    () =>
+      NOTES_BASE.map((n) => ({
+        ...n,
+        name: t(`noteNames.${n.id}`),
+      })),
+    [t],
+  )
   const reducedMotion = usePrefersReducedMotion()
   const { play, stop, playingId } = useNotePreview()
   const [hovered, setHovered] = useState<string | null>(null)
-  const focusedNote = NOTES.find((n) => n.id === (playingId ?? hovered)) ?? null
-  const { line, fade } = useCycledLine(LINES, 3800, reducedMotion)
+  const focusedNote = notes.find((n) => n.id === (playingId ?? hovered)) ?? null
+  const { line, fade } = useCycledLine(lines, 3800, reducedMotion)
 
   const handleSelect = useCallback(
     (note: LandingNote) => {
@@ -185,6 +198,16 @@ export function SoundieLanding() {
     [play, stop, playingId],
   )
 
+  const steps = useMemo(
+    () =>
+      [
+        { k: 'one', titleKey: 'step1Title' as const, bodyKey: 'step1Body' as const },
+        { k: 'two', titleKey: 'step2Title' as const, bodyKey: 'step2Body' as const },
+        { k: 'three', titleKey: 'step3Title' as const, bodyKey: 'step3Body' as const },
+      ] as const,
+    [],
+  )
+
   return (
     <div
       className="relative min-h-dvh overflow-hidden transition-colors duration-1000"
@@ -195,7 +218,7 @@ export function SoundieLanding() {
       }}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        {NOTES.map((n, i) => (
+        {notes.map((n, i) => (
           <span
             key={n.id}
             className="absolute rounded-full blur-3xl transition-opacity duration-700"
@@ -212,14 +235,19 @@ export function SoundieLanding() {
         ))}
       </div>
 
-      <header className="relative z-10 flex items-center justify-between border-b border-pearl-border/40 px-6 py-5">
+      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-pearl-border/40 px-6 py-5">
         <Link
           href="/"
           className="font-[family-name:var(--font-fraunces,serif)] text-xl font-semibold tracking-tight text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-coral rounded-sm"
         >
-          Soundie
+          {t('brand')}
         </Link>
-        <p className="font-mono text-xs text-ink-muted">261.63 – 493.88 Hz</p>
+        <div className="flex flex-shrink-0 items-center gap-3 sm:gap-4">
+          <LanguageSwitcher />
+          <p className="text-right font-mono text-[0.65rem] text-ink-muted sm:text-xs">
+            {t('freqRange')}
+          </p>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-xl px-6 pb-24 pt-20 sm:pt-28">
@@ -235,24 +263,25 @@ export function SoundieLanding() {
         </p>
 
         <h1 className="text-center font-[family-name:var(--font-fraunces,serif)] text-4xl font-bold leading-tight text-ink sm:text-5xl">
-          Sound that knows<br />you&apos;re here.
+          {t('headlineLine1')}
+          <br />
+          {t('headlineLine2')}
         </h1>
 
         <p className="mt-6 text-center font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink-muted">
-          A meditative world of living notes. Each one heals something different.
-          The longer you listen, the more it reveals.
+          {t('subhead')}
         </p>
 
         <p className="mt-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted">
-          Tap a note to hear it
+          {t('tapHint')}
         </p>
 
         <div
           className="mt-6 flex flex-wrap justify-center gap-3"
           role="group"
-          aria-label="Listen to a note from the Soundie scale"
+          aria-label={t('ariaNoteGroup')}
         >
-          {NOTES.map((n) => {
+          {notes.map((n) => {
             const isHovered = hovered === n.id
             const isPlaying = playingId === n.id
             const active = isHovered || isPlaying
@@ -266,7 +295,7 @@ export function SoundieLanding() {
                 onFocus={() => setHovered(n.id)}
                 onBlur={() => setHovered((cur) => (cur === n.id ? null : cur))}
                 aria-pressed={isPlaying}
-                aria-label={`Play ${n.name} (${n.freq.toFixed(2)} Hz)`}
+                aria-label={t('playAria', { name: n.name, freq: n.freq.toFixed(2) })}
                 className="group relative flex flex-col items-center gap-1.5 rounded-2xl border px-4 py-3 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
                 style={{
                   borderColor: active ? n.hex : 'var(--pearl-border)',
@@ -276,7 +305,12 @@ export function SoundieLanding() {
                   boxShadow: isPlaying ? `0 8px 24px -12px ${n.hex}80` : 'none',
                 }}
               >
-                <NoteOrb note={n} hovered={isHovered} playing={isPlaying} reducedMotion={reducedMotion} />
+                <NoteOrb
+                  note={n}
+                  hovered={isHovered}
+                  playing={isPlaying}
+                  reducedMotion={reducedMotion}
+                />
                 <span
                   className="font-mono text-[0.65rem] font-semibold tracking-wide transition-colors duration-300"
                   style={{ color: active ? n.hex : 'var(--ink-muted)' }}
@@ -296,55 +330,50 @@ export function SoundieLanding() {
             href="/play"
             className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-coral px-8 py-4 font-mono text-sm font-semibold text-pearl shadow-md transition-all duration-200 hover:bg-coral-light hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
           >
-            Begin Session
+            {t('cta')}
           </Link>
           <p className="font-[family-name:var(--font-lora,serif)] text-xs italic text-ink-muted">
-            C · The Foundation · 261.63 Hz
+            {t('footnote')}
           </p>
         </div>
 
         <section
           className="mx-auto mt-24 grid max-w-md grid-cols-1 gap-5 sm:grid-cols-3"
-          aria-label="How Soundie works"
+          aria-label={t('howItWorks')}
         >
-          {[
-            { k: 'one',   t: 'Listen', d: 'Choose a note. Stay with it. The frequency does the rest.' },
-            { k: 'two',   t: 'Grow',   d: 'Each session feeds your note. It deepens, slowly, like memory.' },
-            { k: 'three', t: 'Reveal', d: 'Lore unlocks as time passes. The note tells you what it knows.' },
-          ].map((s, i) => (
+          {steps.map((s, i) => (
             <div
               key={s.k}
               className="rounded-xl border border-pearl-border/60 bg-pearl/60 px-4 py-4 backdrop-blur-sm"
             >
               <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-coral">
-                Step {String(i + 1).padStart(2, '0')}
+                {t('stepLabel', { num: String(i + 1).padStart(2, '0') })}
               </p>
               <p className="mt-1 font-[family-name:var(--font-fraunces,serif)] text-lg font-semibold text-ink">
-                {s.t}
+                {t(s.titleKey)}
               </p>
               <p className="mt-1 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink-muted">
-                {s.d}
+                {t(s.bodyKey)}
               </p>
             </div>
           ))}
         </section>
 
         <p className="mx-auto mt-16 max-w-md text-center font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink-muted">
-          Soundie does not demand your attention. It rewards your stillness.
+          {t('closing')}
         </p>
       </main>
 
       <footer className="relative z-10 border-t border-pearl-border/40 px-6 py-7">
         <div className="mx-auto flex max-w-xl flex-col items-center gap-2 text-center sm:flex-row sm:justify-between sm:text-left">
           <p className="font-mono text-[0.65rem] tracking-widest text-ink-muted uppercase">
-            Soundie — it heals.
+            {t('footerTagline')}
           </p>
           <p className="font-mono text-[0.6rem] text-ink-muted/70">
-            © {new Date().getFullYear()} · Presence Pass
+            {t('footerCopyright', { year: new Date().getFullYear() })}
           </p>
         </div>
       </footer>
-
     </div>
   )
 }

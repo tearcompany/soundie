@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
 import { useSoundieStore } from '@/lib/soundie-store'
 import { isValidNoteId, noteIdFromUrlKey, urlKeyForNoteId } from '@/lib/notes'
 import { trpc } from '@/lib/trpc/react'

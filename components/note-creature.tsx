@@ -1,8 +1,9 @@
 'use client'
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useSoundieStore } from '@/lib/soundie-store'
-import { getCaptionsForNote, getEmotionById, getLoreFragmentsForNote, getNoteById } from '@/lib/notes'
+import { getEmotionById, getNoteById } from '@/lib/notes'
 import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
 import { LockedNotes } from '@/components/locked-notes'
@@ -31,24 +32,8 @@ interface AudioContextType {
 const LORE_STAGES = MAX_LORE_FRAGMENTS
 
 export function NoteCreature() {
-  const [locale, setLocale] = useState<'pl' | 'en'>('en')
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    setLocale(window.navigator.language.toLowerCase().startsWith('pl') ? 'pl' : 'en')
-  }, [])
-
-  const shelfLabels =
-    locale === 'pl'
-      ? {
-          open: 'pokaż półkę teardrop',
-          close: 'ukryj półkę teardrop',
-          title: 'teardrop',
-        }
-      : {
-          open: 'open teardrop shelf',
-          close: 'close teardrop shelf',
-          title: 'teardrop',
-        }
+  const locale = useLocale() as 'en' | 'pl'
+  const t = useTranslations('noteCreature')
 
   const {
     activeNoteId,
@@ -94,10 +79,22 @@ export function NoteCreature() {
     noteQuery.isError && !noteQuery.data && !fallbackDef && !noteQuery.isFetching
   if (!def) return null
   const c = def.chromaHex
-  const captions = useMemo(
-    () => noteQuery.data?.captions?.map((f: { body: string }) => f.body) ?? getCaptionsForNote(activeNoteId),
-    [noteQuery.data, activeNoteId],
-  )
+  const captions = useMemo(() => {
+    const key = activeNoteId as
+      | 'C'
+      | 'C#'
+      | 'D'
+      | 'D#'
+      | 'E'
+      | 'F'
+      | 'F#'
+      | 'G'
+      | 'G#'
+      | 'A'
+      | 'A#'
+      | 'B'
+    return t.raw(`captions.${key}`) as string[]
+  }, [activeNoteId, t])
   const captionIndex = captions.length > 0
     ? Math.floor(currentSession.elapsed / 20) % captions.length
     : 0
@@ -126,7 +123,22 @@ export function NoteCreature() {
   const effectiveTotalListenTime =
     progress.totalListenTime + (currentSession.active ? currentSession.elapsed : 0)
 
-  const loreFragments = noteQuery.data?.loreFragments ?? getLoreFragmentsForNote(activeNoteId)
+  const loreFragments = useMemo(() => {
+    const key = activeNoteId as
+      | 'C'
+      | 'C#'
+      | 'D'
+      | 'D#'
+      | 'E'
+      | 'F'
+      | 'F#'
+      | 'G'
+      | 'G#'
+      | 'A'
+      | 'A#'
+      | 'B'
+    return t.raw(`lore.${key}`) as string[]
+  }, [activeNoteId, t])
 
   const loreStageTexts = useMemo(() => {
     const out = [...loreFragments]
@@ -174,7 +186,6 @@ export function NoteCreature() {
   }
 
   const loreXpPercent = loreStatus.progressWithinCurrentFragmentPercent
-  const minutesToNextLore = Math.ceil(loreStatus.secondsToNextUnlock / 60)
 
   useEffect(() => {
     if (!loreCarouselApi) return
@@ -388,7 +399,7 @@ export function NoteCreature() {
     <div className="flex w-full min-h-0 flex-1 flex-col items-center px-4 pb-8">
       {showNoteLoadError && (
         <p className="mb-4 mt-4 max-w-md text-center font-mono text-xs text-coral-dark">
-          Could not load this note. Is the database set up?
+          {t('loadError')}
         </p>
       )}
 
@@ -439,12 +450,12 @@ export function NoteCreature() {
 
           <div className="mb-6 space-y-4 text-center">
             <div>
-              <p className="mb-1 font-mono text-xs text-ink-muted">Frequency</p>
+              <p className="mb-1 font-mono text-xs text-ink-muted">{t('frequency')}</p>
               <p className="text-lora text-ink">{def.frequency} Hz</p>
             </div>
             {healingChips.length > 0 && (
               <div>
-                <p className="mb-2 font-mono text-xs text-ink-muted">Supports</p>
+                <p className="mb-2 font-mono text-xs text-ink-muted">{t('supports')}</p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {healingChips.map((chip) => (
                     <span
@@ -463,7 +474,7 @@ export function NoteCreature() {
               </div>
             )}
             <div>
-              <p className="mb-3 font-mono text-xs text-ink-muted">Lore</p>
+              <p className="mb-3 font-mono text-xs text-ink-muted">{t('loreLabel')}</p>
               <Carousel
                 className="w-full"
                 setApi={setLoreCarouselApi}
@@ -493,7 +504,7 @@ export function NoteCreature() {
                               >
                                 {isNew && (
                                   <p className="mb-2 font-mono text-[0.65rem] font-semibold tracking-widest uppercase" style={{ color: c }}>
-                                    Fragment unlocked
+                                    {t('fragmentUnlocked')}
                                   </p>
                                 )}
                                 <p className="font-mono text-[0.65rem] text-ink-muted mb-2">
@@ -513,7 +524,7 @@ export function NoteCreature() {
                                   {i + 1} / {LORE_STAGES}
                                 </p>
                                 <p className="font-mono text-[0.65rem] text-ink-muted">
-                                  ~{minsLeft} min to unlock
+                                  {t('minsToUnlock', { mins: minsLeft })}
                                 </p>
                               </div>
                             )}
@@ -537,7 +548,7 @@ export function NoteCreature() {
                     className="font-mono text-[0.65rem] text-ink-muted underline-offset-4 hover:underline"
                     aria-expanded={teardropShelfOpen}
                   >
-                    {teardropShelfOpen ? shelfLabels.close : shelfLabels.open}
+                    {teardropShelfOpen ? t('shelfClose') : t('shelfOpen')}
                   </button>
                   <div
                     className={cn(
@@ -580,7 +591,7 @@ export function NoteCreature() {
                           }}
                         >
                           <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
-                            {shelfLabels.title} · {selectedTeardropCard.name}
+                            {t('shelfTitle')} · {selectedTeardropCard.name}
                           </p>
                           {selectedTeardropTexts.affirmation && (
                             <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
@@ -608,7 +619,7 @@ export function NoteCreature() {
           </div>
 
           <div className="border-t border-pearl-border pt-5 text-center">
-            <p className="font-mono text-xs text-ink-muted mb-3">Listening Session</p>
+            <p className="font-mono text-xs text-ink-muted mb-3">{t('listeningSession')}</p>
             <button
               onClick={toggleAudio}
               className={`
@@ -619,7 +630,7 @@ export function NoteCreature() {
                   : 'bg-coral text-pearl hover:bg-coral-light'}
               `}
             >
-              {isPlaying ? 'Stop Listening' : 'Begin Session'}
+              {isPlaying ? t('stopListening') : t('beginSession')}
             </button>
 
             {currentSession.active && (
@@ -640,7 +651,7 @@ export function NoteCreature() {
 
         <div className="rounded-2xl border border-pearl-border bg-pearl-dark px-6 py-5">
           <div className="mb-3 flex items-center justify-between">
-            <p className="font-mono text-xs text-ink-muted">Journey</p>
+            <p className="font-mono text-xs text-ink-muted">{t('journey')}</p>
           </div>
 
           <div className="mb-3 grid grid-cols-2 gap-3">
@@ -648,7 +659,7 @@ export function NoteCreature() {
               <p className="font-mono text-lg font-bold text-ink">
                 {sessionsQuery.data?.totalCount ?? '—'}
               </p>
-              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">sessions</p>
+              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">{t('sessions')}</p>
             </div>
             <div className="rounded-xl bg-pearl px-3 py-2 text-center">
               <p className="font-mono text-lg font-bold text-ink">
@@ -656,7 +667,7 @@ export function NoteCreature() {
                   ? `${Math.floor(sessionsQuery.data.totalSeconds / 60)}m`
                   : '—'}
               </p>
-              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">total listened</p>
+              <p className="font-mono text-[0.6rem] text-ink-muted mt-0.5">{t('totalListened')}</p>
             </div>
           </div>
 

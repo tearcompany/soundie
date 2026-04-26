@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Carousel,
   type CarouselApi,
@@ -15,6 +16,7 @@ import { trpc } from '@/lib/trpc/react'
 import { cn } from '@/lib/utils'
 
 export function LockedNotes() {
+  const t = useTranslations('lockedNotes')
   const { activeNoteId, setNote } = useNoteSelection()
   const listQ = trpc.note.list.useQuery(undefined, { retry: false })
   const notes = listQ.data && listQ.data.length > 0 ? listQ.data : NOTE_LIST
@@ -33,7 +35,7 @@ export function LockedNotes() {
     <div className="w-full shrink-0 bg-gradient-to-t from-pearl via-pearl to-transparent px-6 py-8 pb-12">
       <div className="mx-auto max-w-7xl">
         <p className="pointer-events-auto mb-4 text-center font-mono text-xs text-ink-muted">
-        The next note appears only to the still.
+          {t('caption')}
         </p>
 
         <Carousel
