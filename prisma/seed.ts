@@ -2,25 +2,34 @@ import { PrismaClient } from '@prisma/client'
 import { NOTE_LIST, EMOTIONS } from '../lib/notes'
 import enMessages from '../messages/en.json'
 import plMessages from '../messages/pl.json'
+import noteCaptionsByLocale from '../data/note-captions-by-locale.json'
+import teardropCardTextsEn from '../data/teardrop-card-texts-en.json'
 
 const prisma = new PrismaClient()
 
 type MessagesShape = {
   noteCreature: {
-    captions: Record<string, string[]>
     lore: Record<string, string[]>
   }
 }
 
-const CAPTIONS_BY_LOCALE = {
-  en: (enMessages as MessagesShape).noteCreature.captions,
-  pl: (plMessages as MessagesShape).noteCreature.captions,
-} as const
+const CAPTIONS_BY_LOCALE: Record<'en' | 'pl', Record<string, string[]>> = {
+  en: noteCaptionsByLocale.en as Record<string, string[]>,
+  pl: noteCaptionsByLocale.pl as Record<string, string[]>,
+}
 
 const LORE_BY_LOCALE = {
   en: (enMessages as MessagesShape).noteCreature.lore,
   pl: (plMessages as MessagesShape).noteCreature.lore,
 } as const
+
+type TeardropTextBlock = {
+  tagline: string
+  description: string
+  meaningUpright: string
+  meaningShadow: string
+  affirmation: string
+}
 
 type ParsedCard = {
   slug: string
@@ -449,6 +458,59 @@ const TEARDROP_CARDS: ParsedCard[] = [
   },
 ]
 
+const TEARDROP_EMOTION_BY_SLUG: Record<string, string> = {
+  'the-seed': 'anxiety',
+  'the-soil': 'attachment',
+  'the-anchor': 'anxiety',
+  'the-shell': 'attachment',
+  'the-core': 'shame',
+  'the-stone': 'frustration',
+  'the-branch': 'frustration',
+  'the-tree': 'attachment',
+  'the-stream': 'frustration',
+  'the-tide': 'grief',
+  'the-ebb': 'grief',
+  'the-drift': 'anxiety',
+  'the-surge': 'anger',
+  'the-whisper': 'anxiety',
+  'the-breaker': 'anger',
+  'the-shadow': 'shame',
+  'the-pause': 'guilt',
+  'the-abyss': 'grief',
+  'the-fog': 'anxiety',
+  'the-silence': 'sadness',
+  'the-stillness': 'guilt',
+  'the-veil': 'anxiety',
+  'the-glow': 'dissatisfaction',
+  'the-halo': 'shame',
+  'the-lantern': 'anxiety',
+  'the-sun': 'dissatisfaction',
+  'the-star': 'grief',
+  'the-prism': 'envy',
+  'the-beam': 'frustration',
+  'the-initiate': 'anxiety',
+  'the-path': 'frustration',
+  'the-crossing': 'anxiety',
+  'the-sanctuary': 'attachment',
+  'the-echo': 'grief',
+  'the-pulse': 'anxiety',
+  'the-flame': 'anger',
+  'the-watcher': 'attachment',
+  'the-wave': 'anger',
+  'the-weaver': 'frustration',
+  'the-witness': 'sadness',
+  'the-mirror': 'shame',
+  'the-return': 'grief',
+  'the-bridge': 'attachment',
+  'the-messenger': 'anxiety',
+  'the-guardian': 'attachment',
+  'the-lightkeeper': 'dissatisfaction',
+  'the-spiral': 'shame',
+  'the-teardrop': 'grief',
+  'the-teardrop-bearer': 'grief',
+  'the-vessel': 'guilt',
+}
+
 const NOTE_TEARDROP_PLAYLIST: Record<string, string[]> = {
   C:   ['the-vessel', 'the-seed', 'the-core', 'the-anchor', 'the-path'],
   'C#': ['the-crossing', 'the-echo', 'the-whisper', 'the-veil', 'the-return'],
@@ -543,6 +605,10 @@ async function main() {
   const teardropCardIdBySlug = new Map<string, string>()
 
   for (const card of TEARDROP_CARDS) {
+    const emotionId = TEARDROP_EMOTION_BY_SLUG[card.slug] ?? null
+    if (emotionId == null) {
+      console.warn(`[seed] no Emotion id for teardrop card: ${card.slug}`)
+    }
     const upserted = await prisma.teardropCard.upsert({
       where: { deckId_slug: { deckId: deck.id, slug: card.slug } },
       create: {
@@ -556,6 +622,7 @@ async function main() {
         cardNumber: card.cardNumber,
         sourcePath: 'inline',
         isTemplate: false,
+        emotionId,
       },
       update: {
         name: card.name,
@@ -566,6 +633,7 @@ async function main() {
         cardNumber: card.cardNumber,
         sourcePath: 'inline',
         isTemplate: false,
+        emotionId,
       },
     })
     teardropCardIdBySlug.set(card.slug, upserted.id)
@@ -585,6 +653,29 @@ async function main() {
         create: { cardId: upserted.id, locale: 'pl', field, content },
         update: { content },
       })
+    }
+
+    const enBlock = (teardropCardTextsEn as Record<string, TeardropTextBlock>)[
+      card.slug
+    ]
+    if (enBlock) {
+      const enFields = [
+        ['tagline', enBlock.tagline],
+        ['description', enBlock.description],
+        ['meaning_upright', enBlock.meaningUpright],
+        ['meaning_shadow', enBlock.meaningShadow],
+        ['affirmation', enBlock.affirmation],
+      ] as const
+      for (const [field, content] of enFields) {
+        if (!content) continue
+        await prisma.teardropCardText.upsert({
+          where: { cardId_locale_field: { cardId: upserted.id, locale: 'en', field } },
+          create: { cardId: upserted.id, locale: 'en', field, content },
+          update: { content },
+        })
+      }
+    } else {
+      console.warn(`[seed] missing English teardrop block for: ${card.slug}`)
     }
 
     console.log(`  [card] ${card.slug} (affirmation: ${card.affirmation ? 'yes' : 'NO'})`)

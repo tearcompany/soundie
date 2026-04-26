@@ -1,0 +1,352 @@
+{
+  "the-seed": {
+    "tagline": "A beginning is a decision, not a plan.",
+    "description": "A seed does not know it will become a tree. It still says: “yes.”",
+    "meaningUpright": "Initiation\nIntuitive decision\nFaith without proof",
+    "meaningShadow": "Fear of starting\nNeed for control\nProcrastination",
+    "affirmation": "I begin before I understand."
+  },
+  "the-soil": {
+    "tagline": "The ground decides growth.",
+    "description": "Soil remembers every seed that fell into it. You are what you feed.",
+    "meaningUpright": "Preparation\nFertility\nPatient holding",
+    "meaningShadow": "Barrenness\nPoisoned ground\nNeglect of the basics",
+    "affirmation": "I tend the earth I grow from."
+  },
+  "the-anchor": {
+    "tagline": "Not everything has to flow.",
+    "description": "An anchor is not a prison. It is a choice of where to stop.",
+    "meaningUpright": "Grounding\nStability\nConscious stillness",
+    "meaningShadow": "Stuckness\nFear of change\nHolding to what is past",
+    "affirmation": "I stay where I have chosen to be."
+  },
+  "the-shell": {
+    "tagline": "Protection is a form of love.",
+    "description": "The shell did not close from fear. It made space for the pearl.",
+    "meaningUpright": "Protection\nBoundaries\nInner safe space",
+    "meaningShadow": "Isolation\nHarshness\nFear of contact",
+    "affirmation": "My boundaries are my wisdom."
+  },
+  "the-core": {
+    "tagline": "What is inside is real.",
+    "description": "The center does not seek approval. It burns with no audience.",
+    "meaningUpright": "Essence\nAuthenticity\nInner confidence",
+    "meaningShadow": "Losing yourself\nFalse identity\nEmptiness within",
+    "affirmation": "I am what I am in the center."
+  },
+  "the-stone": {
+    "tagline": "Solidity can be a gift.",
+    "description": "Stone does not apologize for being solid. It endures. It is quiet. It is.",
+    "meaningUpright": "Endurance\nResistance\nUnshapeliness as truth",
+    "meaningShadow": "Rigidity\nFreezing\nInability to change",
+    "affirmation": "I am strong. I do not have to change for anyone."
+  },
+  "the-branch": {
+    "tagline": "Growth does not need permission.",
+    "description": "A branch does not ask if it may grow. It reaches toward the light unapproved.",
+    "meaningUpright": "Expansion\nSpontaneous growth\nLeaning into light",
+    "meaningShadow": "Chaotic overgrowth\nLost structure\nLeaping without root",
+    "affirmation": "I reach toward what feeds me."
+  },
+  "the-tree": {
+    "tagline": "Root and sky at once.",
+    "description": "A tree does not choose—earth or air. It lives in both worlds.",
+    "meaningUpright": "Integration\nMaturity\nBalance between ground and sky",
+    "meaningShadow": "Torn in two\nInstability\nLosing the root",
+    "affirmation": "I am rooted and free at the same time."
+  },
+  "the-stream": {
+    "tagline": "Continuity is a form of courage.",
+    "description": "The stream does not stop when it hits rock. It goes around or carves it.",
+    "meaningUpright": "Flow\nAdaptation\nGentle persistence",
+    "meaningShadow": "Inability to rest\nFleeing depth\nSuperficiality",
+    "affirmation": "I move on without fighting what is."
+  },
+  "the-tide": {
+    "tagline": "The rhythm of in and out is a law.",
+    "description": "Ebb and flow are not chaos—the ocean’s breath.",
+    "meaningUpright": "Rhythm\nCycle\nSurrender to the turn",
+    "meaningShadow": "Irregularity\nFear of the ebb\nResistance to the pattern",
+    "affirmation": "I trust the rhythm that carries me."
+  },
+  "the-ebb": {
+    "tagline": "Ebb is not the end—it is revelation.",
+    "description": "When the water pulls back, it shows what was hidden. The shore.",
+    "meaningUpright": "Quieting\nRevelation\nNatural ending",
+    "meaningShadow": "Abandonment\nFear of loss\nLonging for the past",
+    "affirmation": "I let go of what must flow away."
+  },
+  "the-drift": {
+    "tagline": "Drifting is also movement.",
+    "description": "Not everything needs direction. Sometimes the current knows better.",
+    "meaningUpright": "Surrender\nTrust in the drift\nSpontaneity",
+    "meaningShadow": "Lost\nNo aim\nFleeing responsibility",
+    "affirmation": "I trust where I am carried."
+  },
+  "the-surge": {
+    "tagline": "Power comes in waves.",
+    "description": "A surge of energy is a gift—use it before it subsides.",
+    "meaningUpright": "Energy\nBreakthrough moment\nSurge forward",
+    "meaningShadow": "Rashness\nOverstimulation\nAction with no ground",
+    "affirmation": "I act when the wave is with me."
+  },
+  "the-whisper": {
+    "tagline": "Said quietly—heard deeply.",
+    "description": "A whisper needs stillness. Attention. Readiness.",
+    "meaningUpright": "Intuition\nA subtle sign\nAn inner message",
+    "meaningShadow": "Ignoring intuition\nInner noise\nA sign missed",
+    "affirmation": "I hear what is spoken in the quiet."
+  },
+  "the-breaker": {
+    "tagline": "Break can be release.",
+    "description": "A wave that breaks on rock does not lose—it changes form.",
+    "meaningUpright": "Breakthrough\nOld form shatters\nLiberation through shattering",
+    "meaningShadow": "Destruction\nRage out of control\nPower without wisdom",
+    "affirmation": "What shatters makes room for what is new."
+  },
+  "the-shadow": {
+    "tagline": "The shadow is part of the light.",
+    "description": "A shadow only exists where there is light. Do not war with it.",
+    "meaningUpright": "Integrating the shadow\nSelf-knowledge\nAccepting the dark side",
+    "meaningShadow": "Denial\nProjection\nFear of your own depth",
+    "affirmation": "My shadow is my map."
+  },
+  "the-pause": {
+    "tagline": "Silence between the notes is what makes the music.",
+    "description": "A pause is not a mistake. It is part of the piece.",
+    "meaningUpright": "Rest\nReflection\nA conscious hold",
+    "meaningShadow": "Procrastination\nFreeze\nFear of moving",
+    "affirmation": "I stop because I know I must."
+  },
+  "the-abyss": {
+    "tagline": "The abyss does not devour. It teaches depth.",
+    "description": "To stand on the edge and not fall is courage too.",
+    "meaningUpright": "Facing the void\nDeep change\nPassing through darkness",
+    "meaningShadow": "Fall\nDepression\nLosing the thread",
+    "affirmation": "I am in the dark, and I am not the dark."
+  },
+  "the-fog": {
+    "tagline": "Fog does not hide truth. It asks for slowness.",
+    "description": "When you see nothing, go slower. That is fog’s lesson.",
+    "meaningUpright": "Uncertainty\nGentle navigation\nAccepting not-seeing",
+    "meaningShadow": "Lost\nParalysis\nFear of the unknown",
+    "affirmation": "I go slowly through what I cannot see."
+  },
+  "the-silence": {
+    "tagline": "Silence is not absence. It is presence.",
+    "description": "Silence has a voice. You have to know how to listen.",
+    "meaningUpright": "Inner stillness\nMeaning without words\nDeep attention",
+    "meaningShadow": "Isolation\nStifling\nCut off from self",
+    "affirmation": "In stillness I hear what words never reach."
+  },
+  "the-stillness": {
+    "tagline": "Stillness is not passivity.",
+    "description": "Stillness is gathered power. A choice, not an escape.",
+    "meaningUpright": "Focus\nCentering\nPower in repose",
+    "meaningShadow": "Numbness\nWithdrawal from life\nShutting down",
+    "affirmation": "I am still, and that is enough."
+  },
+  "the-veil": {
+    "tagline": "A veil separates—and also protects.",
+    "description": "Not everything must be seen at once. The veil has its function.",
+    "meaningUpright": "Boundary between worlds\nMystery\nA gentle threshold",
+    "meaningShadow": "Hiding the truth\nSelf-deception\nFear of what would show",
+    "affirmation": "I let the real appear slowly, at its own pace."
+  },
+  "the-glow": {
+    "tagline": "Gentle light does not blind.",
+    "description": "A glow does not shout. It quietly points a way.",
+    "meaningUpright": "Soft hope\nInner warmth\nA subtle sign",
+    "meaningShadow": "Light too dim\nUnseen potential\nFear of shining",
+    "affirmation": "I shine as I can, and that is enough."
+  },
+  "the-halo": {
+    "tagline": "Holiness is not rare. It is possible.",
+    "description": "A halo is not a prize. It is the natural effect of being fully yourself.",
+    "meaningUpright": "Clarity of intent\nBlessing\nLuminous presence",
+    "meaningShadow": "False piety\nSuperiority\nA mask of perfection",
+    "affirmation": "My sacredness is simple and ordinary."
+  },
+  "the-lantern": {
+    "tagline": "The lantern does not ask where you are going.",
+    "description": "A lantern lights one step in front of you. That is enough.",
+    "meaningUpright": "Guidance\nOne step at a time\nLight in the dark",
+    "meaningShadow": "Burnout\nA snuffed wick\nFear of the dark",
+    "affirmation": "I carry light for myself and for those beside me."
+  },
+  "the-sun": {
+    "tagline": "The sun does not ask if you deserve it.",
+    "description": "The sun rises for everyone. No exception. No judgment.",
+    "meaningUpright": "Joy\nSuccess\nFull expression",
+    "meaningShadow": "Ego\nScorching\nKilling shadow with your own light",
+    "affirmation": "I allow myself to be fully here, bright and alive."
+  },
+  "the-star": {
+    "tagline": "Hope exists even after the longest night.",
+    "description": "A star does not warm—it leads. And that is enough.",
+    "meaningUpright": "Hope\nInspiration\nA long view",
+    "meaningShadow": "Scattered\nUnrealistic\nEscape into fantasy",
+    "affirmation": "There is hope. I can see it even now."
+  },
+  "the-prism": {
+    "tagline": "One light—many truths.",
+    "description": "A prism does not change the light. It reveals what was always in it.",
+    "meaningUpright": "Perspective\nMany meanings\nSplitting into parts",
+    "meaningShadow": "Fragmentation\nLost in multiplicity\nInability to synthesize",
+    "affirmation": "I can see many sides without choosing only one."
+  },
+  "the-beam": {
+    "tagline": "Focused light goes deeper.",
+    "description": "A beam is a gift with direction. It knows its aim.",
+    "meaningUpright": "Focus\nIntention\nCutting through the fog",
+    "meaningShadow": "Tunnel vision\nLosing the periphery\nRigidity",
+    "affirmation": "I turn toward what matters, and the rest falls away."
+  },
+  "the-initiate": {
+    "tagline": "Every initiation starts in not-knowing.",
+    "description": "The initiate does not know the way. That is the condition of passage.",
+    "meaningUpright": "A new beginning\nOpenness to learn\nThe novice’s humility",
+    "meaningShadow": "Fear of the first step\nFalse readiness\nDelaying initiation",
+    "affirmation": "I am ready even when I do not know how."
+  },
+  "the-path": {
+    "tagline": "Not a place, but a way of being.",
+    "description": "A path is more than a route—it is a relationship to movement. The journey is a way of thinking.",
+    "meaningUpright": "Process\nOpenness\nIntuitive navigation",
+    "meaningShadow": "Lost\nComparing routes\nCut off from the goal",
+    "affirmation": "I walk, therefore I am."
+  },
+  "the-crossing": {
+    "tagline": "A crossing is not the end. It is a gate.",
+    "description": "A crossroads is a moment of choice. You stand here only once in the same way.",
+    "meaningUpright": "A moment of decision\nPassing a threshold\nA point of no return",
+    "meaningShadow": "Indecision\nFear of crossing\nLonging to go back",
+    "affirmation": "I cross the threshold. On the other side is my life."
+  },
+  "the-sanctuary": {
+    "tagline": "Everyone needs a place that is only theirs.",
+    "description": "A sanctuary is not escape. It is a place you can act from.",
+    "meaningUpright": "Protection\nSafety\nSacred space",
+    "meaningShadow": "Isolation\nFleeing the world\nInability to leave",
+    "affirmation": "I have a place that is mine. I can return to it."
+  },
+  "the-echo": {
+    "tagline": "What you send returns, changed.",
+    "description": "An echo is the world’s answer to your voice. Not the same—but kin.",
+    "meaningUpright": "Understanding your impact\nSpiritual communication\nA sign from the ether",
+    "meaningShadow": "Not listening\nFear of the answer\nRepeating the same mistake",
+    "affirmation": "What I hear is the answer to my call."
+  },
+  "the-pulse": {
+    "tagline": "Rhythm is the heart’s presence.",
+    "description": "A pulse is more than a beat—it is a spiritual tempo. Sync with life.",
+    "meaningUpright": "Vital energy\nSync\nFeeling the rhythm",
+    "meaningShadow": "Overstimulation\nOff-beat\nLost contact with the body",
+    "affirmation": "I beat in time with life."
+  },
+  "the-flame": {
+    "tagline": "Fire does not ask permission.",
+    "description": "Flame transforms everything it touches—including itself.",
+    "meaningUpright": "Passion\nChange\nLive creative energy",
+    "meaningShadow": "Destruction\nBurnout\nDevouring others",
+    "affirmation": "I burn with what is true."
+  },
+  "the-watcher": {
+    "tagline": "I see. I do not judge.",
+    "description": "A witness does not intervene—they watch. Seeing without judgment is an act of love.",
+    "meaningUpright": "Deep understanding\nCalm\nPresence",
+    "meaningShadow": "Passivity\nA hidden critic\nFear of engagement",
+    "affirmation": "I look with the heart. I do not have to do anything."
+  },
+  "the-wave": {
+    "tagline": "Surrender. You are the wave, not the breakwater.",
+    "description": "Do not stop the wave—let it through. A wave is motion through you, not from you.",
+    "meaningUpright": "Consent\nEmotional flow\nTrust",
+    "meaningShadow": "Resistance\nControl\nStifling",
+    "affirmation": "I let the wave pass through."
+  },
+  "the-weaver": {
+    "tagline": "Every thread has a place in the fabric.",
+    "description": "The weaver does not judge a strand—it joins it with others. A pattern, not chaos.",
+    "meaningUpright": "Integration\nWeaving connection\nA vision of the whole",
+    "meaningShadow": "Tangling over-complication\nManipulation",
+    "affirmation": "I see the pattern in what looks scattered."
+  },
+  "the-witness": {
+    "tagline": "Being seen is a gift.",
+    "description": "A witness sees you as you are. No filters. No score.",
+    "meaningUpright": "Being seen\nRecognition\nAnother’s presence",
+    "meaningShadow": "Invisibility\nNo witness to your life\nLoneliness in the experience",
+    "affirmation": "I am seen. My being matters."
+  },
+  "the-mirror": {
+    "tagline": "The mirror shows what is, not what you want.",
+    "description": "A mirror is an honest friend. No commentary.",
+    "meaningUpright": "Self-knowledge\nReflection\nFacing the truth",
+    "meaningShadow": "Distortion\nSelf-deceit\nFear of the mirror",
+    "affirmation": "I look at myself with love and no illusion."
+  },
+  "the-return": {
+    "tagline": "Every return is a new birth.",
+    "description": "Return is not going back—it is rebirth with memory. When you return, you are someone new.",
+    "meaningUpright": "Reintegration\nThe past re-valued\nSaying yes to your path",
+    "meaningShadow": "Stuck in nostalgia\nDenying change\nEmptiness after the road",
+    "affirmation": "I came back to remember who I became."
+  },
+  "the-bridge": {
+    "tagline": "A bridge exists to be crossed.",
+    "description": "A bridge links two banks without belonging to either. It is the space of crossing.",
+    "meaningUpright": "Connection\nCrossing\nMediation",
+    "meaningShadow": "Forever halfway\nFear to land on either side",
+    "affirmation": "I connect what was apart."
+  },
+  "the-messenger": {
+    "tagline": "The message matters more than the messenger.",
+    "description": "A messenger does not keep the message for themselves. They carry it on.",
+    "meaningUpright": "Communication\nThe flow of information\nGrace passed along",
+    "meaningShadow": "Distortion of the message\nSelf-promotion\nThe carrier’s ego",
+    "affirmation": "I pass on what I was given. Faithfully."
+  },
+  "the-guardian": {
+    "tagline": "A guardian does not attack. A guardian stands.",
+    "description": "The presence of a guardian is protection enough. A sword is not always needed.",
+    "meaningUpright": "Protection\nSafety\nA caring presence",
+    "meaningShadow": "Over-control\nConstant fear of threat\nIsolation",
+    "affirmation": "I protect what matters. I know what matters."
+  },
+  "the-lightkeeper": {
+    "tagline": "The light is not held. The light is carried.",
+    "description": "A keeper of the light does not dim it for themselves so others can find a way.",
+    "meaningUpright": "Guidance\nHumility\nA presence that leads",
+    "meaningShadow": "Superiority\nBurnout\nNeeding control",
+    "affirmation": "I am not the light—but I carry it."
+  },
+  "the-spiral": {
+    "tagline": "There is no line back—only ever deeper in.",
+    "description": "The spiral of evolution: a path that never ends, yet always deepens.",
+    "meaningUpright": "Growth of the soul\nIntegrating experience\nMovement toward center",
+    "meaningShadow": "Stuck in repetition\nFear of change\nFleeing depth",
+    "affirmation": "I circle, but I do not wander. I return—deeper."
+  },
+  "the-teardrop": {
+    "tagline": "A tear compresses a whole life.",
+    "description": "The teardrop holds it all—pain, love, cleansing. It is an end and a start.",
+    "meaningUpright": "Cleansing\nWholeness\nAn emotional full measure",
+    "meaningShadow": "Blocked pain\nWounds that never heal\nInability to cry",
+    "affirmation": "I let myself feel. Every tear is real."
+  },
+  "the-teardrop-bearer": {
+    "tagline": "The one who carries a tear is not weak. They are brave.",
+    "description": "The teardrop bearer holds another’s pain without losing themselves.",
+    "meaningUpright": "Empathy\nCarrying weight\nThe gift of co-feeling",
+    "meaningShadow": "Self-loss\nSoaking in others’ pain\nNo personal boundaries",
+    "affirmation": "I feel their pain and I remain myself."
+  },
+  "the-vessel": {
+    "tagline": "This card shows the tension between silence and listening within.",
+    "description": "This card reveals the inner tension between silence and listening. A call to read your interior—and an invitation to stop.",
+    "meaningUpright": "Inner guidance\nAwakened intent\nA space for truth",
+    "meaningShadow": "Trapped in illusion\nScattered light\nFear of what you would see",
+    "affirmation": "Even in doubt, I stay true to what is real."
+  }
+}

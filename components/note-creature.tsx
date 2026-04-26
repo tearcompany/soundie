@@ -83,21 +83,12 @@ export function NoteCreature() {
   if (!def) return null
   const c = def.chromaHex
   const captions = useMemo(() => {
-    const key = activeNoteId as
-      | 'C'
-      | 'C#'
-      | 'D'
-      | 'D#'
-      | 'E'
-      | 'F'
-      | 'F#'
-      | 'G'
-      | 'G#'
-      | 'A'
-      | 'A#'
-      | 'B'
-    return t.raw(`captions.${key}`) as string[]
-  }, [activeNoteId, t])
+    const fromApi = noteQuery.data?.captions
+    if (fromApi && fromApi.length > 0) {
+      return fromApi.map((c) => c.body)
+    }
+    return fallbackDef?.captions ?? []
+  }, [noteQuery.data?.captions, fallbackDef?.captions])
   const captionIndex = captions.length > 0
     ? Math.floor(currentSession.elapsed / 20) % captions.length
     : 0
@@ -577,7 +568,7 @@ export function NoteCreature() {
                   >
                     <div className="overflow-hidden">
                       <div className="flex flex-wrap justify-center gap-2">
-                        {teardropPlaylistQuery.data.slice(0, 5).map((card, idx) => (
+                        {teardropPlaylistQuery.data.slice(0, 5).map((card) => (
                           <button
                             type="button"
                             key={card.id}
@@ -595,7 +586,7 @@ export function NoteCreature() {
                                   : hexToRgba(c, 0.06),
                             }}
                           >
-                            {idx + 1}. {card.name}
+                            {card.name}
                           </button>
                         ))}
                       </div>

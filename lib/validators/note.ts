@@ -27,7 +27,7 @@ export const noteBaseSchema = z.object({
 
 export const noteWithLoreSchema = noteBaseSchema.extend({
   loreFragments: z.array(z.string()).min(0).max(8),
-  captions: z.array(captionItemSchema).max(10),
+  captions: z.array(captionItemSchema).max(500),
 })
 
 export const noteListItemSchema = noteBaseSchema

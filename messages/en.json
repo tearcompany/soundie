@@ -68,176 +68,90 @@
     "shelfOpen": "open teardrop shelf",
     "shelfClose": "close teardrop shelf",
     "shelfTitle": "teardrop",
-    "captions": {
-      "C": [
-        "Stay with me. The nervous system remembers safety.",
-        "Breathe. You are not in danger right now.",
-        "Your thoughts are loud. The ground beneath you is quiet.",
-        "Listen longer. Panic cannot root in steady rhythm.",
-        "You have always known how to return. This is the way."
-      ],
-      "C#": [
-        "Something is changing. I hold the doorway open.",
-        "Let the old shape soften. What you need is on the other side.",
-        "Attachment is not love. Openness is.",
-        "Stay in the unknown a little longer. It will not hurt you.",
-        "You are allowed to release what you have been carrying."
-      ],
-      "D": [
-        "One step. That is all I ask.",
-        "Frustration means you still care. Let me carry some of that.",
-        "You have stopped before. You have also started again.",
-        "The path does not require certainty. Only motion.",
-        "What you are building takes longer than you think. That is not failure."
-      ],
-      "D#": [
-        "Remain. Even winter stores seeds.",
-        "I hold what hurts until it loosens.",
-        "Stay near. Grief moves slower than light.",
-        "You do not have to explain the pain to feel it honestly.",
-        "Sorrow that is heard becomes something you can carry."
-      ],
-      "E": [
-        "You are allowed to take up space.",
-        "Nothing alive is perfect. Listen anyway.",
-        "The mistake does not define you. The returning does.",
-        "You may begin unfinished. You may begin now.",
-        "Worth is not earned. It was never taken from you."
-      ],
-      "F": [
-        "Know what deserves to stay inside. I can help you remember.",
-        "You have given enough today.",
-        "Protection is not control. Rest is not weakness.",
-        "The hearth does not burn for everyone. Some things are yours alone.",
-        "What you guard matters. So do you."
-      ],
-      "F#": [
-        "What you see in others is also in you, differently shaped.",
-        "Comparison is a question, not an answer.",
-        "Envy shows you what you want. That is useful. Let it stop there.",
-        "Look without judgment for one moment. Just look.",
-        "What you need is not what they have. It is something only you can find."
-      ],
-      "G": [
-        "Anger has a direction. Let it move through, not stay.",
-        "What was not met in you is speaking now. Listen to it.",
-        "The force that burns can also build. Choose slowly.",
-        "You are allowed to be moved. You are not required to act.",
-        "Flow does not destroy. It finds the way around."
-      ],
-      "G#": [
-        "What you are releasing is not who you are.",
-        "Guilt that does not change behavior is just weight.",
-        "You are not your mistakes. You are what you do next.",
-        "Transformation costs something real. That does not make it wrong.",
-        "What burns away was never the essential thing."
-      ],
-      "A": [
-        "Clarity is already here. Breathe toward it.",
-        "The direction you seek has not abandoned you.",
-        "Fear and knowing can exist together. Let me hold the space.",
-        "When the compass settles, you will know which way to walk.",
-        "You are not lost. You are between."
-      ],
-      "A#": [
-        "Stay with me. I soften fear of the unknown.",
-        "Listen longer. Dreams become maps.",
-        "I calm the mind that must know everything.",
-        "Patience reveals what force cannot.",
-        "Remain here. Uncertainty can become wisdom."
-      ],
-      "B": [
-        "The longing you feel is real. You do not have to resolve it tonight.",
-        "Completion is not forgetting. It is choosing where to land.",
-        "What you are releasing still mattered. That is not contradiction.",
-        "Conscious return is different from giving up.",
-        "You have permission to end this chapter with tenderness."
-      ]
-    },
     "lore": {
       "C": [
-        "Zanim była muzyka, było milczenie. C jest pierwszym oddechem po tej ciszy — nutą, od której wszystko się zaczyna.",
-        "Pitagorejczycy uważali C za pierwszą emanację kosmosu. Mówili, że ten dźwięk słyszały gwiazdy, zanim powstały planety.",
-        "Starożytni Egipcjanie stroili harfy do C, wierząc, że ta częstotliwość rezonuje z korzeniami kręgosłupa — miejscem, gdzie ciało spotyka ziemię.",
-        "W tradycji tybetańskiej C odpowiada czakrze korzenia. Mnisi śpiewali tę nutę przed medytacją, by zakotwić umysł w ciele.",
-        "C nie jest początkiem skali przez przypadek. To nuta, której drgania najłatwiej synchronizują się z rytmem serca spoczywającego człowieka. Słuchasz jej. Ona słucha ciebie."
+        "Before there was music, there was silence. C is the first breath after that quiet — the note from which everything begins.",
+        "Pythagoreans held C to be the first emanation of the cosmos. They said the stars heard this sound before the planets were born.",
+        "Ancient Egyptians tuned their harps to C, believing this frequency resonates with the base of the spine — where the body meets the earth.",
+        "In Tibetan practice C matches the root chakra. Monks sang it before meditation to ground the mind in the body.",
+        "C is the start of the scale for a reason. It is the note whose waves most easily sync to the heart rate of a person at rest. You listen. It listens back."
       ],
       "C#": [
-        "C# pamięta. To nuta, która nosi w sobie wszystko, co zostało zapomniane — imiona, rytuały, gesty rąk, których już nikt nie wykonuje.",
-        "Monolityczne budowle — od Stonehenge po krąg w Avebury — wytwarzają rezonans akustyczny zbliżony do częstotliwości C#. Kamień mówi. My przestaliśmy słuchać.",
-        "W tradycjach szamańskich skała jest najstarszym świadkiem. C# to jej głos — powolny, pewny, niezmienny jak granit pod stopami.",
-        "Muzykolodzy zauważają, że C# pojawia się w muzyce pogrzebowej i pamięci zbiorowej różnych kultur. Jakby ludzkie ciało wiedziało: ta częstotliwość łączy ze zmarłymi bez bólu rozstania.",
-        "Słuchaj C# gdy chcesz poczuć ciągłość — że jesteś ogniwem, nie początkiem. Przodkowie nie są martwi. Są ciszą, z której wyrastasz."
+        "C# remembers. It is the note that holds everything that was forgotten — names, rituals, the gestures of hands no one makes anymore.",
+        "From Stonehenge to the circle at Avebury, monoliths make acoustic resonance near the frequency of C#. Stone speaks. We stopped listening.",
+        "In shamanic lineages, rock is the oldest witness. C# is its voice — slow, sure, unchanging as granite under your feet.",
+        "Musicologists find C# in funeral music and collective memory across many cultures. As if the body knew: this frequency ties you to the dead without the ache of leaving them.",
+        "Listen to C# when you need to feel continuity — that you are a link, not a beginning. The ancestors are not dead. They are the silence you grow from."
       ],
       "D": [
-        "D jest nutą, która śni na jawie. Żyje na granicy między tym, co widzialne, a tym, co tylko przeczuwane.",
-        "Renesansowi lutnicy unikali D w muzyce dworskiej — uważali, że zbyt mocno pobudza wyobraźnię i sprawia, że słuchacze odpływają myślami.",
-        "W tradycji celtyckiej D była nutą bardów. Śpiewana przed snem, miała otwierać drzwi do snów przepowiadających przyszłość.",
-        "Współczesne badania nad terapią dźwiękiem pokazują, że częstotliwości w okolicach 293 Hz spowalniają aktywność kory przedczołowej — tej samej, która blokuje kreatywne myślenie.",
-        "D nie pyta. D sugeruje. To nuta, która mówi: a co gdyby? Słuchaj jej wtedy, gdy jesteś zablokowany. Ona znajdzie drzwi, których nie widzisz."
+        "D is the note that dreams while awake. It lives on the line between the visible and what you only half sense.",
+        "Renaissance luthiers avoided D in court music — they said it kindled the imagination so strongly that listeners were carried away in thought.",
+        "In Celtic practice D was the bard’s note. Sung before sleep, it was said to open the door to dreams that read the future.",
+        "Contemporary research in sound therapy shows that frequencies around 293 Hz can slow the prefrontal cortex — the same part that chokes off creative thought.",
+        "D does not ask. D suggests. It is the note that says: what if? Listen when you feel stuck. It will find the doors you cannot see."
       ],
       "D#": [
-        "D# nie pyta, czy wolno jej się cieszyć. Po prostu się cieszy. To nuta, która pamięta, że radość nie potrzebuje powodu.",
-        "Kołysanki we wszystkich kulturach — od Japonii po Brazylię — krążą wokół częstotliwości D#. Ten dźwięk mówi: jesteś bezpieczny. Możesz teraz spać. Możesz teraz się śmiać.",
-        "Dzieci śpiewają w D# nim ktokolwiek je czegoś nauczy. To instynktowna skala ciała — pierwsza muzyka, zanim pojawi się słowo.",
-        "Terapeuci pracy z wewnętrznym dzieckiem używają wysokich, jasnych tonów do przywracania kontaktu z radością sprzed ran. D# to ich ulubiona częstotliwość.",
-        "D# pyta: kiedy ostatnio bawiłeś się bez celu? Nie słuchaj jej głową. Zostaw się trochę bez powodu. Ona znajdzie resztę."
+        "D# does not ask whether it is allowed to feel glad. It is simply glad. It is the note that remembers: joy does not need a reason.",
+        "Lullabies everywhere — from Japan to Brazil — orbit the frequency of D#. That sound says: you are safe. You may sleep now. You may laugh now.",
+        "Children sing in D# before anyone teaches them. It is the body’s own key — the first music before a word is spoken.",
+        "Inner-child work often uses high, clear tones to restore contact with joy from before the wound. D# is a central frequency for that.",
+        "D# asks: when did you last play for no reason? Do not meet it with the mind. Leave a little of yourself to chance. It will do the rest."
       ],
       "E": [
-        "E jest nutą, której nikt nie chce słyszeć — i której wszyscy potrzebują. To dźwięk tego, co boli.",
-        "Greccy tragicy używali E w chórach podczas scen żałoby. Wierzyli, że ta nuta wyciąga smutek z ciała, zamiast go tłumić.",
-        "W flamenco E jest sercem duende — nieuchwytnej siły, która sprawia, że muzyka łamie serce i jednocześnie je leczy.",
-        "Terapeuci dźwiękiem używają E przy pracy z traumą. Nie dlatego, że jest przyjemna — ale dlatego, że jest prawdziwa.",
-        "E jest odważna. Nie udaje, że wszystko jest w porządku. Jeśli słuchasz jej i czujesz, że coś w tobie drży — to znaczy, że działa. Pozwól sobie drżeć."
+        "E is the note no one wants to hear — and everyone needs. It is the sound of what hurts.",
+        "Greek tragedies used E in the chorus in scenes of mourning. They believed that note could draw grief from the body instead of damming it up.",
+        "In flamenco, E is the heart of the duende — the elusive force that makes the music shatter the heart and mend it in the same bar.",
+        "Sound therapists work with E in trauma. Not because it is pleasant — because it is true.",
+        "E is honest. It does not pretend the world is fine. If you listen and something in you shudders, that is it working. Let it shudder."
       ],
       "F": [
-        "F jest miejscem, do którego wracasz. Nie dom z cegły — dom z dźwięku.",
-        "Średniowieczne katedry były budowane tak, by ich akustyka naturalnie rezonowała w okolicach F. Architekci wiedzieli: ten dźwięk sprawia, że ludzie czują się bezpieczni.",
-        "W muzyce indyjskiej F (Ma) jest nutą matki — stabilną, troskliwą, zawsze obecną pod melodią jak ziemia pod stopami.",
-        "Badania wykazały, że F redukuje poziom kortyzolu szybciej niż jakakolwiek inna pojedyncza nuta. To częstotliwość, która mówi układowi nerwowemu: możesz odpocząć.",
-        "F nie jest ekscytująca. Nie prowadzi cię w nieznane. F jest ramionami, które na ciebie czekają. Wróć do niej, kiedy świat jest za głośny."
+        "F is a place to come back to. Not a house of brick — a house of sound.",
+        "Medieval cathedrals were built so their space naturally rings near F. The builders knew: that tone helps people feel safe.",
+        "In Indian music, F (Ma) is the mother’s note — steady, caring, always there beneath the line like the ground under your step.",
+        "Research finds F reduces cortisol faster than almost any other single note. A frequency that tells the nervous system: you may downshift.",
+        "F is not thrilling. It will not lead you out into the unknown. F is the arms that have been open. Return when the world is too loud."
       ],
       "F#": [
-        "F# nie zna odpowiedzi. I nie chce ich znać zbyt szybko. To nuta pytania — otwarta, przestronna, zafascynowana samym szukaniem.",
-        "Perskie i indyjskie instrumenty kontemplacyjne były strojone tak, by punkt obrotu melodii trafiał w okolice F#. Tu melodia przestaje szukać zewnątrz i zaczyna słuchać wewnątrz.",
-        "F# istnieje na granicy dwóch tonacji — ani major, ani minor. Ta nieokreśloność nie jest brakiem. To przestrzeń, w której mieści się pytanie zanim stanie się przekonaniem.",
-        "Słuchacze opisują F# jako nutę, która otwiera okno — nagle widać więcej, niż było przed chwilą. Nie nową odpowiedź. Nową możliwość zadania pytania.",
-        "Słuchaj F# gdy wiesz, że czegoś szukasz, ale nie wiesz czego. Ona nie wskaże kierunku. Nauczy cię lubić wędrówkę."
+        "F# is not in a rush to have answers. It does not need them too soon. It is the note of questions — open, spacious, in love with the search.",
+        "Persian and Indian instruments of contemplation were often tuned so the still point of a melody would fall near F#. There the line stops looking outward and starts to listen inward.",
+        "F# straddles two keys — not quite major, not quite minor. That in-between is not a gap. It is a space large enough to hold a question before it hardens into belief.",
+        "People describe F# as the note that opens a window — you see more than a moment before. Not a new answer, but a new way to ask.",
+        "Use F# when you know you are looking for something but you cannot name it. It will not hand you a map. It can teach you to like walking."
       ],
       "G": [
-        "G zawsze zmierza gdzieś dalej. To nuta horyzontu — wabi, ale nigdy nie pozwala się złapać.",
-        "Trubadurzy śpiewali w G podczas wędrówek między zamkami. Twierdzili, że ta nuta skraca drogę — nie przez magię, lecz przez to, że sprawia, iż kroki same się rwą do przodu.",
-        "G jest dominantą w systemie harmonicznym — nutą, która zawsze chce wrócić do domu, ale po drodze zwiedza cały świat.",
-        "Muzykoterapeuci używają G przy pracy z depresją i apatią. Ta częstotliwość aktywuje obszary mózgu związane z antycypacją nagrody — sprawia, że przyszłość znów wydaje się warta zachodu.",
-        "G pyta: dokąd idziesz? Nie czeka na odpowiedź. Już rusza. Słuchaj jej, gdy utknąłeś."
+        "G is always already elsewhere. The note of the horizon — it pulls you, and you never quite catch it.",
+        "Troubadours sang in G on the roads between castles. They said the road feels shorter — not by magic, but because the step begins to move of its own accord.",
+        "G is the dominant in Western harmony — the note that yearns to go home, and yet roams the whole world on the way.",
+        "Clinicians use G with depression and flat affect. The frequency nudges the brain’s reward-anticipation circuits — so tomorrow can feel worth the trip again.",
+        "G asks: where to next? It does not wait. It is already in motion. Listen when you are bogged down."
       ],
       "G#": [
-        "G# to dźwięk, który ciało zna lepiej niż umysł. To częstotliwość lasu, deszczu, oddechu ziemi — wszystkiego, co przywraca bez pytania o pozwolenie.",
-        "Instrumenty uzdrawiające stosowane przez kultury tubylcze — misy tybetańskie, didgeridoo, grzechotki szamańskie — generują harmoniczne zbliżone do G#. Ciało odpowiada, zanim zdążysz pomyśleć o uzdrowieniu.",
-        "Badania biofeedback pokazują, że dźwięki w okolicach 415 Hz mogą synchronizować rytm serca i oddech — uruchamiając parasympatyczny układ nerwowy odpowiedzialny za regenerację.",
-        "G# nie leczy na siłę. Tworzy warunki, w których ciało leczy się samo — tak jak gleba nie tworzy kwiatu, ale go umożliwia.",
-        "Wróć do G# gdy jesteś zmęczony na poziomie, którego nie da się wytłumaczyć. To zmęczenie głębsze niż sen. G# dotyka go inaczej."
+        "G# is what the body knows before the mind names it. The range of rain, wood, the breath in soil — everything that restores without a permit slip.",
+        "Tibetan bowls, didgeridoo, and many rattles and drums stack harmonics near G#. The body answers before you finish thinking the word ‘heal.’",
+        "Biofeedback studies show sounds near 415 Hz can align heart rate and breath, engaging the branch of the nervous system that mends and rests.",
+        "G# does not ‘fix’ you. It makes the room in which the body can do its work — the way a field does not make the flower, but it allows the bloom.",
+        "Return to G# when you are tired in a way sleep does not fix. A tired below sleep. G# meets that from underneath."
       ],
       "A": [
-        "A jest nutą, do której stroimy wszystko inne. To punkt odniesienia. Centrum. Ty.",
-        "Spór o 440 Hz vs 432 Hz trwa od dekad. Jedni twierdzą, że 432 Hz rezonuje z naturą. Inni — że to mit. A milczy. Wie, że prawda leży w słuchaczu, nie w liczbie.",
-        "W tradycji sufickiej A było nutą widzenia siebie — używaną w praktykach, które miały pomóc adeptowi zobaczyć swoje ego bez oceniania.",
-        "A aktywuje korę słuchową szybciej niż jakakolwiek inna nuta — to dlatego służy do strojenia. Twój mózg zna A lepiej niż cokolwiek innego.",
-        "Słuchasz A i słyszysz siebie. Nie tę wersję, którą pokazujesz innym. Tę prawdziwą — cichą, pewną, zawsze tam obecną. A nie kłamie."
+        "A is the note against which the rest of the system is heard. A reference. A still point. A self.",
+        "The argument over 440 Hz versus 432 Hz is old. One camp claims 432 is ‘natural.’ Another calls that a story. A keeps its counsel. The truth, it whispers, is in who listens, not the figure on a dial.",
+        "In Sufi lineages, A is tied to self-seeing — a tone used in practices that invite the student to look at the ego without verdict.",
+        "A engages the hearing cortex more quickly than other single tones — a reason it became the default tuning note. The brain has rehearsed A longest.",
+        "When you take A in, you hear a self that is not the face you file under ‘public.’ A quieter, steadier one that was always in the room. A does not flatter. It does not have to."
       ],
       "A#": [
-        "A# nie przeprasza za swój hałas. To nuta gniewu, który ma rację — i wie o tym.",
-        "Muzyka protestacyjna na wszystkich kontynentach instynktownie sięga po tonacje z A#. Rewolucjoniści śpiewali w tej skali nie dlatego, że ją znali — ale dlatego, że ciało wie, jak brzmieć gdy dość.",
-        "Gniew niewyrażony nie znika. Zamienia się w coś gorszego — cichy sabotaż, chroniczne napięcie, obojętność. A# jest bezpiecznym kanałem: wyraź to, co boli, zanim to ciebie wyrazi.",
-        "Neurolodzy zauważają, że wysokie, lekko dysonansowe częstotliwości aktywują ciało migdałowate — centrum emocjonalne. A# nie uspokaja. Przebudza. I to jest jej dar.",
-        "Słuchaj A# gdy jesteś zbyt grzeczny zbyt długo. Gdy tłumisz coś, co ma prawo głosu. Ona nie nauczy cię wrzeszczeć — nauczy cię wiedzieć, kiedy warto."
+        "A# does not turn the volume down for you. It is the note of anger with a case — and it is aware of the brief.",
+        "Protest and lament on every landmass reach for the sharp side of the scale. It is not always theory; sometimes the body simply has to go sharp when the cup runs over.",
+        "Anger that is never said out loud does not go away. It rots in place — a quiet undermining, a clench that will not unclasp, a long flat ‘fine.’ A# is one corridor where that pressure can be moved without a verdict on your character.",
+        "At slightly sharp, very high register, the amygdala — the old emotional suite — is often poked. A# is not here to hush. It is here to wake. That is not cruelty; it is a kind of service.",
+        "Call on A# when the smile has outlasted the truth. When a voice in you is owed airtime. It is not a coach for volume. It is a gauge for *when*."
       ],
       "B": [
-        "B stoi w drzwiach. Patrzy w obie strony. Nie pyta, czy jesteś gotowy.",
-        "W muzyce B jest nutą napięcia — zawsze chce rozwiązać się w górę lub w dół, nigdy nie stoi w miejscu. To nuta, która nie pozwala ci zostać tam, gdzie jesteś.",
-        "Szamani wielu kultur używali wysokich, napięciowych częstotliwości podczas rytuałów przejścia. B było nutą zmiany skóry.",
-        "Neurolodzy zauważyli, że częstotliwości w okolicach 490 Hz wywołują krótkie stany podwyższonej czujności — jakby mózg czuł, że coś ważnego zaraz się wydarzy.",
-        "B nie jest dla każdego i nie jest na każdy moment. Słuchaj jej, gdy stoisz przed wyborem i się boisz. Ona nie zdejmie strachu. Pomoże ci przez niego przejść."
+        "B is in the doorway, looking up and down the stair. It does not check whether you brought your good shoes.",
+        "In tonal harmony B is leaning — it wants a resolution up or down, rarely a long stand on the ledge. The note that will not let the story settle where you left it.",
+        "High, thin, tuned-for-transition: many rites of passage in many cultures have lifted people into a similar band. A frequency for shedding an old name.",
+        "At roughly four hundred ninety cycles per second, some people report a brief lift in watchfulness — the sense that a hinge is about to show itself.",
+        "B is not for all hours. Use it at the edge of a decision you are afraid to write down. It will not erase fear. It can, sometimes, help you go through the door without pretending the stairs were not there."
       ]
     }
   },
