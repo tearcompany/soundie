@@ -44,6 +44,7 @@ interface SoundieStore extends SoundieState {
   updateSessionElapsed: (elapsed: number) => void
   completeSession: () => void
   unlockLore: () => void
+  ensureLoreUnlockedAtLeast: (target: number) => void
   setActiveNote: (id: string) => void
   setPlayerId: (id: string | null) => void
   setTeardropShelfOpen: (open: boolean) => void
@@ -172,6 +173,18 @@ export const useSoundieStore = create<SoundieStore>()(
           progress: {
             ...state.progress,
             loreUnlocked: Math.min(5, state.progress.loreUnlocked + 1),
+          },
+        }))
+      },
+
+      ensureLoreUnlockedAtLeast: (target: number) => {
+        set((state) => ({
+          progress: {
+            ...state.progress,
+            loreUnlocked: Math.max(
+              state.progress.loreUnlocked,
+              Math.min(5, Math.max(0, Math.floor(target))),
+            ),
           },
         }))
       },

@@ -30,6 +30,7 @@ interface AudioContextType {
 }
 
 const LORE_STAGES = MAX_LORE_FRAGMENTS
+const MIRACLE_SESSION_SECONDS = 180
 
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
@@ -44,6 +45,8 @@ export function NoteCreature() {
     completeSession,
     stopSession,
   } = useSoundieStore()
+  const ensureLoreUnlockedAtLeast = useSoundieStore((s) => s.ensureLoreUnlockedAtLeast)
+  const [growthPulse, setGrowthPulse] = useState(false)
   const noteQuery = trpc.note.getById.useQuery(
     { id: activeNoteId, locale },
     { retry: false }
@@ -154,9 +157,13 @@ export function NoteCreature() {
     () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
     [effectiveTotalListenTime]
   )
+  const miracleUnlocked = effectiveTotalListenTime >= MIRACLE_SESSION_SECONDS
+  const unlockedLoreCount = miracleUnlocked
+    ? Math.max(loreStatus.unlockedFragments, 2)
+    : loreStatus.unlockedFragments
   const prevLoreRef = useRef(loreStatus.unlockedFragments)
 
-  const loreStageUnlocked = (index: number) => index < loreStatus.unlockedFragments
+  const loreStageUnlocked = (index: number) => index < unlockedLoreCount
 
   const selectedTeardropCard = useMemo(() => {
     const cards = teardropPlaylistQuery.data ?? []
@@ -191,10 +198,10 @@ export function NoteCreature() {
     if (!loreCarouselApi) return
     const idx = Math.max(
       0,
-      Math.min(LORE_STAGES - 1, loreStatus.unlockedFragments - 1)
+      Math.min(LORE_STAGES - 1, unlockedLoreCount - 1)
     )
     queueMicrotask(() => loreCarouselApi.scrollTo(idx, true))
-  }, [loreCarouselApi, activeNoteId, loreStatus.unlockedFragments])
+  }, [loreCarouselApi, activeNoteId, unlockedLoreCount])
 
   useEffect(() => {
     if (!loreCarouselApi) return
@@ -208,16 +215,16 @@ export function NoteCreature() {
 
   useEffect(() => {
     const prev = prevLoreRef.current
-    if (loreStatus.unlockedFragments > prev) {
-      const newIdx = loreStatus.unlockedFragments - 1
+    if (unlockedLoreCount > prev) {
+      const newIdx = unlockedLoreCount - 1
       setJustUnlocked(newIdx)
       setTimeout(() => setJustUnlocked(null), 3500)
       if (loreCarouselApi) {
         queueMicrotask(() => loreCarouselApi.scrollTo(newIdx))
       }
     }
-    prevLoreRef.current = loreStatus.unlockedFragments
-  }, [loreStatus.unlockedFragments, loreCarouselApi])
+    prevLoreRef.current = unlockedLoreCount
+  }, [unlockedLoreCount, loreCarouselApi])
 
   // Initialize Web Audio
   useEffect(() => {
@@ -279,6 +286,11 @@ export function NoteCreature() {
         const credited = Math.min(elapsed, currentSession.duration)
         stopSession()
         completeSession()
+        if (credited >= MIRACLE_SESSION_SECONDS) {
+          ensureLoreUnlockedAtLeast(2)
+          setGrowthPulse(true)
+          setTimeout(() => setGrowthPulse(false), 1400)
+        }
         setIsPlaying(false)
         pauseAudio()
         const pid = useSoundieStore.getState().playerId
@@ -306,6 +318,7 @@ export function NoteCreature() {
     updateSessionElapsed,
     stopSession,
     completeSession,
+    ensureLoreUnlockedAtLeast,
     completeRemoteSession,
   ])
 
@@ -344,7 +357,7 @@ export function NoteCreature() {
     setIsPlaying(true)
 
     if (!currentSession.active) {
-      startSession()
+      startSession(MIRACLE_SESSION_SECONDS)
     }
   }
 
@@ -431,7 +444,11 @@ export function NoteCreature() {
         <div className="lore-card">
           <div className="mb-5 flex justify-center">
             <span
-              className="h-12 w-12 rounded-full border-2 border-pearl bg-pearl shadow-sm"
+              className={cn(
+                'h-12 w-12 rounded-full border-2 border-pearl bg-pearl shadow-sm transition-all duration-700',
+                miracleUnlocked && 'scale-110',
+                growthPulse && 'scale-[1.18]',
+              )}
               style={{ boxShadow: `0 0 0 4px ${hexToRgba(c, 0.2)}` }}
               aria-hidden
             >
