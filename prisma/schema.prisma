@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,12 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Player {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
 
-  soundies  Soundie[]
-  sessions  ListenSession[]
+  accounts Account[]
+  sessions Session[]
+  player   Player?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Player {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  streakNights Int      @default(0)
+  userId       String?  @unique
+
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  soundies        Soundie[]
+  sessions        ListenSession[]
+  dailyVisits     DailyVisit[]
+  dailyClaims     DailyClaim[]
+  moodEntries     MoodEntry[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 model Soundie {
@@ -91,6 +144,7 @@ model TeardropCard {
   emotion     Emotion?     @relation(fields: [emotionId], references: [id], onDelete: SetNull)
   texts       TeardropCardText[]
   noteLinks   NoteTeardropCard[]
+  dailyClaims DailyClaim[]
   outgoing    TeardropCardRelation[] @relation("TeardropOutgoing")
   incoming    TeardropCardRelation[] @relation("TeardropIncoming")
 
@@ -129,6 +183,62 @@ model TeardropCardRelation {
   @@index([toCardId])
 }
 
+model DailyVisit {
+  id         String   @id @default(cuid())
+  playerId   String
+  visitDate  String
+  createdAt  DateTime @default(now())
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, visitDate])
+  @@index([playerId])
+}
+
+model DailyClaim {
+  id              String   @id @default(cuid())
+  playerId        String
+  claimDate       String
+  noteId          String
+  glowKey         String
+  rareCaption     String
+  teardropCardId  String
+  createdAt       DateTime @default(now())
+  player          Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note            Note         @relation(fields: [noteId], references: [id], onDelete: Restrict)
+  teardropCard    TeardropCard @relation(fields: [teardropCardId], references: [id], onDelete: Restrict)
+
+  @@unique([playerId, claimDate])
+  @@index([playerId])
+  @@index([claimDate])
+}
+
+model MoodEntry {
+  id         String   @id @default(cuid())
+  playerId   String
+  noteId     String
+  mood       String
+  entryDate  String
+  createdAt  DateTime @default(now())
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note       Note     @relation(fields: [noteId], references: [id], onDelete: Restrict)
+
+  @@index([playerId, entryDate])
+  @@index([playerId, createdAt])
+  @@index([mood, createdAt])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  playerId   String?
+  name       String
+  meta       Json?
+  createdAt  DateTime @default(now())
+  player     Player?  @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([name, createdAt])
+  @@index([playerId, createdAt])
+}
+
 model Note {
   id                 String         @id
   short              String
@@ -149,6 +259,8 @@ model Note {
   captions           NoteCaption[]
   soundies           Soundie[]
   teardropCards      NoteTeardropCard[]
+  dailyClaims        DailyClaim[]
+  moodEntries        MoodEntry[]
 
   @@index([sortOrder])
 }
@@ -183,9 +295,10 @@ model LoreFragment {
   id         String @id @default(cuid())
   noteId     String
   orderIndex Int
+  locale     String @default("en")
   body       String
   note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
-  @@unique([noteId, orderIndex])
-  @@index([noteId])
+  @@unique([noteId, orderIndex, locale])
+  @@index([noteId, locale])
 }

@@ -27,9 +27,11 @@ export const noteRouter = router({
       if (!n) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Note not found' })
       }
-      const [fr, caps, emotion] = await Promise.all([
+      const loreLoc =
+        locale.toLowerCase().startsWith('pl') ? 'pl' : 'en'
+      const [frInit, caps, emotion] = await Promise.all([
         ctx.db.loreFragment.findMany({
-          where: { noteId: input.id },
+          where: { noteId: input.id, locale: loreLoc },
           orderBy: { orderIndex: 'asc' },
           select: { body: true },
         }),
@@ -42,6 +44,14 @@ export const noteRouter = router({
           ? ctx.db.emotion.findUnique({ where: { id: n.emotionId } })
           : Promise.resolve(null),
       ])
+      const fr =
+        frInit.length === 0 && loreLoc === 'pl'
+          ? await ctx.db.loreFragment.findMany({
+              where: { noteId: input.id, locale: 'en' },
+              orderBy: { orderIndex: 'asc' },
+              select: { body: true },
+            })
+          : frInit
       const fallbackCaps =
         caps.length === 0
           ? await ctx.db.noteCaption.findMany({

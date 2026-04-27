@@ -5,13 +5,19 @@ import {
   soundieRowSchema,
 } from '@/lib/validators/soundie'
 import { noteIdInput } from '@/lib/validators/note'
+import {
+  LORE_THRESHOLDS_MINUTES,
+  calcProgressToNextFragment,
+  getNewlyUnlockedLoreFragmentIndices,
+  loreUnlockedCountFromTotalMinutes,
+} from '@/lib/progress'
 
 const playerNoteInput = z.object({
   playerId: z.string().cuid(),
   noteId: noteIdInput,
 })
 
-const LORE_THRESHOLDS_MINUTES = [0, 15, 30, 60, 120] as const
+const calcLoreUnlocked = loreUnlockedCountFromTotalMinutes
 
 const NOTE_UNLOCK_REQUIREMENTS: Record<number, number> = {
   2: 15,
@@ -27,35 +33,8 @@ const NOTE_UNLOCK_REQUIREMENTS: Record<number, number> = {
   12: 120,
 }
 
-function calcLoreUnlocked(totalMinutes: number): number {
-  return LORE_THRESHOLDS_MINUTES.filter((m) => totalMinutes >= m).length
-}
-
 function calcLevel(totalMinutes: number): number {
   return Math.min(5, Math.floor(totalMinutes / 15) + 1)
-}
-
-function getNewlyUnlockedFragments(previousLoreUnlocked: number, newLoreUnlocked: number) {
-  if (newLoreUnlocked <= previousLoreUnlocked) return []
-  const out: number[] = []
-  for (let i = previousLoreUnlocked + 1; i <= newLoreUnlocked; i++) out.push(i)
-  return out
-}
-
-export function calcProgressToNextFragment(totalMinutes: number): {
-  current: number
-  next: number | null
-  percent: number
-} {
-  for (let i = 0; i < LORE_THRESHOLDS_MINUTES.length - 1; i++) {
-    const current = LORE_THRESHOLDS_MINUTES[i]!
-    const next = LORE_THRESHOLDS_MINUTES[i + 1]!
-    if (totalMinutes < next) {
-      const percent = Math.round(((totalMinutes - current) / (next - current)) * 100)
-      return { current, next, percent: Math.min(100, Math.max(0, percent)) }
-    }
-  }
-  return { current: 120, next: null, percent: 100 }
 }
 
 const sessionItemSchema = z.object({
@@ -348,6 +327,16 @@ export const soundieRouter = router({
           }
         }
 
+        if (input.durationSeconds >= 180) {
+          await tx.analyticsEvent.create({
+            data: {
+              name: 'session_180_complete',
+              playerId: input.playerId,
+              meta: { noteId: input.noteId, durationSeconds: input.durationSeconds },
+            },
+          })
+        }
+
         return {
           soundie,
           session: {
@@ -358,7 +347,7 @@ export const soundieRouter = router({
           diff: {
             previousLoreLevel,
             newLoreLevel: Math.min(5, newLoreLevel),
-            newlyUnlockedFragments: getNewlyUnlockedFragments(
+            newlyUnlockedFragments: getNewlyUnlockedLoreFragmentIndices(
               previousLoreLevel,
               Math.min(5, newLoreLevel)
             ),
@@ -448,4 +437,4 @@ export const soundieRouter = router({
     }),
 })
 
-export { LORE_THRESHOLDS_MINUTES, NOTE_UNLOCK_REQUIREMENTS, calcLoreUnlocked }
+export { LORE_THRESHOLDS_MINUTES, NOTE_UNLOCK_REQUIREMENTS, calcLoreUnlocked, calcProgressToNextFragment }

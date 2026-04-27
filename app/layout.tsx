@@ -15,28 +15,73 @@ const _dmMono = DM_Mono({
   weight: '400',
   variable: '--font-dm-mono',
 })
-
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
-  generator: 'v0.app',
-  icons: {
-    icon: [
+
+  title: {
+    default: 'Soundie — Sound Healing App with Living Notes',
+    template: '%s | Soundie',
+  },
+
+  description:
+    'Soundie is a meditative sound healing app where musical notes become living companions. Listen, unlock lore, reduce stress, and build calm through frequency-based sessions.',
+
+  keywords: [
+    'sound healing app',
+    'healing frequencies',
+    'meditation app',
+    'calm app alternative',
+    'stress relief sounds',
+    'frequency therapy',
+    'music wellness app',
+    'mindfulness app',
+    'relaxation sounds',
+    'sleep sounds',
+    'nervous system regulation',
+    'breathing app',
+    'sound meditation',
+    'wellness app',
+    'Soundie',
+  ],
+
+  applicationName: 'Soundie',
+
+  authors: [{ name: 'Soundie' }],
+  creator: 'Soundie',
+  publisher: 'Soundie',
+
+  openGraph: {
+    type: 'website',
+    siteName: 'Soundie',
+    title: 'Soundie — Sound Healing App with Living Notes',
+    description:
+      'A new kind of meditation app. Living musical notes, healing frequencies, lore, and calm listening sessions.',
+    url: '/',
+    images: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Soundie — Living Notes',
       },
     ],
-    apple: '/apple-icon.png',
   },
-}
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Soundie — Sound Healing App with Living Notes',
+    description:
+      'Reduce stress and reconnect through living notes, frequencies, and meditative listening.',
+    images: ['/og-image.jpg'],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  category: 'health',
+};
 
 export default async function RootLayout({
   children,

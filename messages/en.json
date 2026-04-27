@@ -2,24 +2,35 @@
   "common": {
     "languageNav": "Language"
   },
+  "siteNav": {
+    "brand": "Soundie",
+    "home": "Home",
+    "play": "Lab",
+    "sanctuary": "Echo",
+    "mainNav": "Main menu",
+    "signIn": "Log in",
+    "signOut": "Log out"
+  },
   "meta": {
     "rootTitle": "Soundie — Presence Pass | Heal with Living Notes",
     "rootDescription": "Soundie: a meditative healing-sound Tamagotchi. Presence Pass — a refinement layer that makes sound feel alive. Twelve living notes, lore, and breath.",
     "homeTitle": "Soundie — Sound that knows you're here",
     "homeDescription": "A meditative world of living notes. Twelve frequencies, each one heals something different. The longer you listen, the more it reveals.",
-    "playTitle": "Play — Soundie",
+    "playTitle": "Lab — Soundie",
     "playDescription": "Listen to living notes. Your healing sound Tamagotchi.",
+    "sanctuaryTitle": "Echo — Soundie",
+    "sanctuaryDescription": "A quiet reflection of your listening: time with each emotional tone, and the moods you named before play.",
     "applicationName": "Soundie",
     "keywords": "sound healing, meditative app, frequency therapy, Soundie, living notes, presence",
     "ogLocale": "en_US"
   },
   "landing": {
     "brand": "Soundie",
-    "freqRange": "261.63 – 493.88 Hz",
+    "freqRange": "{min} – {max} Hz",
     "lines": [
-      "Twelve notes. Each one alive.",
+      "Notes. Each one alive.",
       "Listen long enough — they grow.",
-      "No scores. No timers.",
+      "No rush.",
       "Only presence.",
       "Soundie heals."
     ],
@@ -58,6 +69,9 @@
     "supports": "Supports",
     "loreLabel": "Lore",
     "fragmentUnlocked": "Fragment unlocked",
+    "unlockBannerTitle": "The story grows",
+    "unlockBannerBody": "Layer {n} of 5 — a new line of this note’s lore is yours.",
+    "unlockBannerDismiss": "OK",
     "minsToUnlock": "~{mins} min to unlock",
     "listeningSession": "Listening Session",
     "stopListening": "Stop",
@@ -68,6 +82,12 @@
     "shelfOpen": "open teardrop shelf",
     "shelfClose": "close teardrop shelf",
     "shelfTitle": "teardrop",
+    "shelfVesselBookAria": "Vessel book card for this note",
+    "shelfReadingTagline": "Motto",
+    "shelfReadingDescription": "Reading",
+    "shelfReadingUpright": "In the light",
+    "shelfReadingShadow": "Shadow",
+    "shelfReadingAffirmation": "Affirmation",
     "lore": {
       "C": [
         "Before there was music, there was silence. C is the first breath after that quiet — the note from which everything begins.",
@@ -155,7 +175,65 @@
       ]
     }
   },
+  "returnEngine": {
+    "welcomeBack": "Your Soundie waited in silence.",
+    "dailyWhisper": "{note} feels steadier today.",
+    "streakLabel": "{n} nights of resonance",
+    "continue": "Continue",
+    "dailyGift": {
+      "title": "A gift formed overnight.",
+      "sub": "Nothing to grab — just something the Soundie held for you.",
+      "teardrop": "teardrop",
+      "listen": "Listen"
+    }
+  },
+  "moodIntelligence": {
+    "ask": "How do you feel?",
+    "reactionLabel": "Right now, with this note",
+    "moods": {
+      "anxious": "Anxious",
+      "numb": "Numb",
+      "heavy": "Heavy",
+      "scattered": "Scattered",
+      "hopeful": "Hopeful"
+    },
+    "notNow": "Not now",
+    "back": "Back",
+    "enter": "Enter play"
+  },
   "lockedNotes": {
     "caption": "The next note appears only to the still."
+  },
+  "sanctuary": {
+    "greeting": "Echo",
+    "sub": "A mirror of your listening — not a score, not a verdict. Patterns here are invitations, not pressure.",
+    "noPlayer": "To see your path,",
+    "goPlay": "begin a session on Lab",
+    "loading": "Arriving…",
+    "todayCard": "Today",
+    "todayMinutes": "{m} minutes of listening so far",
+    "todayMinutesUnknown": "A gentle day — we could not read today’s minutes yet",
+    "releaseTitle": "Time with each inner climate",
+    "releaseHint": "Bubbles size by the minutes you have spent with notes that carry each emotional tone. More time means more of that tone was held, not “fixed.”",
+    "emptyRelease": "When you listen, these waters will show where your attention has rested.",
+    "moodTitle": "Moods you named at the door",
+    "moodHint": "Count of check-ins in the last two weeks. No grades — just rhythm.",
+    "emptyMood": "When you tell us how you feel before play, a gentle map appears here.",
+    "law": "Echo never assigns homework. It only remembers.",
+    "notesTitle": "Your notes",
+    "notesHint": "Each note you have listened to grows at its own pace.",
+    "noteLevel": "Lv {lv}",
+    "noteMinutes": "{m, plural, =0 {no minutes yet} one {# min listened} other {# min listened}}",
+    "noteFragmentsAria": "{n} of {max} lore layers unlocked",
+    "bubbleAria": "Circle pack of time spent with each emotional tone",
+    "moodAria": "Horizontal bars: how often each mood was chosen in check-ins",
+    "tooltipEmotion": "{name} — {minutes}m {seconds}s of listening in this period",
+    "moodLabels": {
+      "anxious": "Tense / anxious",
+      "numb": "Numb / flat",
+      "heavy": "Heavy",
+      "scattered": "Scattered",
+      "hopeful": "Hopeful"
+    }
   }
 }

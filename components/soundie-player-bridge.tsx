@@ -10,6 +10,13 @@ export function SoundiePlayerBridge() {
   const activeNoteId = useSoundieStore((s) => s.activeNoteId)
   const setPlayerId = useSoundieStore((s) => s.setPlayerId)
   const syncFromRemote = useSoundieStore((s) => s.syncFromRemote)
+
+  const sessionPlayerQuery = trpc.player.getForSession.useQuery(undefined, {
+    enabled: hasHydrated,
+    staleTime: 60_000,
+    retry: false,
+  })
+
   const ensure = trpc.player.ensure.useMutation()
   const ensureRan = useRef(false)
 
@@ -20,13 +27,20 @@ export function SoundiePlayerBridge() {
 
   useEffect(() => {
     if (!hasHydrated) return
+    if (sessionPlayerQuery.isLoading) return
+
+    if (sessionPlayerQuery.data?.id) {
+      setPlayerId(sessionPlayerQuery.data.id)
+      return
+    }
+
     if (playerId) return
     if (ensureRan.current) return
     ensureRan.current = true
     ensure.mutate(undefined, {
       onSuccess: (data) => setPlayerId(data.id),
     })
-  }, [hasHydrated, playerId, ensure, setPlayerId])
+  }, [hasHydrated, sessionPlayerQuery.isLoading, sessionPlayerQuery.data, playerId, ensure, setPlayerId])
 
   useEffect(() => {
     if (!hasHydrated) return

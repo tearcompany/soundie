@@ -1,16 +1,17 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useSoundieStore } from '@/lib/soundie-store'
 import { getEmotionById, getNoteById } from '@/lib/notes'
 import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
+import { getTeardropVesselBookPrimarySlug } from '@/lib/teardrop-ksiega'
 import { LockedNotes } from '@/components/locked-notes'
 import {
   MAX_LORE_FRAGMENTS,
   loreUnlockStatusFromTotalListenSeconds,
-  secondsRequiredForLoreFragment,
+  minutesRequiredForLoreSlideIndexZeroBased,
 } from '@/lib/progress'
 import {
   Carousel,
@@ -43,9 +44,14 @@ export function NoteCreature() {
     startSession,
     updateSessionElapsed,
     completeSession,
-    stopSession,
   } = useSoundieStore()
-  const ensureLoreUnlockedAtLeast = useSoundieStore((s) => s.ensureLoreUnlockedAtLeast)
+  const dailyGiftGlow = useSoundieStore((s) => s.dailyGiftGlow)
+  const dailyGiftForNoteId = useSoundieStore((s) => s.dailyGiftForNoteId)
+  const dailyGiftCaption = useSoundieStore((s) => s.dailyGiftCaption)
+  const setPendingListenFromDailyGift = useSoundieStore(
+    (s) => s.setPendingListenFromDailyGift
+  )
+  const sessionMoodReaction = useSoundieStore((s) => s.sessionMoodReaction)
   const [growthPulse, setGrowthPulse] = useState(false)
   const noteQuery = trpc.note.getById.useQuery(
     { id: activeNoteId, locale },
@@ -65,6 +71,7 @@ export function NoteCreature() {
     { staleTime: 30_000, retry: false },
   )
 
+  const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
     onSuccess: (result) => {
       const row = result.soundie
@@ -93,6 +100,10 @@ export function NoteCreature() {
     ? Math.floor(currentSession.elapsed / 20) % captions.length
     : 0
   const activeCaption = captions[captionIndex] ?? null
+  const useDailyRareCaption = Boolean(
+    dailyGiftForNoteId === activeNoteId && dailyGiftCaption
+  )
+  const lineCaption = useDailyRareCaption ? dailyGiftCaption : activeCaption
 
   const emotion = getEmotionById(noteQuery.data?.emotionId ?? def.emotionId ?? '')
   const healingStyle = noteQuery.data?.healingStyle ?? def.healingStyle
@@ -114,6 +125,9 @@ export function NoteCreature() {
   })
   const animationRef = useRef<number | null>(null)
   const sessionIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isPlayingRef = useRef(false)
+  const lastListenTickAtRef = useRef<number | null>(null)
+  const listenSecondsAccRef = useRef(0)
   const effectiveTotalListenTime =
     progress.totalListenTime + (currentSession.active ? currentSession.elapsed : 0)
 
@@ -131,8 +145,12 @@ export function NoteCreature() {
       | 'A'
       | 'A#'
       | 'B'
+    const fromApi = noteQuery.data?.loreFragments
+    if (fromApi && fromApi.length > 0) {
+      return fromApi
+    }
     return t.raw(`lore.${key}`) as string[]
-  }, [activeNoteId, t])
+  }, [activeNoteId, t, noteQuery.data?.loreFragments])
 
   const loreStageTexts = useMemo(() => {
     const out = [...loreFragments]
@@ -143,15 +161,16 @@ export function NoteCreature() {
   const [loreCarouselApi, setLoreCarouselApi] = useState<CarouselApi | null>(null)
   const [selectedLoreIndex, setSelectedLoreIndex] = useState(0)
   const [justUnlocked, setJustUnlocked] = useState<number | null>(null)
+  const [unlockBanner, setUnlockBanner] = useState<{
+    primaryOneBased: number
+  } | null>(null)
   const [selectedTeardropCardId, setSelectedTeardropCardId] = useState<string | null>(null)
   const loreStatus = useMemo(
     () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
     [effectiveTotalListenTime]
   )
-  const miracleUnlocked = effectiveTotalListenTime >= MIRACLE_SESSION_SECONDS
-  const unlockedLoreCount = miracleUnlocked
-    ? Math.max(loreStatus.unlockedFragments, 2)
-    : loreStatus.unlockedFragments
+  const hadQualifyingSession = effectiveTotalListenTime >= MIRACLE_SESSION_SECONDS
+  const unlockedLoreCount = loreStatus.unlockedFragments
   const prevLoreRef = useRef(loreStatus.unlockedFragments)
 
   const loreStageUnlocked = (index: number) => index < unlockedLoreCount
@@ -163,27 +182,56 @@ export function NoteCreature() {
   }, [teardropPlaylistQuery.data, selectedTeardropCardId])
 
   const selectedTeardropTexts = useMemo(() => {
-    if (!selectedTeardropCard) return { affirmation: '', description: '', tagline: '' }
+    if (!selectedTeardropCard) {
+      return {
+        affirmation: '',
+        description: '',
+        tagline: '',
+        meaningUpright: '',
+        meaningShadow: '',
+      }
+    }
     const pick = (field: string) =>
       selectedTeardropCard.texts.find((t) => t.field === field)?.content?.trim() ?? ''
     return {
       affirmation: pick('affirmation'),
       description: pick('description'),
       tagline: pick('tagline'),
+      meaningUpright: pick('meaning_upright'),
+      meaningShadow: pick('meaning_shadow'),
     }
   }, [selectedTeardropCard])
+
+  const vesselBookSlug = useMemo(
+    () => getTeardropVesselBookPrimarySlug(activeNoteId),
+    [activeNoteId],
+  )
 
   useEffect(() => {
     setSelectedTeardropCardId(null)
   }, [activeNoteId])
 
-  const minutesToUnlockFragment = (index: number) => {
-    const requiredSec = secondsRequiredForLoreFragment(index + 1)
-    const remaining = Math.max(0, requiredSec - effectiveTotalListenTime)
-    return Math.ceil(remaining / 60)
-  }
+  useEffect(() => {
+    if (!teardropShelfOpen) return
+    const cards = teardropPlaylistQuery.data
+    if (!cards?.length) return
+    if (selectedTeardropCardId != null) return
+    const preferId = vesselBookSlug
+      ? cards.find((x) => x.slug === vesselBookSlug)?.id
+      : undefined
+    setSelectedTeardropCardId(preferId ?? cards[0]!.id)
+  }, [
+    teardropShelfOpen,
+    teardropPlaylistQuery.data,
+    vesselBookSlug,
+    selectedTeardropCardId,
+  ])
 
-  const loreXpPercent = loreStatus.progressWithinCurrentFragmentPercent
+  const minutesToUnlockFragment = (index: number) => {
+    const requiredMin = minutesRequiredForLoreSlideIndexZeroBased(index)
+    const totalMin = Math.floor(effectiveTotalListenTime / 60)
+    return Math.max(0, requiredMin - totalMin)
+  }
 
   useEffect(() => {
     if (!loreCarouselApi) return
@@ -209,9 +257,16 @@ export function NoteCreature() {
     if (unlockedLoreCount > prev) {
       const newIdx = unlockedLoreCount - 1
       setJustUnlocked(newIdx)
-      setTimeout(() => setJustUnlocked(null), 3500)
+      setUnlockBanner({ primaryOneBased: unlockedLoreCount })
       if (loreCarouselApi) {
-        queueMicrotask(() => loreCarouselApi.scrollTo(newIdx))
+        queueMicrotask(() => loreCarouselApi.scrollTo(newIdx, true))
+      }
+      const t1 = setTimeout(() => setJustUnlocked(null), 3500)
+      const t2 = setTimeout(() => setUnlockBanner(null), 8000)
+      prevLoreRef.current = unlockedLoreCount
+      return () => {
+        clearTimeout(t1)
+        clearTimeout(t2)
       }
     }
     prevLoreRef.current = unlockedLoreCount
@@ -258,60 +313,9 @@ export function NoteCreature() {
     initAudio().catch(console.error)
   }, [])
 
-  // Handle session timer
   useEffect(() => {
-    if (!currentSession.active) {
-      if (sessionIntervalRef.current) {
-        clearInterval(sessionIntervalRef.current)
-        sessionIntervalRef.current = null
-      }
-      return
-    }
-
-    sessionIntervalRef.current = setInterval(() => {
-      const now = Date.now()
-      const elapsed = Math.floor((now - currentSession.startedAt) / 1000)
-      updateSessionElapsed(elapsed)
-
-      if (elapsed >= currentSession.duration) {
-        const credited = Math.min(elapsed, currentSession.duration)
-        stopSession()
-        completeSession()
-        if (credited >= MIRACLE_SESSION_SECONDS) {
-          ensureLoreUnlockedAtLeast(2)
-          setGrowthPulse(true)
-          setTimeout(() => setGrowthPulse(false), 1400)
-        }
-        setIsPlaying(false)
-        pauseAudio()
-        const pid = useSoundieStore.getState().playerId
-        const nid = useSoundieStore.getState().activeNoteId
-        if (pid && credited > 0) {
-          completeRemoteSession({
-            playerId: pid,
-            noteId: nid,
-            durationSeconds: credited,
-          })
-        }
-      }
-    }, 100)
-
-    return () => {
-      if (sessionIntervalRef.current) {
-        clearInterval(sessionIntervalRef.current)
-        sessionIntervalRef.current = null
-      }
-    }
-  }, [
-    currentSession.active,
-    currentSession.startedAt,
-    currentSession.duration,
-    updateSessionElapsed,
-    stopSession,
-    completeSession,
-    ensureLoreUnlockedAtLeast,
-    completeRemoteSession,
-  ])
+    isPlayingRef.current = isPlaying
+  }, [isPlaying])
 
   // Play/pause audio
   const toggleAudio = () => {
@@ -349,10 +353,25 @@ export function NoteCreature() {
 
     if (!currentSession.active) {
       startSession(MIRACLE_SESSION_SECONDS)
+      const pid = useSoundieStore.getState().playerId
+      const nid = useSoundieStore.getState().activeNoteId
+      const fromGift = useSoundieStore.getState().pendingListenFromDailyGift
+      if (pid) {
+        trackSessionStart({
+          name: 'session_started',
+          playerId: pid,
+          meta: fromGift
+            ? { noteId: nid, afterDailyGift: true }
+            : { noteId: nid },
+        })
+      }
+      if (fromGift) {
+        setPendingListenFromDailyGift(false)
+      }
     }
   }
 
-  const pauseAudio = () => {
+  const pauseAudio = useCallback(() => {
     const ctx = audioRef.current.ctx
     const osc = audioRef.current.oscillator
 
@@ -367,7 +386,90 @@ export function NoteCreature() {
     }
 
     setIsPlaying(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!currentSession.active) {
+      if (sessionIntervalRef.current) {
+        clearInterval(sessionIntervalRef.current)
+        sessionIntervalRef.current = null
+      }
+      lastListenTickAtRef.current = null
+      listenSecondsAccRef.current = 0
+      return
+    }
+
+    const startedAt = currentSession.startedAt
+    const duration = currentSession.duration
+    listenSecondsAccRef.current = useSoundieStore.getState().currentSession.elapsed
+    lastListenTickAtRef.current = null
+
+    sessionIntervalRef.current = setInterval(() => {
+      const st = useSoundieStore.getState()
+      const cs = st.currentSession
+      if (!cs.active || cs.startedAt !== startedAt) {
+        return
+      }
+
+      const now = Date.now()
+      if (!isPlayingRef.current) {
+        lastListenTickAtRef.current = now
+        return
+      }
+
+      const last = lastListenTickAtRef.current
+      if (last == null) {
+        lastListenTickAtRef.current = now
+        return
+      }
+      const delta = Math.min(Math.max((now - last) / 1000, 0), 0.4)
+      lastListenTickAtRef.current = now
+      listenSecondsAccRef.current = Math.max(0, listenSecondsAccRef.current) + delta
+      const acc = listenSecondsAccRef.current
+      const d = cs.duration
+
+      if (acc >= d) {
+        const credited = d
+        updateSessionElapsed(credited)
+        completeSession()
+        if (credited >= MIRACLE_SESSION_SECONDS) {
+          setGrowthPulse(true)
+          setTimeout(() => setGrowthPulse(false), 1400)
+        }
+        setIsPlaying(false)
+        pauseAudio()
+        const pid = st.playerId
+        const nid = st.activeNoteId
+        if (pid && credited > 0) {
+          completeRemoteSession({
+            playerId: pid,
+            noteId: nid,
+            durationSeconds: credited,
+          })
+        }
+        lastListenTickAtRef.current = null
+        listenSecondsAccRef.current = 0
+        return
+      }
+      const floored = Math.min(Math.floor(acc), d)
+      updateSessionElapsed(floored)
+    }, 100)
+
+    return () => {
+      if (sessionIntervalRef.current) {
+        clearInterval(sessionIntervalRef.current)
+        sessionIntervalRef.current = null
+      }
+    }
+  }, [
+    currentSession.active,
+    currentSession.startedAt,
+    currentSession.duration,
+    updateSessionElapsed,
+    completeSession,
+    completeRemoteSession,
+    pauseAudio,
+  ])
 
   useEffect(() => {
     const ctx = audioRef.current.ctx
@@ -420,13 +522,21 @@ export function NoteCreature() {
         </p>
         <p className="font-mono text-xs text-ink-muted mt-1">{def.frequency} Hz</p> */}
 
-        {activeCaption && (
+        {lineCaption && (
           <p
-            key={captionIndex}
+            key={useDailyRareCaption ? 'daily' : captionIndex}
             className="font-mono text-xs italic text-ink-muted mb-3 max-w-xs mx-auto leading-relaxed transition-opacity duration-700"
             style={{ color: hexToRgba(c, 0.7) }}
           >
-            {activeCaption}
+            {lineCaption}
+          </p>
+        )}
+        {sessionMoodReaction && (
+          <p
+            className="text-lora text-sm text-ink/90 mb-3 max-w-sm mx-auto text-center leading-relaxed"
+            style={{ color: hexToRgba(c, 0.88) }}
+          >
+            {sessionMoodReaction}
           </p>
         )}
       </div>
@@ -437,10 +547,17 @@ export function NoteCreature() {
             <span
               className={cn(
                 'h-12 w-12 rounded-full border-2 border-pearl bg-pearl shadow-sm transition-all duration-700',
-                miracleUnlocked && 'scale-110',
+                hadQualifyingSession && 'scale-110',
                 growthPulse && 'scale-[1.18]',
+                dailyGiftForNoteId === activeNoteId &&
+                  dailyGiftGlow &&
+                  `daily-glow--${dailyGiftGlow}`,
               )}
-              style={{ boxShadow: `0 0 0 4px ${hexToRgba(c, 0.2)}` }}
+              style={
+                dailyGiftForNoteId === activeNoteId && dailyGiftGlow
+                  ? { ['--glow' as string]: c, boxShadow: 'none' }
+                  : { boxShadow: `0 0 0 4px ${hexToRgba(c, 0.2)}` }
+              }
               aria-hidden
             >
               <span
@@ -483,6 +600,31 @@ export function NoteCreature() {
             )}
             <div>
               <p className="mb-3 font-mono text-xs text-ink-muted">{t('loreLabel')}</p>
+              {unlockBanner && (
+                <div
+                  className="mb-4 rounded-xl border px-4 py-3 text-left shadow-sm"
+                  style={{
+                    borderColor: hexToRgba(c, 0.4),
+                    backgroundColor: hexToRgba(c, 0.1),
+                    boxShadow: `0 0 0 1px ${hexToRgba(c, 0.12)} inset`,
+                  }}
+                  role="status"
+                >
+                  <p className="text-lora text-sm font-medium text-ink">
+                    {t('unlockBannerTitle')}
+                  </p>
+                  <p className="mt-1.5 font-mono text-[0.65rem] leading-relaxed text-ink/90">
+                    {t('unlockBannerBody', { n: unlockBanner.primaryOneBased })}
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-2 font-mono text-[0.6rem] uppercase tracking-widest text-ink-muted underline-offset-2 hover:underline"
+                    onClick={() => setUnlockBanner(null)}
+                  >
+                    {t('unlockBannerDismiss')}
+                  </button>
+                </div>
+              )}
               <Carousel
                 className="w-full"
                 setApi={setLoreCarouselApi}
@@ -568,27 +710,48 @@ export function NoteCreature() {
                   >
                     <div className="overflow-hidden">
                       <div className="flex flex-wrap justify-center gap-2">
-                        {teardropPlaylistQuery.data.slice(0, 5).map((card) => (
-                          <button
-                            type="button"
-                            key={card.id}
-                            onClick={() => setSelectedTeardropCardId(card.id)}
-                            className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide transition-all duration-200"
-                            style={{
-                              borderColor:
-                                selectedTeardropCard?.id === card.id
-                                  ? hexToRgba(c, 0.65)
-                                  : hexToRgba(c, 0.35),
-                              color: c,
-                              backgroundColor:
-                                selectedTeardropCard?.id === card.id
-                                  ? hexToRgba(c, 0.15)
-                                  : hexToRgba(c, 0.06),
-                            }}
-                          >
-                            {card.name}
-                          </button>
-                        ))}
+                        {teardropPlaylistQuery.data.slice(0, 5).map((card) => {
+                          const isVesselBook =
+                            vesselBookSlug !== null && card.slug === vesselBookSlug
+                          return (
+                            <button
+                              type="button"
+                              key={card.id}
+                              onClick={() => setSelectedTeardropCardId(card.id)}
+                              aria-label={
+                                isVesselBook
+                                  ? `${card.name} — ${t('shelfVesselBookAria')}`
+                                  : undefined
+                              }
+                              className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide transition-all duration-200"
+                              style={{
+                                borderColor:
+                                  selectedTeardropCard?.id === card.id
+                                    ? hexToRgba(c, 0.65)
+                                    : isVesselBook
+                                      ? hexToRgba(c, 0.5)
+                                      : hexToRgba(c, 0.35),
+                                color: c,
+                                backgroundColor:
+                                  selectedTeardropCard?.id === card.id
+                                    ? hexToRgba(c, 0.15)
+                                    : hexToRgba(c, 0.06),
+                                boxShadow: isVesselBook
+                                  ? `0 0 0 1px ${hexToRgba(c, 0.4)}`
+                                  : undefined,
+                              }}
+                            >
+                              {isVesselBook && (
+                                <span
+                                  className="mr-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                                  style={{ backgroundColor: c }}
+                                  aria-hidden
+                                />
+                              )}
+                              {card.name}
+                            </button>
+                          )
+                        })}
                       </div>
                       {selectedTeardropCard && (
                         <div
@@ -601,20 +764,73 @@ export function NoteCreature() {
                           <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
                             {t('shelfTitle')} · {selectedTeardropCard.name}
                           </p>
-                          {selectedTeardropTexts.affirmation && (
-                            <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
-                              &ldquo;{selectedTeardropTexts.affirmation}&rdquo;
-                            </p>
-                          )}
-                          {!selectedTeardropTexts.affirmation && selectedTeardropTexts.tagline && (
-                            <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink">
-                              &ldquo;{selectedTeardropTexts.tagline}&rdquo;
-                            </p>
+                          {selectedTeardropTexts.tagline && (
+                            <div className="mt-2">
+                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                {t('shelfReadingTagline')}
+                              </p>
+                              <p className="mt-1 text-lora text-sm italic leading-relaxed text-ink/95">
+                                {selectedTeardropTexts.tagline}
+                              </p>
+                            </div>
                           )}
                           {selectedTeardropTexts.description && (
-                            <p className="mt-2 font-mono text-[0.68rem] leading-relaxed text-ink-muted">
-                              {selectedTeardropTexts.description}
-                            </p>
+                            <div className="mt-3">
+                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                {t('shelfReadingDescription')}
+                              </p>
+                              <p className="mt-1.5 font-mono text-[0.68rem] leading-relaxed text-ink/85">
+                                {selectedTeardropTexts.description}
+                              </p>
+                            </div>
+                          )}
+                          {selectedTeardropTexts.meaningUpright
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean).length > 0 && (
+                            <div className="mt-3">
+                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                {t('shelfReadingUpright')}
+                              </p>
+                              <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[0.75rem] leading-relaxed text-ink/90">
+                                {selectedTeardropTexts.meaningUpright
+                                  .split('\n')
+                                  .map((l) => l.trim())
+                                  .filter(Boolean)
+                                  .map((line, i) => (
+                                    <li key={i}>{line}</li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
+                          {selectedTeardropTexts.meaningShadow
+                            .split('\n')
+                            .map((l) => l.trim())
+                            .filter(Boolean).length > 0 && (
+                            <div className="mt-3">
+                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                {t('shelfReadingShadow')}
+                              </p>
+                              <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[0.75rem] leading-relaxed text-ink/80">
+                                {selectedTeardropTexts.meaningShadow
+                                  .split('\n')
+                                  .map((l) => l.trim())
+                                  .filter(Boolean)
+                                  .map((line, i) => (
+                                    <li key={i}>{line}</li>
+                                  ))}
+                              </ul>
+                            </div>
+                          )}
+                          {selectedTeardropTexts.affirmation && (
+                            <div className="mt-4 border-t border-pearl-border pt-3">
+                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                {t('shelfReadingAffirmation')}
+                              </p>
+                              <p className="mt-1.5 text-lora text-sm italic leading-relaxed text-ink">
+                                &ldquo;{selectedTeardropTexts.affirmation}&rdquo;
+                              </p>
+                            </div>
                           )}
                         </div>
                       )}

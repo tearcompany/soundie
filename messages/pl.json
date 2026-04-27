@@ -2,20 +2,31 @@
   "common": {
     "languageNav": "Język"
   },
+  "siteNav": {
+    "brand": "Soundie",
+    "home": "Start",
+    "play": "Lab",
+    "sanctuary": "Echo",
+    "mainNav": "Główne menu",
+    "signIn": "Zaloguj",
+    "signOut": "Wyloguj"
+  },
   "meta": {
     "rootTitle": "Soundie — Presence Pass | Ulecz żywymi nutami",
     "rootDescription": "Soundie: medytacyjny, uzdrawiający dźwiękowo Tamagotchi. Presence Pass — warstwa, która sprawia, że dźwięk jest żywy. Dwanaście żywych nut, lore i oddech.",
     "homeTitle": "Soundie — Dźwięk, który wie, że jesteś",
     "homeDescription": "Medytacyjny świat żywych nut. Każda leczy co innego. Im dłużej słuchasz, tym więcej się odsłania.",
-    "playTitle": "Graj — Soundie",
+    "playTitle": "Lab — Soundie",
     "playDescription": "Słuchaj żywych nut. Twój uzdrawiający dźwiękowy Tamagotchi.",
+    "sanctuaryTitle": "Echo — Soundie",
+    "sanctuaryDescription": "Cichy odblask słuchania: czas przy każdym klimacie emocji i nastroje, które nazwałeś przed grą.",
     "applicationName": "Soundie",
     "keywords": "leczenie dźwiękiem, medytacja, terapia częstotliwością, Soundie, żywe nuty, obecność",
     "ogLocale": "pl_PL"
   },
   "landing": {
     "brand": "Soundie",
-    "freqRange": "261,63 – 493,88 Hz",
+    "freqRange": "{min} – {max} Hz",
     "lines": [
       "Dwanaście nut. Każda żyje.",
       "Posłuchaj wystarczająco długo — rosną.",
@@ -58,6 +69,9 @@
     "supports": "Wspiera",
     "loreLabel": "Lore",
     "fragmentUnlocked": "Fragment odblokowany",
+    "unlockBannerTitle": "Opowieść rośnie",
+    "unlockBannerBody": "Warstwa {n} z 5 — nowa linia tej opowieści o nucie jest twoja.",
+    "unlockBannerDismiss": "Rozumiem",
     "minsToUnlock": "~{mins} min do odblokowania",
     "listeningSession": "Sesja słuchania",
     "stopListening": "Stop",
@@ -68,6 +82,12 @@
     "shelfOpen": "pokaż półkę teardrop",
     "shelfClose": "ukryj półkę teardrop",
     "shelfTitle": "teardrop",
+    "shelfVesselBookAria": "Karta z Księgi Naczynia tej nuty",
+    "shelfReadingTagline": "Hasło",
+    "shelfReadingDescription": "Opis",
+    "shelfReadingUpright": "W świetle",
+    "shelfReadingShadow": "Cień",
+    "shelfReadingAffirmation": "Afirmacja",
     "lore": {
       "C": [
         "Zanim była muzyka, było milczenie. C jest pierwszym oddechem po tej ciszy — nutą, od której wszystko się zaczyna.",
@@ -155,7 +175,65 @@
       ]
     }
   },
+  "returnEngine": {
+    "welcomeBack": "Twój Soundie czekał w ciszy.",
+    "dailyWhisper": "Dziś {note} brzmi spokojniej.",
+    "streakLabel": "{n} noce rezonansu",
+    "continue": "Dalej",
+    "dailyGift": {
+      "title": "Podarunek uformował się przez noc.",
+      "sub": "Nic do zdobycia — tylko to, co Soundie trzymał dla ciebie.",
+      "teardrop": "kropla",
+      "listen": "Słuchaj"
+    }
+  },
+  "moodIntelligence": {
+    "ask": "Jak się czujesz?",
+    "reactionLabel": "Z tą nutą, w tej chwili",
+    "moods": {
+      "anxious": "Niespokojnie",
+      "numb": "Odrętwiale",
+      "heavy": "Ciężko",
+      "scattered": "Rozproszony",
+      "hopeful": "Z nadzieją"
+    },
+    "notNow": "Później",
+    "back": "Wstecz",
+    "enter": "Wejdź w grę"
+  },
   "lockedNotes": {
     "caption": "Kolejna nuta ukazuje się tylko temu, kto jest w bezruchu."
+  },
+  "sanctuary": {
+    "greeting": "Echo",
+    "sub": "Lustro słuchania — nie wynik, nie wyrok. Wzorce tutaj to zaproszenia, nie pęd.",
+    "noPlayer": "Żeby zobaczyć ślad,",
+    "goPlay": "zacznij sesję w Lab",
+    "loading": "Chwila…",
+    "todayCard": "Dziś",
+    "todayMinutes": "{m} minut słuchania na razie",
+    "todayMinutesUnknown": "Spokojny dzień — jeszcze nie odczytaliśmy dziś minut",
+    "releaseTitle": "Czas przy każdym klimacie wewnętrznym",
+    "releaseHint": "Bąble rosną z minut spędzonych z nutami, które niosą dany ton emocji. Więcej czasu to więcej trzymania, nie „naprawy”.",
+    "emptyRelease": "Gdy będziesz słuchać, woda pokaże, gdzie spoczywała twoja uwaga.",
+    "moodTitle": "Nastroje przy progu",
+    "moodHint": "Liczba check-inów w ostatnich dwóch tygodniach. Bez ocen — tylko rytm.",
+    "emptyMood": "Gdy powiesz, jak się czujesz przed grą, delikatna mapa pojawi się tutaj.",
+    "law": "Echo nigdy nie zadaje pracy domowej. Tylko pamięta.",
+    "notesTitle": "Twoje nuty",
+    "notesHint": "Każda nuta, której słuchałeś, rośnie we własnym tempie.",
+    "noteLevel": "Poz. {lv}",
+    "noteMinutes": "{m, plural, =0 {jeszcze brak minut} one {# min słuchania} few {# min słuchania} many {# min słuchania} other {# min słuchania}}",
+    "noteFragmentsAria": "{n} z {max} warstw lore odblokowanych",
+    "bubbleAria": "Paki o czasie przy każdym klimacie emocji",
+    "moodAria": "Paski: jak często wybierano każdy nastrój w check-inach",
+    "tooltipEmotion": "{name} — {minutes}m {seconds}s słuchania w tym okresie",
+    "moodLabels": {
+      "anxious": "Niespokojnie / lęk",
+      "numb": "Odrętwiało / płasko",
+      "heavy": "Ciężko",
+      "scattered": "Rozproszenie",
+      "hopeful": "Nadzieja"
+    }
   }
 }

@@ -1,7 +1,9 @@
 import { db } from '@/lib/db'
+import { auth } from '@/auth'
 
-export function createContext() {
-  return { db }
+export async function createContext() {
+  const session = await auth()
+  return { db, session }
 }
 
-export type Context = ReturnType<typeof createContext>
+export type Context = Awaited<ReturnType<typeof createContext>>

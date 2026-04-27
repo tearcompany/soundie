@@ -1,0 +1,352 @@
+{
+  "the-seed": {
+    "tagline": "Początek jest ukryty, ale prawdziwy.",
+    "description": "To potencjał, który jeszcze nie wie, że już istnieje. Ziarno nie zna drzewa, ale niesie jego całość. Karta mówi o wewnętrznej gotowości bez formy – o prawdzie, która jeszcze nie została wypowiedziana.",
+    "meaningUpright": "Czysta intencja\nNiewidoczne źródło ruchu\nNapięcie przed startem",
+    "meaningShadow": "Brak wiary w sens\nOpór przed początkiem\nUtrata kontaktu z potencjałem",
+    "affirmation": "Noszę przyszłość, nawet jeśli jej jeszcze nie widzę."
+  },
+  "the-soil": {
+    "tagline": "To, co przyjmuje, nie jest bierne.",
+    "description": "To przestrzeń, która obejmuje i przemienia. Nie działa gwałtownie – ale nie jest pasywna. To gleba, która pamięta każdy upadek, każdą łzę i zamienia je w nowe życie.",
+    "meaningUpright": "Głęboka wewnętrzna gotowość\nMilcząca mądrość\nZiemia pod przyszłe działanie",
+    "meaningShadow": "Zatrzymanie, które staje się zgnilizną\nBrak ruchu\nZgoda na wszystko bez rozeznania",
+    "affirmation": "Nie wszystko musi rosnąć od razu. Jestem miejscem, gdzie zaczyna się prawdziwe."
+  },
+  "the-anchor": {
+    "tagline": "Nie każde trzymanie jest zatrzymaniem.",
+    "description": "The Anchor to głęboka lojalność wobec fundamentu. To to, co nie pozwala odpłynąć, gdy wszystko inne się rusza. Karta mówi o trwałości, zakotwiczeniu w czymś większym niż emocje. O mądrości zatrzymania się, by nie stracić kierunku.",
+    "meaningUpright": "Wierność wewnętrznej prawdzie\nZatrzymanie przed rozpadem\nStabilność mimo chaosu",
+    "meaningShadow": "Lęk przed ruchem\nUparte trwanie w martwym punkcie\nPrzewaga kontroli nad życiem",
+    "affirmation": "Trwam nie z lęku, ale z rozeznania."
+  },
+  "the-shell": {
+    "tagline": "To, co chroni, może też oddzielać.",
+    "description": "The Shell symbolizuje ochronę — ale też izolację. Jest mądrością zachowania granicy, ale też wyzwaniem do jej przekroczenia. Karta mówi o czasie, w którym potrzebujemy bezpiecznego wnętrza, zanim objawimy się światu.",
+    "meaningUpright": "Bezpieczne granice\nIntrowersja jako siła\nSamowystarczalność i regeneracja",
+    "meaningShadow": "Zamknięcie na relacje\nLęk przed odsłonięciem\nPozorna niezależność",
+    "affirmation": "Chronię to, co we mnie najczystsze. Ale nie zapominam otwierać się, gdy przychodzi czas."
+  },
+  "the-core": {
+    "tagline": "Nie wszystko, co ukryte, jest słabe.",
+    "description": "The Core to miejsce wewnętrznego skupienia, esencja tożsamości. To punkt, który nie zmienia się, nawet gdy wszystko inne się rozpada. Jest źródłem siły i kierunku, ale trudno do niego dotrzeć bez odwagi.",
+    "meaningUpright": "Spójność i integralność\nKontakt z sobą poza rolami\nWewnętrzne centrum decyzji",
+    "meaningShadow": "Zamknięcie się w swojej prawdzie\nNiezdolność do kompromisu\nSamotność z wyboru",
+    "affirmation": "To, kim jestem, nie potrzebuje uzasadnienia."
+  },
+  "the-stone": {
+    "tagline": "Ciężar nie musi być przeszkodą.",
+    "description": "The Stone to masa, pamięć i trwanie. Symbolizuje obciążenie, ale i trwałość. Karta mówi o dziedzictwie, historii, o tym, co niesiemy nie zawsze z własnego wyboru — ale co może być naszym gruntem.",
+    "meaningUpright": "Stabilność\nPamięć przodków\nWartość doświadczenia",
+    "meaningShadow": "Ciężar nie do uniesienia\nSkostnienie\nPrzeszłość jako więzienie",
+    "affirmation": "Nie wszystko, co ciężkie, jest złe. Niektóre rzeczy mnie chronią."
+  },
+  "the-branch": {
+    "tagline": "Nie każda droga prowadzi w górę.",
+    "description": "The Branch to rozgałęzienie, decyzja, nowy kierunek. Karta mówi o wyborze, ale i o nieprzewidywalności życia. Gałąź może się złamać – ale może też zakwitnąć. Wszystko zależy od miejsca, z którego wyrasta.",
+    "meaningUpright": "Nowe możliwości\nElastyczność\nRuch w stronę światła",
+    "meaningShadow": "Rozproszenie sił\nNiepewność kierunku\nZgubienie osi",
+    "affirmation": "Jestem gałęzią, ale pamiętam korzeń."
+  },
+  "the-tree": {
+    "tagline": "To, co rośnie, łączy niebo i ziemię.",
+    "description": "The Tree to połączenie. Korzenie w glebie, korona w świetle. Karta mówi o dojrzałości, wzroście i zharmonizowaniu światów. Nie jest już potencjałem – jest spełnieniem biologii i duchowości.",
+    "meaningUpright": "Wzrost i stabilizacja\nGłęboka mądrość życia\nObecność i trwanie",
+    "meaningShadow": "Utrata kontaktu z jednym z biegunów\nNadmiar kontroli\nSztywność w strukturze",
+    "affirmation": "Rośnę we wszystkich kierunkach, ale jestem jeden."
+  },
+  "the-stream": {
+    "tagline": "Ruch nie musi mieć celu, by był święty.",
+    "description": "The Stream symbolizuje pierwszy przepływ emocji, informacji, intuicji. To karta wrażliwości, która porusza się lekko i bez oporu. Przypomina, że nie wszystko trzeba zatrzymać — czasem wystarczy płynąć.",
+    "meaningUpright": "Spontaniczność\nPrzejrzystość uczuć\nKomunikacja bez blokad",
+    "meaningShadow": "Rozlanie emocji\nBrak granic\nUtrata koncentracji",
+    "affirmation": "Nie muszę wiedzieć, dokąd płynę, by być w porządku."
+  },
+  "the-tide": {
+    "tagline": "To, co odchodzi, też było ważne.",
+    "description": "Karta przypływu i odpływu – cykl emocji, które wracają i znikają. Mądrość tej karty polega na uznaniu sezonowości uczuć, relacji, decyzji. Uczy zaufania do rytmu, który nie zawsze jest liniowy.",
+    "meaningUpright": "Zgoda na zmianę stanu\nCykliczność jako rytm życia\nElastyczność emocjonalna",
+    "meaningShadow": "Uwięzienie w powrotach\nNiezdolność do zakończeń\nUzależnienie od emocjonalnych fal",
+    "affirmation": "Nie każda fala mnie zmywa. Niektóre przynoszą mnie bliżej siebie."
+  },
+  "the-ebb": {
+    "tagline": "Znikanie też jest formą troski.",
+    "description": "The Ebb to cofnięcie — nie jako porażka, lecz jako przygotowanie do nowego. To chwila, w której energia się zbiera, zamiast się rozpraszać. Uczy, że czasem trzeba się wycofać, by móc wrócić z mocą.",
+    "meaningUpright": "Regeneracja\nIntencjonalne wycofanie\nCzas dla siebie",
+    "meaningShadow": "Ucieczka przed konfrontacją\nBrak zaangażowania\nEmocjonalna niedostępność",
+    "affirmation": "Znikam nie po to, by odejść, ale by odzyskać siebie."
+  },
+  "the-drift": {
+    "tagline": "Nie każda utrata kontroli jest upadkiem.",
+    "description": "The Drift to moment, kiedy nie masz wpływu — i nie musisz. To karta zaufania do nurtu życia, nawet jeśli nie znasz kierunku. Zaprasza do oddania ciężaru decyzji na rzecz głębszego prowadzenia.",
+    "meaningUpright": "Poddanie się procesowi\nLekkość bycia\nKreatywność bez presji",
+    "meaningShadow": "Brak kierunku\nBierność\nRozmycie tożsamości",
+    "affirmation": "Nie prowadzę – ale nie jestem zgubiony."
+  },
+  "the-surge": {
+    "tagline": "Czasem trzeba się dać porwać.",
+    "description": "The Surge to fala mocy, gniewu, życia. To karta intensywności — nie zawsze kontrolowanej, ale prawdziwej. Pokazuje, że są chwile, gdy trzeba przestać tłumić, a zacząć płynąć z całą siłą.",
+    "meaningUpright": "Energia i moc\nMoment przełomu\nPrawda emocji",
+    "meaningShadow": "Impulsywność\nEmocjonalny chaos\nZranienie przez nadmiar",
+    "affirmation": "Nie tłumię. Pozwalam sobie być całością."
+  },
+  "the-whisper": {
+    "tagline": "Najcichsze głosy niosą największą prawdę.",
+    "description": "The Whisper to intuicja, podszept duszy, znak subtelny. To karta wewnętrznego słyszenia, które wymaga ciszy. Nie da się jej wymusić — można tylko się zatrzymać i zauważyć, że już mówi.",
+    "meaningUpright": "Intuicja\nDelikatna mądrość\nCzułość wobec siebie",
+    "meaningShadow": "Zagubienie w chaosie\nNiezdolność do wyciszenia\nPomijanie sygnałów",
+    "affirmation": "Słyszę, nawet gdy nic nie mówię."
+  },
+  "the-breaker": {
+    "tagline": "To, co się łamie, może uwolnić.",
+    "description": "The Breaker to fala, która niszczy stare. To karta destrukcji, która jest potrzebna, by coś nowego mogło powstać. Nie przynosi komfortu — ale przynosi prawdę. Uczy rozróżnienia między złamaniem a wyzwoleniem.",
+    "meaningUpright": "Odwaga do zerwania\nWyjście z iluzji\nSiła oczyszczenia",
+    "meaningShadow": "Nadmierna radykalność\nRanienie innych\nBrak empatii w zmianie",
+    "affirmation": "Zrywam to, co mnie więzi. Robię miejsce."
+  },
+  "the-shadow": {
+    "tagline": "To, co ukryte, nie zawsze jest złe.",
+    "description": "The Shadow to spotkanie z tym, co wyparte. To nie zło — to niedostrzeżona część siebie. Karta zaprasza do uznania cienia jako bramy do integracji. Bez tej konfrontacji światło nie jest pełne.",
+    "meaningUpright": "Autentyczność\nWgląd w siebie\nUzdrowienie przez cień",
+    "meaningShadow": "Projekcja\nLęk przed sobą\nUcieczka w fałszywe światło",
+    "affirmation": "Patrzę w cień, bo wiem, że tam jestem cały."
+  },
+  "the-pause": {
+    "tagline": "Zatrzymanie to też ruch — tylko do środka.",
+    "description": "To karta zatrzymania, ciszy, zawieszenia. Nie chodzi o stagnację, lecz o przestrzeń do słuchania. W pauzie rodzi się kierunek. Nie szukaj odpowiedzi — pozwól jej wybrzmieć.",
+    "meaningUpright": "Refleksja\nReset\nGłębokie słuchanie",
+    "meaningShadow": "Odrętwienie\nPrzeciąganie decyzji\nUcieczka w bierność",
+    "affirmation": "Zatrzymuję się, by naprawdę być."
+  },
+  "the-abyss": {
+    "tagline": "Nie wszystko, co głębokie, chce cię pochłonąć.",
+    "description": "The Abyss to spojrzenie w bezdenne. To przestrzeń bez odpowiedzi, która jednak cię widzi. Nie chodzi o to, by ją zrozumieć — ale by uznać, że jest. Karta zaprasza do odwagi istnienia bez pewności.",
+    "meaningUpright": "Duchowa głębia\nPokora wobec nieznanego\nKontakt z tym, co większe",
+    "meaningShadow": "Utrata sensu\nLęk przed nicością\nOdrętwienie istnienia",
+    "affirmation": "Nie wiem. I to też jest święte."
+  },
+  "the-fog": {
+    "tagline": "To, że nie widzisz, nie znaczy, że nie jesteś prowadzony.",
+    "description": "The Fog mówi o stanie pomieszania, przejściu, niejasności. To nie porażka percepcji — to ochrona przed tym, co zbyt jasne zbyt wcześnie. Uczy zaufania, zanim przyjdzie zrozumienie.",
+    "meaningUpright": "Rozpuszczenie iluzji\nZgoda na tajemnicę\nCzułość wobec własnej kruchości",
+    "meaningShadow": "Dezorientacja\nParaliż przez niepewność\nBrak rozeznania",
+    "affirmation": "Nie widzę, ale jestem widziany."
+  },
+  "the-silence": {
+    "tagline": "To nie brak dźwięku — to pełnia obecności.",
+    "description": "The Silence nie jest pustką. To odpowiedź bez słów. Karta przypomina, że nie wszystko musi zostać nazwane, by było prawdziwe. Uczy obecności bez konieczności wypowiedzi.",
+    "meaningUpright": "Głęboka obecność\nPokój ducha\nCzystość słuchania",
+    "meaningShadow": "Ucieczka w milczenie\nNiewyrażony ból\nIzolacja emocjonalna",
+    "affirmation": "Nie mówię. Ale jestem."
+  },
+  "the-stillness": {
+    "tagline": "Ruch nie zawsze znaczy życie.",
+    "description": "The Stillness to zawieszenie. Ale nie martwe — twórcze. Karta mówi o potencjale, który dojrzewa w spokoju. Uczy, że nie każdy bezruch jest stagnacją. Czasem to cisza przed eksplozją.",
+    "meaningUpright": "Uziemienie\nCierpliwość\nGłęboka regeneracja",
+    "meaningShadow": "Marazm\nZatrzymanie ducha\nLęk przed ruchem",
+    "affirmation": "Nie poruszam się — ale jestem gotów."
+  },
+  "the-veil": {
+    "tagline": "Za iluzją też jest sens.",
+    "description": "The Veil to granica percepcji. To, co zakryte — ale nie zapomniane. Karta mówi o tajemnicy, która jest po coś. Uczy szacunku wobec tego, co jeszcze nie może zostać ujawnione.",
+    "meaningUpright": "Ochrona tego, co święte\nMistyczna percepcja\nGotowość na objawienie",
+    "meaningShadow": "Ucieczka przed prawdą\nTrzymanie się złudzeń\nOpór przed odkryciem",
+    "affirmation": "Nie wszystko musi być widoczne, by działać."
+  },
+  "the-glow": {
+    "tagline": "Nie zawsze trzeba świecić, by oświetlać.",
+    "description": "The Glow to pierwsze pojawienie się światła po ciemności. Nie olśniewa – ale pozwala zobaczyć. To karta nadziei, delikatności i dyskretnego prowadzenia. Uczy, że światło może być ciche, ale prawdziwe.",
+    "meaningUpright": "Subtelna siła\nCiepło wewnętrzne\nPowrót jasności",
+    "meaningShadow": "Zbyt mała wiara w siebie\nBierność w objawianiu daru\nStrach przed pełnym blaskiem",
+    "affirmation": "Nie muszę być słońcem, by rozjaśnić noc."
+  },
+  "the-halo": {
+    "tagline": "Świętość nie potrzebuje dowodu.",
+    "description": "The Halo to karta obecności duchowej – nie przez działanie, ale przez samo bycie. To symbol rozpoznania czegoś większego w sobie lub drugim. Nie chodzi o zasługi – chodzi o to, że jesteś nosicielem światła.",
+    "meaningUpright": "Duchowa obecność\nPokora i siła\nBlask z wnętrza",
+    "meaningShadow": "Iluzja wyjątkowości\nUcieczka w duchowość bez życia\nSamouwielbienie",
+    "affirmation": "To nie ja błyszczę. To światło przeze mnie."
+  },
+  "the-lantern": {
+    "tagline": "Nie niesiesz światła. Ty nim jesteś.",
+    "description": "The Lantern to karta przewodnictwa. To światło niesione przez drogę — nie tylko dla siebie, ale i dla innych. Uczy, że obecność może być kierunkiem. Nie musisz znać trasy, by być światłem.",
+    "meaningUpright": "Prowadzenie\nKlarowność intencji\nŚwiatło w trudnym czasie",
+    "meaningShadow": "Zależność od bycia potrzebnym\nWypalenie duchowe\nStrach przed własnym cieniem",
+    "affirmation": "Nie świecę. Ja jestem światłem."
+  },
+  "the-sun": {
+    "tagline": "Życie wraca tam, gdzie jesteś naprawdę sobą.",
+    "description": "The Sun to karta pełni. Światło, które oświetla wszystko bez wyjątku. To życie, radość, prawda, energia. Uczy odwagi bycia w pełni — bez maski, bez ukrywania. Światło, które nie wybiera. Świeci.",
+    "meaningUpright": "Radość\nPrawda\nEnergia życiowa",
+    "meaningShadow": "Arogancja\nBrak cienia, który chroni\nWypalanie innych intensywnością",
+    "affirmation": "Nie chowam się. Jestem cały — i świecę."
+  },
+  "the-star": {
+    "tagline": "Nie musisz być duży, by być widoczny.",
+    "description": "The Star to karta nadziei i kierunku. Mała, ale widoczna z daleka. Uczy, że nawet najmniejszy błysk może prowadzić. To światło w samotności, znak, że jesteś na właściwej drodze.",
+    "meaningUpright": "Nadzieja\nIntuicja\nSkromna moc przewodnictwa",
+    "meaningShadow": "Iluzja zbawiciela\nZgubienie w ideałach\nBrak uziemienia",
+    "affirmation": "Świecę nie po to, by błyszczeć — ale by prowadzić."
+  },
+  "the-prism": {
+    "tagline": "Światło jest jedno — ale wyraża się wielością.",
+    "description": "The Prism to karta rozszczepienia. Nie chodzi o chaos — ale o objawienie różnorodności. Pokazuje, że światło nie musi być jednolite, by być prawdziwe. Uczy akceptacji różnorodnych aspektów siebie.",
+    "meaningUpright": "Integracja\nAkceptacja złożoności\nKreatywność",
+    "meaningShadow": "Rozproszenie\nBrak wewnętrznego spoiwa\nZgubienie się w możliwościach",
+    "affirmation": "Nie jestem jednym kolorem. Jestem spektrum."
+  },
+  "the-beam": {
+    "tagline": "Nie musisz iść szeroko — wystarczy jasno.",
+    "description": "The Beam to kierunkowość. To światło, które nie świeci wszędzie, ale tam, gdzie trzeba. Uczy koncentracji, skupienia, jasności celu. Światło, które tnie mrok — nie przez ilość, ale przez intensywność.",
+    "meaningUpright": "Skupienie\nPrecyzja duchowa\nProwadzenie jak laser",
+    "meaningShadow": "Brak elastyczności\nOślepienie własną misją\nNadmiar kontroli",
+    "affirmation": "Nie rozpraszam się. Świecę tam, gdzie jestem posłany."
+  },
+  "the-initiate": {
+    "tagline": "Powiedz tylko słowo.",
+    "description": "To pierwszy moment przebudzenia — jeszcze nie droga, ale już nie sen. „The Initiate” nie wie, dokąd pójdzie, ale coś w nim już się obudziło. Słowo zostało wypowiedziane w jego wnętrzu. Ta karta niesie łagodność, ale i ryzyko: można usłyszeć, lecz nie pójść. Można pozostać w zachwycie początku i nigdy nie wejść w drogę.",
+    "meaningUpright": "Duchowe przebudzenie\nOtworzenie serca na tajemnicę\nOdwaga zapytania: „Kim jestem?”",
+    "meaningShadow": "Ucieczka w fascynację duchową bez zakorzenienia\nBrak decyzji\nPotrzeba duchowej aprobaty zamiast przemiany",
+    "affirmation": "Wystarczy, że słyszę. I to już mnie przemienia."
+  },
+  "the-path": {
+    "tagline": "Idź. Już jesteś gotowy.",
+    "description": "„The Path” to miejsce decyzji. Nie chodzi już o to, co czujesz, ale o to, co zrobisz. Każda ścieżka coś daje i coś odbiera. Ta karta jest jak rozstaj: jedno wyjście prowadzi do życia, drugie do zamknięcia w znanym. Bóg nie wymusza wyboru — tylko zaprasza.",
+    "meaningUpright": "Klarowność wyboru\nWewnętrzne TAK wobec nieznanego\nDojrzałość duchowa",
+    "meaningShadow": "Lęk przed błędem\nSabotowanie własnego postępu\nZwlekanie, które udaje pokorę",
+    "affirmation": "Nie muszę widzieć końca drogi, by zrobić pierwszy krok."
+  },
+  "the-crossing": {
+    "tagline": "Jeśli umrzesz — będziesz żyć.",
+    "description": "To karta progu. Przejścia. Ofiary. „The Crossing” nie pyta, czy jesteś gotowy — ona cię wzywa. Trzeba zostawić za sobą to, co znane. Może coś umrze. Może coś się nie wróci. Ale jeśli się zatrzymasz — zaczniesz się cofać. Tylko ci, którzy przechodzą przez własny cień, widzą prawdziwe światło.",
+    "meaningUpright": "Odwaga przekroczenia lęku\nDuchowe przejście, inicjacja\nCałkowite oddanie się procesowi",
+    "meaningShadow": "Opór wobec zmiany\nTrzymanie się fałszywej tożsamości\nBól utraty, który blokuje nowe życie",
+    "affirmation": "Zgadzam się przejść — nawet jeśli nie wiem, kim będę po drugiej stronie."
+  },
+  "the-sanctuary": {
+    "tagline": "Wejdź. Nikt cię nie szuka.",
+    "description": "„The Sanctuary” to przestrzeń ukrycia, która nie jest ucieczką, lecz wybraniem samotności. Nie znajdziesz tu odpowiedzi — znajdziesz pustkę. Ale to pustka błogosławiona, święta. Karta zaprasza, by przestać grać rolę i stanąć w absolutnej prawdzie bez lustra. Binah to matczyna głębia — pozwala ci umrzeć, nie oceniając.",
+    "meaningUpright": "Przestrzeń uzdrowienia przez wycofanie\nKontakt z wewnętrzną mądrością\nUwolnienie od potrzeby widoczności",
+    "meaningShadow": "Izolacja z lęku, nie z miłości\nDuchowa samotność zamiast samotności duchowej\nRezygnacja z relacji jako uniku",
+    "affirmation": "Mogę być niewidoczny — i całkowicie prawdziwy."
+  },
+  "the-echo": {
+    "tagline": "Co naprawdę słyszysz?",
+    "description": "Echo nie jest głosem — jest jego cieniem. „The Echo” przypomina, że wiele naszych decyzji to reakcje, nie wybory. Ta karta pyta: czy to, co robisz, jest naprawdę twoje? Hod to miejsce odbicia, komunikacji, ale i iluzji języka. Kiedy powtarzasz — czy pamiętasz, co było pierwotne?",
+    "meaningUpright": "Głębokie słuchanie\nRozróżnianie głosu serca od zewnętrznych narracji\nPokora wobec Słowa",
+    "meaningShadow": "Powtarzanie duchowych fraz bez doświadczenia\nŻycie cudzym głosem\nDuchowe echa zamiast obecności",
+    "affirmation": "Nie chcę więcej odbić — tylko prawdy."
+  },
+  "the-pulse": {
+    "tagline": "Czujesz to?",
+    "description": "„The Pulse” jest ruchem ukrytym pod powierzchnią. Nie musisz nic mówić — wystarczy, że jesteś. Yesod to fundament, miejsce kontaktu z życiem przed słowem. Puls tej karty przypomina bicie serca Boga — obecne, ciche, stałe. Czy umiesz zaufać czemuś, czego nie możesz uchwycić?",
+    "meaningUpright": "Zestrojenie z wewnętrznym rytmem\nPraca z energią ciała i duszy\nWrażliwość duchowa bez potrzeby „rozumienia”",
+    "meaningShadow": "Zablokowany przepływ – stagnacja\nIgnorowanie sygnałów ciała i emocji\nDuchowa bezruchowość pod przykrywką spokoju",
+    "affirmation": "Nie muszę rozumieć. Wystarczy, że czuję."
+  },
+  "the-flame": {
+    "tagline": "Nie jestem bezpieczny. Jestem prawdziwy.",
+    "description": "„The Flame” to ogień, który nie daje ciepła — ale wypala to, co fałszywe. Gevurah to siła ograniczenia, osądu, świętego cięcia. Ta karta objawia intensywność duchowej prawdy, która nie głaszcze, lecz rani dla uzdrowienia. Ogień ten nie niszczy duszy — niszczy jej kłamstwa.",
+    "meaningUpright": "Przebudzenie przez konfrontację\nOdwaga zobaczenia siebie bez znieczulenia\nŚwięta dyscyplina i oczyszczenie",
+    "meaningShadow": "Duchowy perfekcjonizm\nUżywanie prawdy jako broni\nAutodestrukcja w imię „wierności”",
+    "affirmation": "Nie boję się płomienia. On zna moje imię."
+  },
+  "the-watcher": {
+    "tagline": "Patrzę i nie odwracam wzroku.",
+    "description": "„The Watcher” to ten, kto widzi — nie dla osądu, lecz dla zrozumienia. Tiferet jest centrum drzewa, sercem równowagi. Ta karta wzywa do spojrzenia prawdzie w oczy, nie uciekając. Patrzenie to akt miłości — nawet jeśli boli. Nawet jeśli wszystko się zmienia.",
+    "meaningUpright": "Wgląd bez lęku\nDuchowa obecność wobec cienia\nZdolność do zobaczenia „całości”",
+    "meaningShadow": "Bierność pod pozorem uważności\nEmocjonalna separacja\nDuchowe obserwatorstwo bez zaangażowania",
+    "affirmation": "Patrzę z serca. I to wystarcza."
+  },
+  "the-wave": {
+    "tagline": "Nie muszę się bronić.",
+    "description": "„The Wave” to fala łaski — nieprzewidywalna, ale zawsze niosąca. Chesed to miłość, która się nie cofa, nawet gdy jest odrzucona. Ta karta przypomina: jesteś niesiony. Nie musisz wszystkiego kontrolować. Otwórz ręce. Fala cię nie pochłonie — jeśli się jej poddasz.",
+    "meaningUpright": "Przyjęcie bezwarunkowej miłości\nUzdrowienie przez poddanie\nUwolnienie od potrzeby kontroli",
+    "meaningShadow": "Naiwność wobec zranień\nPragnienie zbawienia przez innych\nPasywność udająca zaufanie",
+    "affirmation": "Nie zatrzymuję łaski. Pozwalam jej płynąć."
+  },
+  "the-weaver": {
+    "tagline": "To wszystko jest ze sobą połączone.",
+    "description": "„The Weaver” to ten, który tka znaczenie. Nie kontroluje nici, ale widzi wzór. Chokhmah to mądrość jako błysk – intuicja, z której wyrasta struktura. Ta karta pojawia się, gdy zaczynasz widzieć sens tam, gdzie wcześniej była tylko trauma lub chaos. Nie wszystko da się zrozumieć, ale wszystko może być utkane w świętość.",
+    "meaningUpright": "Duchowa integracja doświadczeń\nTwórcze postrzeganie bólu jako materiału do wzrostu\nWejście w rytm życia większy niż kontrola",
+    "meaningShadow": "Nadinterpretacja rzeczywistości\nZaplątanie w mentalne konstrukty\nDuchowy perfekcjonizm ukryty pod „sensotwórstwem”",
+    "affirmation": "Nie muszę wszystkiego wiedzieć. Wystarczy, że tkam."
+  },
+  "the-witness": {
+    "tagline": "Widzę. Nie muszę działać.",
+    "description": "„The Witness” to wewnętrzny obserwator — ten, który nie ratuje, nie osądza, nie poprawia. Po prostu jest. Tiferet to miejsce czystego spojrzenia serca. Karta ta pojawia się, gdy trzeba powstrzymać się od reakcji, by ujrzeć prawdę. Świadek nie jest bierny — on jest absolutnie obecny.",
+    "meaningUpright": "Medytacyjna obecność\nWgląd poza emocją i myślą\nUmiejętność trwania przy czyimś bólu bez przejęcia",
+    "meaningShadow": "Duchowa separacja\nEmocjonalna obojętność jako pozór równowagi\nWycofanie z życia pod pozorem „uważności”",
+    "affirmation": "Jestem przy tobie. I to wystarcza."
+  },
+  "the-mirror": {
+    "tagline": "To, co widzisz, to także ty.",
+    "description": "„The Mirror” nie pokazuje ci świata — pokazuje ciebie w świecie. To karta głębokiego rozpoznania i trudnej łaski: wszystko, co cię porusza, mówi coś o tobie. Yesod to kanał, przez który światło przechodzi — zniekształcone lub oczyszczone. Czy to, co widzisz, jest odbiciem, czy iluzją?",
+    "meaningUpright": "Głębokie rozpoznanie siebie w relacjach\nPrzejęcie odpowiedzialności za projekcje\nŚwiadomość własnego wpływu",
+    "meaningShadow": "Obwinianie świata za wewnętrzny cień\nUcieczka od samoświadomości\nZatrzymanie się na powierzchni lustrzanej gry",
+    "affirmation": "Odsłaniam się, patrząc na ciebie."
+  },
+  "the-return": {
+    "tagline": "Wracasz nie po to, by być taki sam.",
+    "description": "„The Return” to moment powrotu — nie do miejsca, lecz do serca. Tiferet jako centrum drzewa życia przywołuje do równowagi po czasie rozproszenia. To nie jest cofnięcie się — to głębszy poziom kręgu. Kiedy wracasz naprawdę, coś w tobie jest już inne. Karta ta pojawia się, gdy trzeba odzyskać utraconą część siebie — ale nie na starych warunkach.",
+    "meaningUpright": "Duchowy powrót do tego, co istotne\nUzdrowienie relacji lub tożsamości\nIntegracja przeszłości z teraźniejszością",
+    "meaningShadow": "Iluzja powrotu do „jak było”\nPróba reanimacji martwych struktur\nSentimentalizm zamiast transformacji",
+    "affirmation": "Wracam — ale nie jestem już tym samym człowiekiem."
+  },
+  "the-bridge": {
+    "tagline": "Nie należę już do tamtego miejsca. Ale jeszcze nie jestem tutaj.",
+    "description": "„The Bridge” to stan przejściowy. Jesteś pomiędzy — nie w starym, nie w nowym. Yesod, jako fundament, testuje cię: czy zaufasz krokom w pustce? Karta ta nie oferuje stabilności — oferuje ruch. Tylko ci, którzy odważą się przejść, poznają, czym naprawdę jest nowe życie.",
+    "meaningUpright": "Gotowość do zmiany bez gwarancji\nUmiejętność trwania w niepewności\nDuchowa adaptacja",
+    "meaningShadow": "Uwięzienie w „pomiędzy”\nZwątpienie w sens drogi\nDuchowe zawieszenie bez zakorzenienia",
+    "affirmation": "Choć nie wiem, dokąd idę, nie cofnę się."
+  },
+  "the-messenger": {
+    "tagline": "To nie ty jesteś przesłaniem. Ale to przez ciebie przechodzi.",
+    "description": "„The Messenger” niesie słowo, ale go nie tworzy. Jest kanałem. Hod odpowiada za komunikację — nie w sensie technicznym, ale mistycznym. Ta karta pojawia się, gdy masz coś do przekazania, choć nie zawsze to rozumiesz. Twoja rola nie polega na tworzeniu — ale na otwartości.",
+    "meaningUpright": "Przebudzenie duchowego głosu\nKanałowanie inspiracji lub wiedzy\nOdwaga, by mówić to, co trudne",
+    "meaningShadow": "Ego utożsamione z przekazem\nLęk przed wypowiedzeniem prawdy\nDuchowa inflacja",
+    "affirmation": "Nie jestem źródłem. Ale jestem potrzebny."
+  },
+  "the-guardian": {
+    "tagline": "Nie zawsze widzisz, że jesteś chroniony. Ale jesteś.",
+    "description": "„The Guardian” nie zawsze wygląda jak anioł — czasem to zakaz, utrata, zatrzymanie. Gevurah to moc granicy, ochrony przez „nie”. Ta karta przypomina, że nie każda zamknięta droga jest porażką. Czasem największą miłością jest odmowa. Chronieni jesteśmy nawet wtedy, gdy tego nie czujemy.",
+    "meaningUpright": "Duchowa ochrona przez ograniczenie\nNiewidzialna opieka w trudnych sytuacjach\nOdrzucenie jako błogosławieństwo",
+    "meaningShadow": "Bunt wobec duchowych granic\nIluzja bycia porzuconym\nLęk przed autorytetem wewnętrznym",
+    "affirmation": "Zamknięcie drzwi może być najczystszą formą opieki."
+  },
+  "the-lightkeeper": {
+    "tagline": "Świeć nawet wtedy, gdy nikt nie patrzy.",
+    "description": "„The Lightkeeper” to ten, kto przechowuje światło — nie dla siebie, ale dla innych. Chesed to miłosierdzie, ofiarność, obecność. Ta karta przypomina o cichej służbie: kiedy światło nie przynosi chwały, ale wciąż jest potrzebne. Czasem jesteś latarnią, nie znając rozbitków, którzy cię odnaleźli.",
+    "meaningUpright": "Cicha obecność pełna miłości\nWierność bez uznania\nWewnętrzne światło, które nie zależy od zewnętrznych efektów",
+    "meaningShadow": "Wypalanie się w dawaniu bez granic\nCzekanie na wdzięczność\nDuchowe zmęczenie światłem",
+    "affirmation": "Światło nie potrzebuje widza, by być prawdziwe."
+  },
+  "the-spiral": {
+    "tagline": "To nie powrót. To głębiej.",
+    "description": "„The Spiral” nie jest linią — ani cyklem. To ruch ku głębi. Netzach jako trwałość wzywa cię do cierpliwości wobec pozornych powtórek. Czasem wracasz do tego samego miejsca — ale już jako ktoś inny. Karta ta pojawia się, gdy uczysz się ufać rytmowi duchowego rozwoju, nawet jeśli wygląda jak stagnacja.",
+    "meaningUpright": "Wierność procesowi przemiany\nUznanie, że wzrost nie jest liniowy\nPrzemiana przez pozorne powtórki",
+    "meaningShadow": "Lęk przed „kolejną rundą”\nZwątpienie w sens procesu\nDuchowe zniechęcenie",
+    "affirmation": "Nawet jeśli wracam — jestem głębiej."
+  },
+  "the-teardrop": {
+    "tagline": "Ta łza zna twoje imię.",
+    "description": "„The Teardrop” to łza, która nie spływa z bólu — lecz z prawdy. Binah to głębia rozumienia, która boli, ale uzdrawia. Ta karta mówi: twoje łzy są święte. Płaczesz nie dlatego, że przegrałeś, ale dlatego, że rozpoznałeś. Łza oczyszcza to, co było zbyt ciężkie, by nazwać.",
+    "meaningUpright": "Uwolnienie emocjonalne\nGłębokie duchowe uzdrowienie\nTransformacja przez uznanie cierpienia",
+    "meaningShadow": "Rozpacz bez kontemplacji\nUtopienie się w emocji\nOpór wobec przeżycia bólu",
+    "affirmation": "Płaczę — i to mnie przywraca do życia."
+  },
+  "the-teardrop-bearer": {
+    "tagline": "Niosę łzę. I to wystarczy.",
+    "description": "„The Teardrop Bearer” to nie rola — to tożsamość. Tav, ostatnia litera, to znak spełnienia, zakończenia, wcielenia. Ta karta mówi: nie musisz być więcej. To, że nosisz łzę — że ją znasz — to znaczy, że należysz. To jest znak, którego nie musisz pokazywać. Ale on cię zna.",
+    "meaningUpright": "Duchowa tożsamość jako nosiciel światła\nWierność swojej historii\nZgoda na bycie naczyniem",
+    "meaningShadow": "Poczucie izolacji z powodu „inności”\nNoszenie cierpienia bez uziemienia\nPoczucie misji bez łaski",
+    "affirmation": "Nie muszę robić nic więcej. Jestem."
+  },
+  "the-vessel": {
+    "tagline": "Nie jestem pełny — ale gotowy.",
+    "description": "„The Vessel” nie wybiera, co przyjmie. Jest pusty, ale gotowy. Yesod jako pojemność na światło mówi: twoją rolą nie jest stworzenie sensu, lecz przyjęcie go. Karta ta wzywa do otwartości — bez warunków. I do zaufania, że puste może być święte.",
+    "meaningUpright": "Zgoda na przyjęcie bez kontroli\nPojemność duchowa\nPrzestrzeń gotowości",
+    "meaningShadow": "Lęk przed wypełnieniem\nPustka jako chroniczny brak\nDuchowa pasywność",
+    "affirmation": "Nie wiem, co nadejdzie. Ale jestem gotowy."
+  }
+}

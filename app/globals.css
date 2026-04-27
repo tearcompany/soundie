@@ -240,6 +240,37 @@
     animation: note-pulse-soft 4s ease-in-out infinite;
     transform-origin: center;
   }
+
+  @keyframes lore-dust-drift {
+    0% { transform: translate(0, 0) scale(0.8); opacity: 0.45; }
+    50% { transform: translate(3px, -8px) scale(1.05); opacity: 0.85; }
+    100% { transform: translate(-2px, 4px) scale(0.9); opacity: 0.4; }
+  }
+
+  .daily-gift-orb {
+    border-radius: 9999px;
+  }
+
+  .daily-glow--dawn {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--glow, #c4a574) 25%, transparent),
+      0 0 28px color-mix(in srgb, var(--glow, #c4a574) 40%, transparent),
+      0 0 60px color-mix(in srgb, #f4c48a 35%, transparent);
+  }
+
+  .daily-glow--dusk {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--glow, #6b5a8c) 30%, transparent),
+      0 0 32px color-mix(in srgb, var(--glow, #6b5a8c) 38%, transparent),
+      0 0 56px color-mix(in srgb, #9a86b8 28%, transparent);
+  }
+
+  .daily-glow--nocturne {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--glow, #4a6a8a) 28%, transparent),
+      0 0 26px color-mix(in srgb, var(--glow, #4a6a8a) 35%, transparent),
+      0 0 50px color-mix(in srgb, #5c7c9a 30%, transparent);
+  }
 }
 
 @layer base {

@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { router, publicProcedure } from '../init'
 import {
   playerEnsureInput,
@@ -18,5 +19,14 @@ export const playerRouter = router({
       }
       const created = await ctx.db.player.create({ data: {} })
       return { id: created.id }
+    }),
+
+  getForSession: publicProcedure
+    .output(z.object({ id: z.string() }).nullable())
+    .query(async ({ ctx }) => {
+      const userId = ctx.session?.user?.id
+      if (!userId) return null
+      const player = await ctx.db.player.findUnique({ where: { userId } })
+      return player ? { id: player.id } : null
     }),
 })

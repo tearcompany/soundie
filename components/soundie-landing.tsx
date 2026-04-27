@@ -1,9 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { LanguageSwitcher } from '@/components/language-switcher'
+import { NOTE_LIST } from '@/lib/notes'
 
 type LandingNote = {
   id: string
@@ -12,15 +12,7 @@ type LandingNote = {
   name: string
 }
 
-const NOTES_BASE: Omit<LandingNote, 'name'>[] = [
-  { id: 'C', freq: 261.63, hex: '#6B1D1D' },
-  { id: 'D', freq: 293.66, hex: '#B45309' },
-  { id: 'E', freq: 329.63, hex: '#CA8A04' },
-  { id: 'F', freq: 349.23, hex: '#4D7C0F' },
-  { id: 'G', freq: 392.0, hex: '#047857' },
-  { id: 'A', freq: 440.0, hex: '#0284C7' },
-  { id: 'B', freq: 493.88, hex: '#5B21B6' },
-]
+const DIATONIC = new Set(['C', 'D', 'E', 'F', 'G', 'A', 'B'])
 
 const PREVIEW_SECONDS = 4
 
@@ -172,14 +164,41 @@ function NoteOrb({
 
 export function SoundieLanding() {
   const t = useTranslations('landing')
+  const locale = useLocale() as 'en' | 'pl'
   const lines = t.raw('lines') as string[]
+  const freqs = useMemo(() => NOTE_LIST.map((e) => e.frequency), [])
+  const freqLabel = useMemo(() => {
+    const min = Math.min(...freqs)
+    const max = Math.max(...freqs)
+    const d = (n: number) =>
+      n.toLocaleString(locale === 'pl' ? 'pl-PL' : 'en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      })
+    return t('freqRange', { min: d(min), max: d(max) })
+  }, [freqs, t, locale])
   const notes: LandingNote[] = useMemo(
     () =>
-      NOTES_BASE.map((n) => ({
-        ...n,
-        name: t(`noteNames.${n.id}`),
+      NOTE_LIST.map((e) => ({
+        id: e.id,
+        freq: e.frequency,
+        hex: e.chromaHex,
+        name: DIATONIC.has(e.id)
+          ? t(
+              `noteNames.${e.id}` as
+                | 'noteNames.C'
+                | 'noteNames.D'
+                | 'noteNames.E'
+                | 'noteNames.F'
+                | 'noteNames.G'
+                | 'noteNames.A'
+                | 'noteNames.B',
+            )
+          : locale === 'pl'
+            ? e.synestheticTitlePl
+            : e.name,
       })),
-    [t],
+    [t, locale],
   )
   const reducedMotion = usePrefersReducedMotion()
   const { play, stop, playingId } = useNotePreview()
@@ -210,7 +229,7 @@ export function SoundieLanding() {
 
   return (
     <div
-      className="relative min-h-dvh overflow-hidden transition-colors duration-1000"
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden transition-colors duration-1000"
       style={{
         backgroundColor: focusedNote
           ? `color-mix(in srgb, ${focusedNote.hex} 6%, var(--pearl))`
@@ -235,22 +254,8 @@ export function SoundieLanding() {
         ))}
       </div>
 
-      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-pearl-border/40 px-6 py-5">
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-fraunces,serif)] text-xl font-semibold tracking-tight text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-coral rounded-sm"
-        >
-          {t('brand')}
-        </Link>
-        <div className="flex flex-shrink-0 items-center gap-3 sm:gap-4">
-          <LanguageSwitcher />
-          <p className="text-right font-mono text-[0.65rem] text-ink-muted sm:text-xs">
-            {t('freqRange')}
-          </p>
-        </div>
-      </header>
-
-      <main className="relative z-10 mx-auto max-w-xl px-6 pb-24 pt-20 sm:pt-28">
+      <main className="relative z-10 mx-auto max-w-xl px-6 pb-24 pt-12 sm:pt-16">
+        <p className="mb-6 text-center font-mono text-[0.65rem] text-ink-muted sm:text-xs">{freqLabel}</p>
         <p
           className="mb-10 text-center font-mono text-xs uppercase tracking-[0.22em] transition-opacity duration-500"
           style={{
@@ -277,7 +282,7 @@ export function SoundieLanding() {
         </p>
 
         <div
-          className="mt-6 flex flex-wrap justify-center gap-3"
+          className="mt-6 grid w-full max-w-4xl grid-cols-2 justify-items-stretch gap-3 sm:grid-cols-3 md:grid-cols-6"
           role="group"
           aria-label={t('ariaNoteGroup')}
         >
@@ -296,7 +301,7 @@ export function SoundieLanding() {
                 onBlur={() => setHovered((cur) => (cur === n.id ? null : cur))}
                 aria-pressed={isPlaying}
                 aria-label={t('playAria', { name: n.name, freq: n.freq.toFixed(2) })}
-                className="group relative flex flex-col items-center gap-1.5 rounded-2xl border px-4 py-3 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
+                className="group relative flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border px-3 py-3 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
                 style={{
                   borderColor: active ? n.hex : 'var(--pearl-border)',
                   backgroundColor: active

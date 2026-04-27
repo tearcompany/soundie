@@ -21,12 +21,18 @@ const SessionSchema = z.object({
   elapsed: z.number().nonnegative(),
 })
 
+const DailyGiftGlowSchema = z.enum(['dawn', 'dusk', 'nocturne'])
+
 const SoundieStateSchema = z.object({
   activeNoteId: z.string(),
   playerId: z.string().cuid().nullable(),
   progress: ProgressSchema,
   currentSession: SessionSchema,
   teardropShelfOpen: z.boolean(),
+  dailyGiftGlow: DailyGiftGlowSchema.nullable(),
+  dailyGiftForNoteId: z.string().nullable(),
+  dailyGiftCaption: z.string().nullable(),
+  pendingListenFromDailyGift: z.boolean(),
 })
 
 export type Progress = z.infer<typeof ProgressSchema>
@@ -48,6 +54,15 @@ interface SoundieStore extends SoundieState {
   setActiveNote: (id: string) => void
   setPlayerId: (id: string | null) => void
   setTeardropShelfOpen: (open: boolean) => void
+  applyDailyClaim: (
+    payload: { noteId: string; glowKey: 'dawn' | 'dusk' | 'nocturne'; rareCaption: string } | null,
+    activeNoteId: string
+  ) => void
+  setPendingListenFromDailyGift: (v: boolean) => void
+  moodEntranceCleared: boolean
+  setMoodEntranceCleared: (v: boolean) => void
+  sessionMoodReaction: string | null
+  setSessionMoodReaction: (v: string | null) => void
   markHydrated: () => void
   syncFromRemote: (row: { totalListenTime: number; level: number; loreUnlocked: number } | null) => void
   reset: () => void
@@ -69,6 +84,10 @@ const INITIAL_STATE: SoundieState = {
     elapsed: 0,
   },
   teardropShelfOpen: false,
+  dailyGiftGlow: null,
+  dailyGiftForNoteId: null,
+  dailyGiftCaption: null,
+  pendingListenFromDailyGift: false,
 }
 
 type V1StateSlice = {
@@ -90,7 +109,67 @@ export const useSoundieStore = create<SoundieStore>()(
 
       setActiveNote: (id: string) => {
         if (!isValidNoteId(id)) return
-        set({ activeNoteId: id })
+        set((s) => {
+          const next: {
+            activeNoteId: string
+            dailyGiftGlow: typeof s.dailyGiftGlow
+            dailyGiftForNoteId: typeof s.dailyGiftForNoteId
+            dailyGiftCaption: typeof s.dailyGiftCaption
+            sessionMoodReaction: string | null
+          } = {
+            activeNoteId: id,
+            dailyGiftGlow: s.dailyGiftGlow,
+            dailyGiftForNoteId: s.dailyGiftForNoteId,
+            dailyGiftCaption: s.dailyGiftCaption,
+            sessionMoodReaction: s.sessionMoodReaction,
+          }
+          if (s.dailyGiftForNoteId && id !== s.dailyGiftForNoteId) {
+            next.dailyGiftGlow = null
+            next.dailyGiftForNoteId = null
+            next.dailyGiftCaption = null
+          }
+          if (id !== s.activeNoteId) {
+            next.sessionMoodReaction = null
+          }
+          return next
+        })
+      },
+
+      applyDailyClaim: (payload, activeNoteId) => {
+        if (!payload) {
+          set({
+            dailyGiftGlow: null,
+            dailyGiftForNoteId: null,
+            dailyGiftCaption: null,
+          })
+          return
+        }
+        if (payload.noteId !== activeNoteId) {
+          set({
+            dailyGiftGlow: null,
+            dailyGiftForNoteId: null,
+            dailyGiftCaption: null,
+          })
+          return
+        }
+        set({
+          dailyGiftGlow: payload.glowKey,
+          dailyGiftForNoteId: payload.noteId,
+          dailyGiftCaption: payload.rareCaption,
+        })
+      },
+
+      setPendingListenFromDailyGift: (v: boolean) => {
+        set({ pendingListenFromDailyGift: v })
+      },
+
+      moodEntranceCleared: false,
+      setMoodEntranceCleared: (v: boolean) => {
+        set({ moodEntranceCleared: v })
+      },
+      sessionMoodReaction: null as string | null,
+      setSessionMoodReaction: (v: string | null) => {
+        set({ sessionMoodReaction: v })
       },
 
       setPlayerId: (id: string | null) => {
@@ -203,12 +282,18 @@ export const useSoundieStore = create<SoundieStore>()(
 
       reset: () => {
         const pid = get().playerId
-        set({ ...INITIAL_STATE, playerId: pid })
+        set({
+          ...INITIAL_STATE,
+          playerId: pid,
+          hasHydrated: get().hasHydrated,
+          moodEntranceCleared: true,
+          sessionMoodReaction: null,
+        })
       },
     }),
     {
       name: 'soundie-storage',
-      version: 4,
+      version: 5,
       partialize: (state): PersistedSoundieState => ({
         activeNoteId: state.activeNoteId,
         playerId: state.playerId,
@@ -218,11 +303,6 @@ export const useSoundieStore = create<SoundieStore>()(
       }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated()
-        if (!state?.currentSession?.active) return
-        const now = Date.now()
-        const elapsed = Math.floor((now - state.currentSession.startedAt) / 1000)
-        const clamped = Math.min(elapsed, state.currentSession.duration)
-        state.updateSessionElapsed(clamped)
       },
       migrate: (persisted, version) => {
         if (version < 2) {
@@ -241,6 +321,7 @@ export const useSoundieStore = create<SoundieStore>()(
             currentSession: p?.currentSession ?? {
               ...INITIAL_STATE.currentSession,
             },
+            teardropShelfOpen: false,
           }
         }
         if (version < 3) {
@@ -250,6 +331,21 @@ export const useSoundieStore = create<SoundieStore>()(
         if (version < 4) {
           const p = persisted as SoundieState & { teardropShelfOpen?: boolean }
           return { ...p, teardropShelfOpen: p.teardropShelfOpen ?? false }
+        }
+        if (version < 5) {
+          const p = persisted as SoundieState & {
+            dailyGiftGlow?: null
+            dailyGiftForNoteId?: null
+            dailyGiftCaption?: null
+            pendingListenFromDailyGift?: boolean
+          }
+          return {
+            ...p,
+            dailyGiftGlow: p.dailyGiftGlow ?? null,
+            dailyGiftForNoteId: p.dailyGiftForNoteId ?? null,
+            dailyGiftCaption: p.dailyGiftCaption ?? null,
+            pendingListenFromDailyGift: p.pendingListenFromDailyGift ?? false,
+          }
         }
         return persisted as SoundieState
       },

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { SoundieLanding } from '@/components/soundie-landing'
+import { JsonLdWebsite } from '@/components/seo/json-ld-website'
+import { HREFLANG_HOME, localizedPath } from '@/lib/localized-path'
+import { getSiteUrl } from '@/lib/site-url'
 
 export async function generateMetadata({
   params,
@@ -16,7 +19,8 @@ export async function generateMetadata({
     .map((s) => s.trim())
     .filter(Boolean)
 
-  const canonicalPath = locale === 'en' ? '/' : `/${locale}`
+  const canonicalPath = localizedPath(locale, 'home')
+  const pageUrl = new URL(canonicalPath, getSiteUrl()).toString()
 
   return {
     title,
@@ -25,14 +29,11 @@ export async function generateMetadata({
     keywords,
     alternates: {
       canonical: canonicalPath,
-      languages: {
-        'x-default': '/',
-        en: '/',
-        pl: '/pl',
-      },
+      languages: { ...HREFLANG_HOME },
     },
     openGraph: {
       type: 'website',
+      url: pageUrl,
       title,
       description,
       siteName: 'Soundie',
@@ -50,6 +51,16 @@ export async function generateMetadata({
   }
 }
 
-export default function Home() {
-  return <SoundieLanding />
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  return (
+    <>
+      <JsonLdWebsite locale={locale} />
+      <SoundieLanding />
+    </>
+  )
 }
