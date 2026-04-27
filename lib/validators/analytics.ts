@@ -3,9 +3,11 @@ import { z } from 'zod'
 const analyticsName = z.enum([
   'first_visit',
   'second_day_return',
+  'sanctuary_enter',
   'session_started',
   'session_180_complete',
   'teardrop_open',
+  'lore_slide_view',
   'share_click',
   'daily_gift_revealed',
   'daily_gift_listen_click',

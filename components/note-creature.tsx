@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface AudioContextType {
@@ -72,6 +73,7 @@ export function NoteCreature() {
   )
 
   const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
+  const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
     onSuccess: (result) => {
       const row = result.soundie
@@ -159,6 +161,9 @@ export function NoteCreature() {
   }, [loreFragments])
 
   const [loreCarouselApi, setLoreCarouselApi] = useState<CarouselApi | null>(null)
+  const [teardropCarouselApi, setTeardropCarouselApi] = useState<CarouselApi | null>(null)
+  const [teardropSnap, setTeardropSnap] = useState(0)
+  const [teardropSnapCount, setTeardropSnapCount] = useState(0)
   const [selectedLoreIndex, setSelectedLoreIndex] = useState(0)
   const [justUnlocked, setJustUnlocked] = useState<number | null>(null)
   const [unlockBanner, setUnlockBanner] = useState<{
@@ -180,6 +185,9 @@ export function NoteCreature() {
     if (cards.length === 0 || !selectedTeardropCardId) return null
     return cards.find((card) => card.id === selectedTeardropCardId) ?? null
   }, [teardropPlaylistQuery.data, selectedTeardropCardId])
+
+  const teardropCards = teardropPlaylistQuery.data ?? []
+  const lastLoreEventKeyRef = useRef<string | null>(null)
 
   const selectedTeardropTexts = useMemo(() => {
     if (!selectedTeardropCard) {
@@ -212,19 +220,81 @@ export function NoteCreature() {
   }, [activeNoteId])
 
   useEffect(() => {
-    if (!teardropShelfOpen) return
-    const cards = teardropPlaylistQuery.data
+    const cards = teardropCards
     if (!cards?.length) return
-    if (selectedTeardropCardId != null) return
-    const preferId = vesselBookSlug
-      ? cards.find((x) => x.slug === vesselBookSlug)?.id
-      : undefined
-    setSelectedTeardropCardId(preferId ?? cards[0]!.id)
+    if (teardropShelfOpen && selectedTeardropCardId != null) return
+    const unlockedCount = Math.max(1, unlockedLoreCount)
+    const cappedLoreIndex = Math.max(
+      0,
+      Math.min(Math.max(0, unlockedCount - 1), selectedLoreIndex),
+    )
+    const byLore = cards[cappedLoreIndex % cards.length] ?? null
+    const fallback = vesselBookSlug
+      ? cards.find((x) => x.slug === vesselBookSlug) ?? null
+      : null
+    const next = byLore ?? fallback ?? cards[0] ?? null
+    if (!next) return
+    if (selectedTeardropCardId === next.id) return
+    setSelectedTeardropCardId(next.id)
   }, [
+    teardropCards,
     teardropShelfOpen,
-    teardropPlaylistQuery.data,
+    unlockedLoreCount,
+    selectedLoreIndex,
     vesselBookSlug,
     selectedTeardropCardId,
+  ])
+
+  useEffect(() => {
+    if (!teardropCarouselApi || !selectedTeardropCardId || teardropCards.length === 0) return
+    const idx = teardropCards.findIndex((c) => c.id === selectedTeardropCardId)
+    if (idx < 0) return
+    teardropCarouselApi.scrollTo(idx, true)
+  }, [teardropCarouselApi, teardropCards, selectedTeardropCardId])
+
+  useEffect(() => {
+    if (!teardropCarouselApi) return
+    const sync = () => {
+      setTeardropSnap(teardropCarouselApi.selectedScrollSnap())
+      setTeardropSnapCount(teardropCarouselApi.scrollSnapList().length)
+    }
+    sync()
+    teardropCarouselApi.on('select', sync)
+    teardropCarouselApi.on('reInit', sync)
+    return () => {
+      teardropCarouselApi.off('select', sync)
+      teardropCarouselApi.off('reInit', sync)
+    }
+  }, [teardropCarouselApi])
+
+  useEffect(() => {
+    if (!playerId) return
+    const key = [
+      playerId,
+      activeNoteId,
+      selectedLoreIndex,
+      selectedTeardropCardId ?? 'none',
+      unlockedLoreCount,
+    ].join(':')
+    if (lastLoreEventKeyRef.current === key) return
+    lastLoreEventKeyRef.current = key
+    trackLoreSlideView({
+      name: 'lore_slide_view',
+      playerId,
+      meta: {
+        noteId: activeNoteId,
+        loreIndex: selectedLoreIndex,
+        loreUnlocked: unlockedLoreCount,
+        teardropCardId: selectedTeardropCardId,
+      },
+    })
+  }, [
+    playerId,
+    activeNoteId,
+    selectedLoreIndex,
+    selectedTeardropCardId,
+    unlockedLoreCount,
+    trackLoreSlideView,
   ])
 
   const minutesToUnlockFragment = (index: number) => {
@@ -709,56 +779,90 @@ export function NoteCreature() {
                     )}
                   >
                     <div className="overflow-hidden">
-                      <div className="flex flex-wrap justify-center gap-2">
-                        {teardropPlaylistQuery.data.slice(0, 5).map((card) => {
-                          const isVesselBook =
-                            vesselBookSlug !== null && card.slug === vesselBookSlug
-                          return (
+                      <Carousel
+                        setApi={setTeardropCarouselApi}
+                        opts={{ align: 'start' }}
+                        className="w-full"
+                      >
+                        <CarouselContent>
+                          {teardropCards.map((card) => {
+                            const isVesselBook =
+                              vesselBookSlug !== null && card.slug === vesselBookSlug
+                            return (
+                              <CarouselItem key={card.id} className="basis-1/2 lg:basis-1/3">
+                                <div className="p-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTeardropCardId(card.id)
+                                      const idx = teardropCards.findIndex((x) => x.id === card.id)
+                                      if (idx >= 0 && loreCarouselApi) {
+                                        const unlockedMax = Math.max(0, unlockedLoreCount - 1)
+                                        loreCarouselApi.scrollTo(Math.min(idx, unlockedMax), true)
+                                      }
+                                    }}
+                                    aria-label={
+                                      isVesselBook
+                                        ? `${card.name} — ${t('shelfVesselBookAria')}`
+                                        : undefined
+                                    }
+                                    className="w-full"
+                                  >
+                                    <Card
+                                      className="bg-transparent py-2 shadow-none"
+                                      style={{
+                                        borderColor:
+                                          selectedTeardropCard?.id === card.id
+                                            ? hexToRgba(c, 0.65)
+                                            : isVesselBook
+                                              ? hexToRgba(c, 0.5)
+                                              : hexToRgba(c, 0.35),
+                                        boxShadow: isVesselBook
+                                          ? `0 0 0 1px ${hexToRgba(c, 0.4)}`
+                                          : undefined,
+                                      }}
+                                    >
+                                      <CardContent
+                                        className="flex h-4 items-center justify-center px-2 py-1 text-center font-mono text-[0.62rem] lowercase tracking-wide"
+                                        style={{ color: c }}
+                                      >
+                                        {card.name}
+                                      </CardContent>
+                                    </Card>
+                                  </button>
+                                </div>
+                              </CarouselItem>
+                            )
+                          })}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
+                      {teardropSnapCount > 1 && (
+                        <div className="mt-2 flex items-center justify-center gap-1.5">
+                          {Array.from({ length: teardropSnapCount }, (_, i) => (
                             <button
+                              key={i}
                               type="button"
-                              key={card.id}
-                              onClick={() => setSelectedTeardropCardId(card.id)}
-                              aria-label={
-                                isVesselBook
-                                  ? `${card.name} — ${t('shelfVesselBookAria')}`
-                                  : undefined
-                              }
-                              className="inline-flex items-center rounded-full border px-3 py-1 font-mono text-[0.62rem] lowercase tracking-wide transition-all duration-200"
+                              onClick={() => teardropCarouselApi?.scrollTo(i)}
+                              className="h-1.5 rounded-full transition-all"
                               style={{
-                                borderColor:
-                                  selectedTeardropCard?.id === card.id
-                                    ? hexToRgba(c, 0.65)
-                                    : isVesselBook
-                                      ? hexToRgba(c, 0.5)
-                                      : hexToRgba(c, 0.35),
-                                color: c,
+                                width: i === teardropSnap ? 18 : 6,
                                 backgroundColor:
-                                  selectedTeardropCard?.id === card.id
-                                    ? hexToRgba(c, 0.15)
-                                    : hexToRgba(c, 0.06),
-                                boxShadow: isVesselBook
-                                  ? `0 0 0 1px ${hexToRgba(c, 0.4)}`
-                                  : undefined,
+                                  i === teardropSnap ? hexToRgba(c, 0.8) : hexToRgba(c, 0.3),
                               }}
-                            >
-                              {isVesselBook && (
-                                <span
-                                  className="mr-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-                                  style={{ backgroundColor: c }}
-                                  aria-hidden
-                                />
-                              )}
-                              {card.name}
-                            </button>
-                          )
-                        })}
-                      </div>
+                              aria-label={`Go to teardrop page ${i + 1}`}
+                              aria-current={i === teardropSnap}
+                            />
+                          ))}
+                        </div>
+                      )}
                       {selectedTeardropCard && (
                         <div
                           className="mt-4 rounded-xl border px-4 py-3 text-left"
                           style={{
                             borderColor: hexToRgba(c, 0.25),
-                            backgroundColor: hexToRgba(c, 0.04),
+                            backgroundColor: 'transparent',
                           }}
                         >
                           <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">

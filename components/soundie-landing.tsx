@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { NOTE_LIST } from '@/lib/notes'
+import { NOTE_LIST, urlKeyForNoteId } from '@/lib/notes'
 
 type LandingNote = {
   id: string
@@ -203,11 +203,18 @@ export function SoundieLanding() {
   const reducedMotion = usePrefersReducedMotion()
   const { play, stop, playingId } = useNotePreview()
   const [hovered, setHovered] = useState<string | null>(null)
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const focusedNote = notes.find((n) => n.id === (playingId ?? hovered)) ?? null
   const { line, fade } = useCycledLine(lines, 3800, reducedMotion)
+  const selectedOrFallback = selectedNoteId ?? focusedNote?.id ?? notes[0]?.id ?? 'A'
+  const playHref = useMemo(
+    () => `/play?note=${encodeURIComponent(urlKeyForNoteId(selectedOrFallback))}`,
+    [selectedOrFallback],
+  )
 
   const handleSelect = useCallback(
     (note: LandingNote) => {
+      setSelectedNoteId(note.id)
       if (playingId === note.id) {
         stop()
       } else {
@@ -332,7 +339,7 @@ export function SoundieLanding() {
 
         <div className="mt-14 flex flex-col items-center gap-5">
           <Link
-            href="/play"
+            href={playHref}
             className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-coral px-8 py-4 font-mono text-sm font-semibold text-pearl shadow-md transition-all duration-200 hover:bg-coral-light hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
           >
             {t('cta')}

@@ -13,10 +13,10 @@ Ramy produktu (pętla użytkownika, minimum funkcji) — wspólny horyzont z tym
 | Blok w pliku | W kodzie (realnie) |
 |--------------|---------------------|
 | Tydzień 1 — wizyty / return | `DailyVisit` używa `visitDate` (string dnia), nie `dateKey`; `returnEngine.logVisit` + `ReturnEngineBridge`; brak osobnej trasy `player.checkIn` |
-| Tydzień 2 — nagroda dziennie | `DailyClaim` (nie `DailyRewardClaim`); `returnEngine.revealDailyClaim`; Teardrop + glow w Zustand / UI; analityka m.in. `daily_gift_*` |
+| Tydzień 2 — nagroda dziennie | `DailyClaim` (nie `DailyRewardClaim`); `returnEngine.revealDailyClaim`; Teardrop + glow w Zustand / UI; analityka m.in. `daily_gift_*`; dodatkowo auto-unlock claim przy wejściu do `/sanctuary` (`SanctuaryUnlockBridge`) |
 | Tydzień 3 — mood | `MoodEntry` + `mood.saveEntry`; UI `MoodCheckInBridge`; linie reakcji: `lib/mood-reaction-texts.ts` (5×12), nie osobny `mood.submit` |
-| Tydzień 4 — share / admin | Część zdarzeń w `AnalyticsEvent` (np. `share_click` w meta); **brak** dedykowanego `/api/share-card` i `/admin` w tym stanie — nadal na roadmapie |
-| Poza planem 30 dni | `/sanctuary` + D3, nawigacja `SiteNav`, lore w karuzeli z `LoreFragment` (en/pl) + fallback i18n — opis: `ZAIMPLEMENTOWANE.md` |
+| Tydzień 4 — share / admin | Część zdarzeń w `AnalyticsEvent` (np. `share_click`, `teardrop_open`, `sanctuary_enter`); **brak** dedykowanego `/api/share-card` i `/admin` w tym stanie — nadal na roadmapie |
+| Poza planem 30 dni | `/sanctuary` + D3, nawigacja `SiteNav`, lore w karuzeli z `LoreFragment` (en/pl) + fallback i18n, auth OTP (tRPC + SMTP/Resend fallback), copy „tonacja afirmacji / intencja korelatywna” — opis: `ZAIMPLEMENTOWANE.md` |
 
 Szczegóły techniczne (mapa kodu w tym repozytorium): [`ZAIMPLEMENTOWANE.md`](./ZAIMPLEMENTOWANE.md).
 
@@ -299,6 +299,8 @@ Share your resonance
 * teardrop_open
 * lore_slide_view
 
+Stan: `teardrop_open` i `sanctuary_enter` są już emitowane; `share_complete` i `lore_slide_view` nadal do dowiezienia.
+
 ---
 
 ## Day 25 — Dashboard
@@ -391,3 +393,19 @@ Nie zabij go nadmiarem.
 ---
 
 # Jeśli chcesz, mogę też dać **Top 10 funkcji, które zrobią z Soundie addictive-beautiful product jak Duolingo + Calm + Tamagotchi razem**.
+
+---
+
+## Next 3 Shipy (z aktualnego stanu)
+
+1. **`lore_slide_view` analytics**
+   - emit event przy wejściu na konkretny slajd lore (index, noteId, loreUnlocked, source)
+   - dopiąć w `components/note-creature.tsx` do zmiany `selectedLoreIndex`
+
+2. **`share_complete` (best effort)**
+   - po `share_click` dopisać logikę wykrycia sukcesu share (Web Share API promise resolve + fallback copy link)
+   - dodać event `share_complete` i osobno `share_copy_fallback` jeśli nie ma natywnego share
+
+3. **Sanctuary: widok „dzisiejsza karta”**
+   - pokazać aktywny daily claim (teardrop name/tagline/affirmation) bez potrzeby powrotu do `/play`
+   - event `teardrop_open` rozszerzyć o `surface: 'sanctuary_card' | 'daily_gift_dialog'`
