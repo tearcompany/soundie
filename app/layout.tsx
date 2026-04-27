@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    'Soundie is a meditative sound healing app where musical notes become living companions. Listen, unlock lore, reduce stress, and build calm through frequency-based sessions.',
+    'Soundie is a meditative sound healing app where musical notes become living companions — a tone of affirmation and a correlational intention mechanism. Listen, unlock lore, reduce stress, and build calm through frequency-based sessions.',
 
   keywords: [
     'sound healing app',
@@ -42,6 +42,8 @@ export const metadata: Metadata = {
     'sound meditation',
     'wellness app',
     'Soundie',
+    'affirmation',
+    'intention',
   ],
 
   applicationName: 'Soundie',
@@ -55,7 +57,7 @@ export const metadata: Metadata = {
     siteName: 'Soundie',
     title: 'Soundie — Sound Healing App with Living Notes',
     description:
-      'A new kind of meditation app. Living musical notes, healing frequencies, lore, and calm listening sessions.',
+      'A new kind of meditation app. Living notes, healing frequencies, lore, calm listening — affirmation and intention made audible.',
     url: '/',
     images: [
       {
@@ -71,7 +73,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Soundie — Sound Healing App with Living Notes',
     description:
-      'Reduce stress and reconnect through living notes, frequencies, and meditative listening.',
+      'Reduce stress and reconnect through living notes, frequencies, meditative listening — affirming sound and intentional presence.',
     images: ['/og-image.jpg'],
   },
 

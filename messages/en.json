@@ -2,10 +2,31 @@
   "common": {
     "languageNav": "Language"
   },
+  "auth": {
+    "emailLabel": "Enter your email",
+    "emailHint": "We will send a 6-digit code. No passwords.",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "checkInbox": "Check your inbox",
+    "sentTo": "We sent a code to {email}",
+    "codePlaceholder": "123456",
+    "verifyCta": "Log in",
+    "verifying": "Verifying…",
+    "changeEmail": "Change email",
+    "errNetwork": "Network error — try again",
+    "errGeneric": "Something went wrong",
+    "errInvalidEmail": "Enter a valid email address",
+    "errCodeExpired": "Code expired — send a new one",
+    "errInvalidCode": "Invalid code",
+    "errSignIn": "Could not sign in — try again",
+    "errEmailSend": "Could not send email. Please try again shortly.",
+    "errEmailSmtpUnreachable": "Mail server did not respond (timeout or wrong host/port). Check SMTP_HOST, SMTP_PORT, and SMTP_SECURE — often 587 with STARTTLS instead of 465.",
+    "errEmailConfig": "Email delivery is not configured. Please contact the site admin."
+  },
   "siteNav": {
     "brand": "Soundie",
     "home": "Home",
-    "play": "Lab",
+    "play": "Tree",
     "sanctuary": "Echo",
     "mainNav": "Main menu",
     "signIn": "Log in",
@@ -13,15 +34,15 @@
   },
   "meta": {
     "rootTitle": "Soundie — Presence Pass | Heal with Living Notes",
-    "rootDescription": "Soundie: a meditative healing-sound Tamagotchi. Presence Pass — a refinement layer that makes sound feel alive. Twelve living notes, lore, and breath.",
+    "rootDescription": "Soundie: a meditative healing-sound Tamagotchi. Presence Pass — a refinement layer that makes sound feel alive. Twelve living notes, lore, and breath. It is also a tone of affirmation and a correlational intention mechanism.",
     "homeTitle": "Soundie — Sound that knows you're here",
-    "homeDescription": "A meditative world of living notes. Twelve frequencies, each one heals something different. The longer you listen, the more it reveals.",
-    "playTitle": "Lab — Soundie",
+    "homeDescription": "A meditative world of living notes. Each frequency heals something different — a tone of affirmation and a correlational intention mechanism in sound. The longer you listen, the more it reveals.",
+    "playTitle": "Tree — Soundie",
     "playDescription": "Listen to living notes. Your healing sound Tamagotchi.",
     "sanctuaryTitle": "Echo — Soundie",
     "sanctuaryDescription": "A quiet reflection of your listening: time with each emotional tone, and the moods you named before play.",
     "applicationName": "Soundie",
-    "keywords": "sound healing, meditative app, frequency therapy, Soundie, living notes, presence",
+    "keywords": "sound healing, meditative app, frequency therapy, Soundie, living notes, presence, affirmation, affirming sound, intention, mindful listening",
     "ogLocale": "en_US"
   },
   "landing": {
@@ -32,11 +53,13 @@
       "Listen long enough — they grow.",
       "No rush.",
       "Only presence.",
+      "A tone of affirmation, too.",
+      "A correlative intention, too.",
       "Soundie heals."
     ],
     "headlineLine1": "Sound that knows",
     "headlineLine2": "you're here.",
-    "subhead": "A meditative world of living notes. Each one heals something different. The longer you listen, the more it reveals.",
+    "subhead": "A meditative world of living notes. Each one heals something different — an affirming tonality and correlative intention. The longer you listen, the more it reveals.",
     "tapHint": "Tap a note to hear it",
     "ariaNoteGroup": "Listen to a note from the Soundie scale",
     "playAria": "Play {name} ({freq} Hz)",
@@ -50,8 +73,8 @@
     "step2Body": "Each session feeds your note. It deepens, slowly, like memory.",
     "step3Title": "Reveal",
     "step3Body": "Lore unlocks as time passes. The note tells you what it knows.",
-    "closing": "Soundie does not demand your attention. It rewards your stillness.",
-    "footerTagline": "Soundie — it heals.",
+    "closing": "Soundie does not demand your attention. It rewards your stillness, your affirmation, and the intention you bring.",
+    "footerTagline": "Soundie — healing in a tone of affirmation and correlative intention.",
     "footerCopyright": "© {year} · Presence Pass",
     "noteNames": {
       "C": "The Foundation",
@@ -199,7 +222,7 @@
     },
     "notNow": "Not now",
     "back": "Back",
-    "enter": "Enter play"
+    "enter": "Enter Tree"
   },
   "lockedNotes": {
     "caption": "The next note appears only to the still."
@@ -208,7 +231,7 @@
     "greeting": "Echo",
     "sub": "A mirror of your listening — not a score, not a verdict. Patterns here are invitations, not pressure.",
     "noPlayer": "To see your path,",
-    "goPlay": "begin a session on Lab",
+    "goPlay": "begin a session on Tree",
     "loading": "Arriving…",
     "todayCard": "Today",
     "todayMinutes": "{m} minutes of listening so far",

@@ -7,6 +7,7 @@ import { soundieRouter } from './routers/soundie'
 import { teardropRouter } from './routers/teardrop'
 import { moodRouter } from './routers/mood'
 import { sanctuaryRouter } from './routers/sanctuary'
+import { otpRouter } from './routers/otp'
 
 export const appRouter = router({
   analytics: analyticsRouter,
@@ -17,6 +18,7 @@ export const appRouter = router({
   teardrop: teardropRouter,
   mood: moodRouter,
   sanctuary: sanctuaryRouter,
+  otp: otpRouter,
 })
 
 export type AppRouter = typeof appRouter

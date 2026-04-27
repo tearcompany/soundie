@@ -32,10 +32,15 @@ export async function sendOtpEmail(input: { to: string; code: string; expiryMinu
     const secure = process.env.SMTP_SECURE
       ? process.env.SMTP_SECURE === 'true' || process.env.SMTP_SECURE === '1'
       : port === 465
+    const connMs = Number(process.env.SMTP_CONNECTION_TIMEOUT_MS)
+    const connectionTimeout = Number.isFinite(connMs) && connMs > 0 ? connMs : 25_000
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port,
       secure,
+      connectionTimeout,
+      greetingTimeout: Math.min(connectionTimeout, 25_000),
+      socketTimeout: Math.min(connectionTimeout + 15_000, 60_000),
       auth: {
         user: process.env.SMTP_USER ?? '',
         pass: process.env.SMTP_PASS ?? '',
@@ -47,7 +52,10 @@ export async function sendOtpEmail(input: { to: string; code: string; expiryMinu
 
   if (process.env.RESEND_API_KEY) {
     const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({ from, to, subject, html })
+    const out = await resend.emails.send({ from, to, subject, html })
+    if (out.error) {
+      throw new Error(out.error.message)
+    }
     return
   }
 

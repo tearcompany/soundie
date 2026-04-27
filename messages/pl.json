@@ -2,10 +2,31 @@
   "common": {
     "languageNav": "Język"
   },
+  "auth": {
+    "emailLabel": "Wpisz swój adres email",
+    "emailHint": "Wyślemy Ci 6-cyfrowy kod. Bez haseł.",
+    "sendCode": "Wyślij kod",
+    "sending": "Wysyłanie…",
+    "checkInbox": "Sprawdź skrzynkę",
+    "sentTo": "Wysłaliśmy kod na {email}",
+    "codePlaceholder": "123456",
+    "verifyCta": "Zaloguj się",
+    "verifying": "Weryfikacja…",
+    "changeEmail": "Zmień adres email",
+    "errNetwork": "Błąd sieci — spróbuj ponownie",
+    "errGeneric": "Coś poszło nie tak",
+    "errInvalidEmail": "Podaj poprawny adres e-mail",
+    "errCodeExpired": "Kod wygasł — wyślij nowy",
+    "errInvalidCode": "Nieprawidłowy kod",
+    "errSignIn": "Nie udało się zalogować — spróbuj ponownie",
+    "errEmailSend": "Nie udało się wysłać e-maila. Spróbuj za chwilę.",
+    "errEmailSmtpUnreachable": "Serwer SMTP nie odpowiada (timeout lub zły host/port). Sprawdź SMTP_HOST, SMTP_PORT i SMTP_SECURE — często 587 + STARTTLS zamiast 465.",
+    "errEmailConfig": "Wysyłka e-maili nie jest skonfigurowana. Skontaktuj się z administratorem."
+  },
   "siteNav": {
     "brand": "Soundie",
     "home": "Start",
-    "play": "Lab",
+    "play": "Tree",
     "sanctuary": "Echo",
     "mainNav": "Główne menu",
     "signIn": "Zaloguj",
@@ -13,15 +34,15 @@
   },
   "meta": {
     "rootTitle": "Soundie — Presence Pass | Ulecz żywymi nutami",
-    "rootDescription": "Soundie: medytacyjny, uzdrawiający dźwiękowo Tamagotchi. Presence Pass — warstwa, która sprawia, że dźwięk jest żywy. Dwanaście żywych nut, lore i oddech.",
+    "rootDescription": "Soundie: medytacyjny, uzdrawiający dźwiękowo Tamagotchi. Presence Pass — warstwa, która sprawia, że dźwięk jest żywy. Dwanaście żywych nut, lore i oddech. To też tonacja afirmacji i mechanizm intencji korelatywnej.",
     "homeTitle": "Soundie — Dźwięk, który wie, że jesteś",
-    "homeDescription": "Medytacyjny świat żywych nut. Każda leczy co innego. Im dłużej słuchasz, tym więcej się odsłania.",
-    "playTitle": "Lab — Soundie",
+    "homeDescription": "Medytacyjny świat żywych nut. Każda leczy co innego — niesie tonację afirmacji i działa jako mechanizm intencji korelatywnej. Im dłużej słuchasz, tym więcej się odsłania.",
+    "playTitle": "Tree — Soundie",
     "playDescription": "Słuchaj żywych nut. Twój uzdrawiający dźwiękowy Tamagotchi.",
     "sanctuaryTitle": "Echo — Soundie",
     "sanctuaryDescription": "Cichy odblask słuchania: czas przy każdym klimacie emocji i nastroje, które nazwałeś przed grą.",
     "applicationName": "Soundie",
-    "keywords": "leczenie dźwiękiem, medytacja, terapia częstotliwością, Soundie, żywe nuty, obecność",
+    "keywords": "leczenie dźwiękiem, medytacja, terapia częstotliwością, Soundie, żywe nuty, obecność, afirmacja, tonacja afirmacji, intencja, mechanizm intencji korelatywnej",
     "ogLocale": "pl_PL"
   },
   "landing": {
@@ -32,11 +53,13 @@
       "Posłuchaj wystarczająco długo — rosną.",
       "Bez partytur. Bez liczników.",
       "Tylko obecność.",
+      "To też tonacja afirmacji.",
+      "To też intencja koleratywna.",
       "Soundie leczy."
     ],
     "headlineLine1": "Dźwięk, który wie,",
     "headlineLine2": "że tu jesteś.",
-    "subhead": "Medytacyjny świat żywych nut. Każda leczy co innego. Im dłużej słuchasz, tym więcej się odsłania.",
+    "subhead": "Medytacyjny świat żywych nut. Każda leczy co innego — niesie tonację afirmacji i intencję koleratywną. Im dłużej słuchasz, tym więcej się odsłania.",
     "tapHint": "Stuknij nutę, aby ją usłyszeć",
     "ariaNoteGroup": "Wybierz nutę ze skali Soundie",
     "playAria": "Odtwórz {name} ({freq} Hz)",
@@ -50,8 +73,8 @@
     "step2Body": "Każda sesja karmi nutę. Pogłębia się, powoli, jak pamięć.",
     "step3Title": "Odsłoń",
     "step3Body": "Lore odblokowuje się w czasie. Nuta mówi, co wie.",
-    "closing": "Soundie nie żąda uwagi. Nagradza spokój.",
-    "footerTagline": "Soundie — leczy.",
+    "closing": "Soundie nie żąda uwagi. Nagradza spokój, afirmację i intencję, którą w to wkładasz.",
+    "footerTagline": "Soundie — leczy w tonacji afirmacji i intencji koleratywnej.",
     "footerCopyright": "© {year} · Presence Pass",
     "noteNames": {
       "C": "Fundament",
@@ -199,7 +222,7 @@
     },
     "notNow": "Później",
     "back": "Wstecz",
-    "enter": "Wejdź w grę"
+    "enter": "Wejdź do Tree"
   },
   "lockedNotes": {
     "caption": "Kolejna nuta ukazuje się tylko temu, kto jest w bezruchu."
@@ -208,7 +231,7 @@
     "greeting": "Echo",
     "sub": "Lustro słuchania — nie wynik, nie wyrok. Wzorce tutaj to zaproszenia, nie pęd.",
     "noPlayer": "Żeby zobaczyć ślad,",
-    "goPlay": "zacznij sesję w Lab",
+    "goPlay": "zacznij sesję w Tree",
     "loading": "Chwila…",
     "todayCard": "Dziś",
     "todayMinutes": "{m} minut słuchania na razie",

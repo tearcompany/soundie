@@ -4,6 +4,10 @@
 
 Sedno Soundie jest proste.
 
+**Soundie to też tonacja afirmacji** — obok uzdrawiającego dźwięku: język, który potwierdza, zamiast wyciskać.
+
+**Soundie to też mechanizm intencji korelatywnej** — słuchanie nie jest pasywne: zostajesz z wyborem nuty, z czasem, z nastrojem; to powtarzalny ruch, który utrwala intencję.
+
 Otwieram appkę.  
 Słucham nuty 3 minuty.  
 Czuję się lepiej.  
