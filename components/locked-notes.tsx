@@ -78,7 +78,16 @@ export function LockedNotes() {
                           </p>
                           <p
                             className={cn(
-                              'mt-0.5 font-mono text-[0.65rem] leading-tight transition-all duration-200',
+                              'mt-0.5 text-lora text-[0.7rem] leading-tight transition-all duration-200',
+                              !selected && 'opacity-60 group-hover:opacity-100',
+                            )}
+                            style={{ color: entry.chromaHex }}
+                          >
+                            {entry.name}
+                          </p>
+                          <p
+                            className={cn(
+                              'mt-0.5 font-mono text-[0.62rem] leading-tight transition-all duration-200',
                               !selected && 'opacity-50 group-hover:opacity-100',
                             )}
                             style={{ color: entry.chromaHex }}

@@ -9,6 +9,8 @@ const analyticsName = z.enum([
   'teardrop_open',
   'lore_slide_view',
   'share_click',
+  'share_complete',
+  'share_copy_fallback',
   'daily_gift_revealed',
   'daily_gift_listen_click',
   'mood_check_in',

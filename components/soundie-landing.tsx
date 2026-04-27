@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { NOTE_LIST, urlKeyForNoteId } from '@/lib/notes'
+import { DEFAULT_NOTE_ID, NOTE_LIST, urlKeyForNoteId } from '@/lib/notes'
+import { trpc } from '@/lib/trpc/react'
 
 type LandingNote = {
   id: string
@@ -206,11 +207,19 @@ export function SoundieLanding() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const focusedNote = notes.find((n) => n.id === (playingId ?? hovered)) ?? null
   const { line, fade } = useCycledLine(lines, 3800, reducedMotion)
-  const selectedOrFallback = selectedNoteId ?? focusedNote?.id ?? notes[0]?.id ?? 'A'
+  const selectedOrFallback = selectedNoteId ?? focusedNote?.id ?? DEFAULT_NOTE_ID
   const playHref = useMemo(
     () => `/play?note=${encodeURIComponent(urlKeyForNoteId(selectedOrFallback))}`,
     [selectedOrFallback],
   )
+  const inviteCardQuery = trpc.teardrop.getMappedForNote.useQuery(
+    { noteId: selectedOrFallback, locale },
+    { staleTime: 60_000, retry: false },
+  )
+  const inviteCard = inviteCardQuery.data?.cards?.[0] ?? null
+  const inviteTagline = inviteCard?.texts.find((x) => x.field === 'tagline')?.content?.trim() ?? ''
+  const inviteAffirmation =
+    inviteCard?.texts.find((x) => x.field === 'affirmation')?.content?.trim() ?? ''
 
   const handleSelect = useCallback(
     (note: LandingNote) => {
@@ -222,16 +231,6 @@ export function SoundieLanding() {
       }
     },
     [play, stop, playingId],
-  )
-
-  const steps = useMemo(
-    () =>
-      [
-        { k: 'one', titleKey: 'step1Title' as const, bodyKey: 'step1Body' as const },
-        { k: 'two', titleKey: 'step2Title' as const, bodyKey: 'step2Body' as const },
-        { k: 'three', titleKey: 'step3Title' as const, bodyKey: 'step3Body' as const },
-      ] as const,
-    [],
   )
 
   return (
@@ -283,6 +282,18 @@ export function SoundieLanding() {
         <p className="mt-6 text-center font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink-muted">
           {t('subhead')}
         </p>
+
+        <div className="mx-auto mt-5 flex max-w-md flex-wrap items-center justify-center gap-2">
+          <span className="rounded-full border border-pearl-border/70 bg-pearl/70 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
+            {t('relief1')}
+          </span>
+          <span className="rounded-full border border-pearl-border/70 bg-pearl/70 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
+            {t('relief2')}
+          </span>
+          <span className="rounded-full border border-pearl-border/70 bg-pearl/70 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
+            {t('relief3')}
+          </span>
+        </div>
 
         <p className="mt-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted">
           {t('tapHint')}
@@ -338,38 +349,32 @@ export function SoundieLanding() {
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-5">
-          <Link
-            href={playHref}
-            className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-coral px-8 py-4 font-mono text-sm font-semibold text-pearl shadow-md transition-all duration-200 hover:bg-coral-light hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
-          >
-            {t('cta')}
-          </Link>
-          <p className="font-[family-name:var(--font-lora,serif)] text-xs italic text-ink-muted">
-            {t('footnote')}
-          </p>
-        </div>
-
-        <section
-          className="mx-auto mt-24 grid max-w-md grid-cols-1 gap-5 sm:grid-cols-3"
-          aria-label={t('howItWorks')}
-        >
-          {steps.map((s, i) => (
-            <div
-              key={s.k}
-              className="rounded-xl border border-pearl-border/60 bg-pearl/60 px-4 py-4 backdrop-blur-sm"
-            >
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-coral">
-                {t('stepLabel', { num: String(i + 1).padStart(2, '0') })}
-              </p>
-              <p className="mt-1 font-[family-name:var(--font-fraunces,serif)] text-lg font-semibold text-ink">
-                {t(s.titleKey)}
-              </p>
-              <p className="mt-1 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink-muted">
-                {t(s.bodyKey)}
-              </p>
+          <section className="w-full max-w-md rounded-2xl border border-pearl-border/60 bg-pearl/70 p-5 text-left shadow-sm backdrop-blur-sm">
+            <p className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-coral">
+              {t('inviteKicker')}
+            </p>
+            <p className="mt-2 font-[family-name:var(--font-fraunces,serif)] text-xl text-ink">
+              {inviteCard?.name ?? t('inviteFallbackTitle')}
+            </p>
+            <p className="mt-1 font-mono text-[0.68rem] uppercase tracking-wide text-ink-muted">
+              {inviteTagline || t('inviteFallbackTagline')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink/85">
+              {inviteAffirmation || t('inviteFallbackAffirmation')}
+            </p>
+            <div className="mt-4">
+              <Link
+                href={playHref}
+                className="inline-flex items-center justify-center rounded-full border border-coral/40 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-wide text-coral transition-colors hover:bg-coral/10"
+              >
+                {t('inviteCta')}
+              </Link>
             </div>
-          ))}
-        </section>
+            <p className="mt-3 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted/80">
+              {t('quickStart')}
+            </p>
+          </section>
+        </div>
 
         <p className="mx-auto mt-16 max-w-md text-center font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink-muted">
           {t('closing')}

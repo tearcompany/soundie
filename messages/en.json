@@ -27,6 +27,7 @@
     "brand": "Soundie",
     "home": "Home",
     "play": "Tree",
+    "teardrop": "Teardrop",
     "sanctuary": "Echo",
     "mainNav": "Main menu",
     "signIn": "Log in",
@@ -59,8 +60,11 @@
     ],
     "headlineLine1": "Sound that knows",
     "headlineLine2": "you're here.",
-    "subhead": "A meditative world of living notes. Each one heals something different — an affirming tonality and correlative intention. The longer you listen, the more it reveals.",
-    "tapHint": "Tap a note to hear it",
+    "subhead": "When your mind is overloaded, Soundie helps you return to yourself through a simple listening ritual. One note. One moment. Real nervous-system relief.",
+    "relief1": "less tension",
+    "relief2": "more breath",
+    "relief3": "back to yourself",
+    "tapHint": "Tap a note and listen for a moment",
     "ariaNoteGroup": "Listen to a note from the Soundie scale",
     "playAria": "Play {name} ({freq} Hz)",
     "cta": "Begin Session",
@@ -73,6 +77,12 @@
     "step2Body": "Each session feeds your note. It deepens, slowly, like memory.",
     "step3Title": "Reveal",
     "step3Body": "Lore unlocks as time passes. The note tells you what it knows.",
+    "inviteKicker": "Shared journey",
+    "inviteFallbackTitle": "A card is waiting",
+    "inviteFallbackTagline": "Touch the sound",
+    "inviteFallbackAffirmation": "Step in gently. This note has a message for you today.",
+    "inviteCta": "Start now",
+    "quickStart": "1 session has 3 repetitions",
     "closing": "Soundie does not demand your attention. It rewards your stillness, your affirmation, and the intention you bring.",
     "footerTagline": "Soundie — healing in a tone of affirmation and correlative intention.",
     "footerCopyright": "© {year} · Presence Pass",
@@ -97,6 +107,13 @@
     "unlockBannerDismiss": "OK",
     "minsToUnlock": "~{mins} min to unlock",
     "listeningSession": "Listening Session",
+    "sessionRepetition": "Repetition {current} of {total}",
+    "minuteEventTone": "The caption changed tone.",
+    "minuteEventEvolution": "The sphere evolved gently.",
+    "minuteEventShimmer": "Ambient shimmer.",
+    "minuteEventPulse": "Pulse deepened.",
+    "minuteEventAwakened": "Something awakened.",
+    "sacredLine": "You stayed. The note remembers.",
     "stopListening": "Stop",
     "beginSession": "Listen",
     "journey": "Journey",
@@ -111,6 +128,9 @@
     "shelfReadingUpright": "In the light",
     "shelfReadingShadow": "Shadow",
     "shelfReadingAffirmation": "Affirmation",
+    "shelfMeaningHintTrigger": "Explanation",
+    "shelfReadingUprightHint": "These 3 points show how the card works in the light: potential, resource, and direction of action.",
+    "shelfReadingShadowHint": "These 3 points show the shadow of the same energy: blocks, distortions, and signals for conscious correction.",
     "lore": {
       "C": [
         "Before there was music, there was silence. C is the first breath after that quiet — the note from which everything begins.",
@@ -227,6 +247,78 @@
   "lockedNotes": {
     "caption": "The next note appears only to the still."
   },
+  "teardropDeck": {
+    "the-vessel": {
+      "tagline": "The vessel remembers what the mind cannot name yet.",
+      "description": "This card reveals the inner tension between silence and listening. It calls you to read your interior and invites you to pause.",
+      "meaningUpright": "Inner guidance\nAwakening intention\nA space for truth",
+      "meaningShadow": "Stuck in illusion\nScattered light\nFear of seeing clearly",
+      "affirmation": "Even when I doubt, I stay faithful to truth."
+    },
+    "the-spiral": {
+      "tagline": "There is no return, only deeper return.",
+      "description": "A symbol of ongoing evolution: the path does not end, it deepens. Spiral learning is repetition with new understanding.",
+      "meaningUpright": "Soul growth\nIntegration of experience\nMovement toward center",
+      "meaningShadow": "Lost in loops\nFear of change\nEscaping depth",
+      "affirmation": "I circle, but I do not wander. I return deeper."
+    },
+    "the-return": {
+      "tagline": "Every return is a new birth.",
+      "description": "Return is not regression, it is rebirth with memory. When you return, you are no longer the same.",
+      "meaningUpright": "Reintegration\nRevaluing the past\nConsent to your own path",
+      "meaningShadow": "Trapped in nostalgia\nDenying change\nEmptiness after the road",
+      "affirmation": "I returned to remember who I became."
+    },
+    "the-seed": {
+      "tagline": "A beginning is a decision, not a plan.",
+      "description": "A seed does not know it will become a tree. It still says yes.",
+      "meaningUpright": "Initiation\nIntuitive decision\nFaith without proof",
+      "meaningShadow": "Fear of starting\nNeed for control\nProcrastination",
+      "affirmation": "I begin before I understand."
+    },
+    "the-watcher": {
+      "tagline": "I see. I do not judge.",
+      "description": "The witness does not intervene, it keeps watch. Seeing without judgment is an act of love.",
+      "meaningUpright": "Deep understanding\nCalm\nPresence",
+      "meaningShadow": "Passivity\nHidden judgment\nFear of engagement",
+      "affirmation": "I look with the heart. I do not need to act."
+    },
+    "the-path": {
+      "tagline": "Not a place, but a way of being.",
+      "description": "The path is more than a route, it is a relationship with movement. The journey is a way of thinking.",
+      "meaningUpright": "Process\nOpenness\nIntuitive navigation",
+      "meaningShadow": "Lost\nComparing paths\nCut off from purpose",
+      "affirmation": "I walk because I am."
+    },
+    "the-echo": {
+      "tagline": "What you send returns differently.",
+      "description": "Echo is the world answering your voice. Not the same, but related.",
+      "meaningUpright": "Understanding impact\nSpiritual communication\nA sign from the ether",
+      "meaningShadow": "Not listening\nFear of the answer\nRepeating old mistakes",
+      "affirmation": "What I hear is an answer to my call."
+    },
+    "the-pulse": {
+      "tagline": "Rhythm is the presence of the heart.",
+      "description": "Pulse is more than heartbeat, it is a spiritual beat. Synchronization with Life.",
+      "meaningUpright": "Life force\nSynchronization\nFeeling the rhythm",
+      "meaningShadow": "Overstimulation\nIrregular rhythm\nLosing touch with the body",
+      "affirmation": "I beat in the rhythm of Life."
+    },
+    "the-lightkeeper": {
+      "tagline": "Light is not kept. Light is carried.",
+      "description": "The Lightkeeper does not hoard light. It carries it so someone else can find the way.",
+      "meaningUpright": "Guidance\nHumility\nA carrying presence",
+      "meaningShadow": "Superiority\nBurnout\nNeed for control",
+      "affirmation": "I am not the light, but I carry it."
+    },
+    "the-wave": {
+      "tagline": "Surrender. You are the wave, not the barrier.",
+      "description": "Do not block it, let it pass. The wave moves through you, not from you.",
+      "meaningUpright": "Consent\nEmotional flow\nTrust",
+      "meaningShadow": "Resistance\nControl\nSuppression",
+      "affirmation": "I allow the wave to pass through."
+    }
+  },
   "sanctuary": {
     "greeting": "Echo",
     "sub": "A mirror of your listening — not a score, not a verdict. Patterns here are invitations, not pressure.",
@@ -234,10 +326,23 @@
     "goPlay": "begin a session on Tree",
     "loading": "Arriving…",
     "todayCard": "Today",
+    "todayTeardropTitle": "Today's card",
+    "todayTeardropLight": "In the light",
+    "todayTeardropShadow": "Shadow",
+    "teardropLabel": "Teardrop",
+    "teardropProgressTitle": "Teardrop Path",
+    "teardropProgressUnlocked": "Revealed cards: {n}/{total}",
+    "teardropProgressXp": "Teardrop experience: {xp} XP",
     "todayMinutes": "{m} minutes of listening so far",
     "todayMinutesUnknown": "A gentle day — we could not read today’s minutes yet",
+    "shareTitle": "My Soundie Echo",
+    "shareText": "Today I listened for {m} minutes in Soundie.",
+    "shareCta": "Share",
+    "shareDone": "Shared.",
+    "shareCopied": "Link copied.",
+    "shareFailed": "Could not share right now.",
     "releaseTitle": "Time with each inner climate",
-    "releaseHint": "Bubbles size by the minutes you have spent with notes that carry each emotional tone. More time means more of that tone was held, not “fixed.”",
+    "releaseHint": "Bubbles size by time spent with notes and Teardrop cards that carry each emotional tone. More time means more of that tone was held, not “fixed.”",
     "emptyRelease": "When you listen, these waters will show where your attention has rested.",
     "moodTitle": "Moods you named at the door",
     "moodHint": "Count of check-ins in the last two weeks. No grades — just rhythm.",
@@ -247,10 +352,12 @@
     "notesHint": "Each note you have listened to grows at its own pace.",
     "noteLevel": "Lv {lv}",
     "noteMinutes": "{m, plural, =0 {no minutes yet} one {# min listened} other {# min listened}}",
+    "listenNote": "Listen to this note",
     "noteFragmentsAria": "{n} of {max} lore layers unlocked",
     "bubbleAria": "Circle pack of time spent with each emotional tone",
     "moodAria": "Horizontal bars: how often each mood was chosen in check-ins",
     "tooltipEmotion": "{name} — {minutes}m {seconds}s of listening in this period",
+    "tooltipEmotionWithTeardrop": "{name} — total {minutes}m {seconds}s (notes: {listenMinutes}m, teardrop focus: {teardropMinutes}m, cards: {teardropClaims})",
     "moodLabels": {
       "anxious": "Tense / anxious",
       "numb": "Numb / flat",
@@ -258,5 +365,17 @@
       "scattered": "Scattered",
       "hopeful": "Hopeful"
     }
+  },
+  "teardropPage": {
+    "kicker": "Teardrop Gallery",
+    "title": "Artifacts of\n Presence",
+    "sub": "This is where practice turns into victory: unlocked Teardrop deck cards. Each card is a reward for presence, not speed.",
+    "noPlayer": "To view your artifacts,",
+    "goPlay": "start listening in Tree",
+    "loading": "Loading cards…",
+    "victoryTitle": "Collection progress",
+    "progress": "Unlocked: {unlocked}/{total}",
+    "empty": "Here story begins.",
+    "unknownPhase": "phase"
   }
 }

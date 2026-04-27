@@ -16,9 +16,9 @@ Stan na podstawie obecnego kodu w repozytorium. Skrót techniczny dla developera
 
 ## Strony i routing
 
-- **`/`** (domyślnie EN) i **`/pl/`** — landing z interaktywną skalą nut (`components/soundie-landing.tsx`)
+- **`/`** (domyślnie EN) i **`/pl/`** — landing z interaktywną skalą nut (`components/soundie-landing.tsx`): wybór nuty + preview audio, karta zaproszenia Teardrop („wspólna podróż / shared journey”) pod siatką nut, CTA osadzone w tej karcie; uproszczony layout (bez sekcji kroków i osobnego głównego przycisku CTA)
 - **`/play`**, **`/pl/play`** — ekran gry (`components/note-creature.tsx`, `components/locked-notes.tsx`); link do Sanctuary w nawigacji
-- **`/sanctuary`**, **`/pl/sanctuary`** — **Sanctuary** (`app/[locale]/sanctuary/`, `components/sanctuary/sanctuary-dashboard.tsx`): dane `sanctuary.getDiagramData` (tRPC) — agregat czasu słuchania po emocjach nuty (`ListenSession` → `soundie` → `note.emotionId`) oraz `MoodEntry` w wybranym oknie; wizualizacje D3: `emotion-bubble-pack` (bąble wg sekund uwalniania), `mood-mosaic-bars` (paski check-inów nastroju); i18n `sanctuary.*`
+- **`/sanctuary`**, **`/pl/sanctuary`** — **Sanctuary** (`app/[locale]/sanctuary/`, `components/sanctuary/sanctuary-dashboard.tsx`): dane `sanctuary.getDiagramData` (tRPC) — agregat czasu słuchania po emocjach nuty (`ListenSession` → `soundie` → `note.emotionId`) oraz `MoodEntry` w wybranym oknie; wizualizacje D3: `emotion-bubble-pack` (bąble wg sekund uwalniania), `mood-mosaic-bars` (paski check-inów nastroju); dodatkowo widok „dzisiejsza karta” z `DailyClaim` (name/tagline/affirmation) i i18n `sanctuary.*`
 - **next-intl**: `locales: ['en', 'pl']`, `defaultLocale: 'en'`, `localePrefix: 'as-needed'` (`i18n/routing.ts`)
 - **Middleware** (`middleware.ts`) — integracja z `next-intl` dla ścieżek (wyłącza `api`, `_next`, pliki statyczne)
 
@@ -40,12 +40,13 @@ Stan na podstawie obecnego kodu w repozytorium. Skrót techniczny dla developera
 - **DailyVisit** — unikalne `(playerId, visitDate)` gdzie `visitDate` to napis `YYYY-MM-DD` (kalendarz lokalny z klienta)
 - **DailyClaim** — maks. jeden wiersz na `(playerId, claimDate)`; zapis dziennej „nagrody bez wstydu”: `glowKey` (`dawn` / `dusk` / `nocturne`), `rareCaption` (najrzadszy napis z `NoteCaption` dla locale, inaczej fallback z nuty), `teardropCardId`, `noteId` (nuty, na której utworzono claim)
 - **MoodEntry** — wpis przed grą: `mood` (`anxious` / `numb` / `heavy` / `scattered` / `hopeful`), `noteId` (aktywna nuta), `entryDate` `YYYY-MM-DD` (dla raportów); powiązanie z `Player` i `Note`
-- **AnalyticsEvent** — zdarzenia produktowe (`first_visit`, `second_day_return`, `session_started`, `session_180_complete`, `daily_gift_revealed`, `daily_gift_listen_click`, `mood_check_in` przy zapisie `MoodEntry`, miejsca na `teardrop_open`, `share_click`) z opcjonalnym `meta` JSON; `session_started` może mieć `afterDailyGift: true`
+- **AnalyticsEvent** — zdarzenia produktowe (`first_visit`, `second_day_return`, `session_started`, `session_180_complete`, `daily_gift_revealed`, `daily_gift_listen_click`, `mood_check_in`, `lore_slide_view`, `teardrop_open`, `share_click`, `share_complete`, `share_copy_fallback`) z opcjonalnym `meta` JSON; `session_started` może mieć `afterDailyGift: true`; `teardrop_open` używa `meta.surface` (`sanctuary_card` / `daily_gift_dialog`)
 - **ListenSession** — ukończone sesje słuchania
 - **TeardropDeck** + **TeardropCard** — talia oracle (50 kart w seederze), m.in. `phase`, `phaseOrder`, `arcanaType`, powiązanie z **Emotion** (`emotionId`)
 - **TeardropCardText** — pola wielojęzyczne (`tagline`, `description`, `meaning_upright`, `meaning_shadow`, `affirmation`) w `en` / `pl`
 - **NoteTeardropCard** — do 5 kart Teardrop przypiętych do każdej nuty (kolejność `sortOrder`)
 - **TeardropCardRelation** — model w schemacie (relacje między kartami); **nie jest wypełniany w obecnym seederze**
+- **TeardropFocusSession** — log sesji focusu kart Teardrop (player/note/card, `durationMs`, `startedAt`, `endedAt`, `source`) pod personalizację sortowania i grupowania kart
 
 Zewnętrzne pliki danych pod seed:
 
@@ -59,12 +60,12 @@ Polecenia: `pnpm run db:push`, `pnpm run db:seed`, `pnpm run db:setup` (push + s
 - **`note`** — `list`, `getById` (lore, captions z bazy, nazwa emocji wg locale), `getByUrlKey`
 - **`player`** — tworzenie / identyfikacja gracza (wg potrzeb frontu)
 - **`soundie`** — sesje, ukończenie sesji, progres, synchronizacja z tabelą `Soundie` (m.in. logika poziomu i odblokowanych fragmentów lore w minutach po stronie serwera, spójna z progami w routerze); przy `durationSeconds >= 180` zapis zdarzenia `session_180_complete` w `AnalyticsEvent`
-- **`teardrop`** — karty z decka, wybór tekstów wg locale (`pickLocaleTexts`: dokładny język, potem EN, potem PL)
+- **`teardrop`** — karty z decka, wybór tekstów wg locale (`pickLocaleTexts`: dokładny język, potem EN, potem PL); `getMappedForNote` wspiera `playerId` i zwraca odblokowaną listę + `totalCards`; odblokowanie kart co **60 min** słuchania + bonus za liczbę `DailyClaim` dla tej nuty; `recordFocus` zapisuje fokus karty (`durationMs >= 1500`)
 - **`returnEngine.logVisit`** — pierwsza wizyta dnia (kalendarz `YYYY-MM-DD` z klienta), nalicza `streakNights`, `first_visit` / `second_day_return` w analityce; odpowiedź: `shouldShowWelcomeBack` (tylko przy **drugim dniu kalendarzowym** użycia), szept z aktywnej nuty, `streakNights`
 - **`returnEngine.revealDailyClaim`** — idempotentna mutacja: tworzy pierwsze danego dnia `DailyClaim` (deterministyczny wybór karty Teardrop do nuty + hash) lub zwraca istniejące; `isNew: true` tylko pierwszym callu dziś, wtedy analityka `daily_gift_revealed` po stronie serwera
 - **`mood.saveEntry`** — zapis `MoodEntry` + rejestracja `mood_check_in` w analityce (w `meta`: `noteId`, `mood`, `entryDate`)
 - **`analytics.record`** — ogólne zdarzenia z klienta (np. `session_started` przy starcie słuchania, `daily_gift_listen_click` na przycisku „Słuchaj / Listen” w module daily gift)
-- **`sanctuary.getDiagramData`** — odczyt agregatów na potrzeby wykresów: `releaseByEmotion` (sekundy / minuty), `moodInRange`, `minutesToday` (z przekazanym „dniem” z klienta), `totalSecondsInRange`; wejście: `playerId`, `rangeDays`, opcjonalnie `dayStartIso` / `dayEndIso`
+- **`sanctuary.getDiagramData`** — odczyt agregatów na potrzeby wykresów: `releaseByEmotion` (sekundy / minuty), `moodInRange`, `minutesToday` (z przekazanym „dniem” z klienta), `totalSecondsInRange`, `todayClaim`; wejście: `playerId`, `rangeDays`, opcjonalnie `dayStartIso` / `dayEndIso` / `locale`
 
 ## Stan klienta (Zustand)
 
@@ -89,7 +90,8 @@ Polecenia: `pnpm run db:push`, `pnpm run db:seed`, `pnpm run db:setup` (push + s
 
 ## Inne
 
-- **Fallback** definicji nuty z `lib/notes.ts` gdy brak odpowiedzi API
+- **Fallback** definicji nuty z `lib/notes.ts` gdy brak odpowiedzi API; domyślna nuta startowa ustawiona na `E`
+- **Sygnał audio wyboru nuty** — przy wyborze nuty odtwarzane jest `public/bells.wav` (hook `useNoteSelection`)
 - **`@vercel/analytics`** w providerach
 - **`docs/`** (ten plik) — opis zaimplementowanego stanu; **`MANIFESTO.md`** w root — kierunek produktowy, osobno od tego opisu
 

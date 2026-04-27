@@ -6,13 +6,14 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { cn } from '@/lib/utils'
 import { useSession, signOut } from 'next-auth/react'
 
-const HREFS = ['/', '/play', '/sanctuary'] as const
+const HREFS = ['/', '/play', '/teardrop', '/sanctuary'] as const
 
 type Href = (typeof HREFS)[number]
 
-const KEYS: Record<Href, 'home' | 'play' | 'sanctuary'> = {
+const KEYS: Record<Href, 'home' | 'play' | 'teardrop' | 'sanctuary'> = {
   '/': 'home',
   '/play': 'play',
+  '/teardrop': 'teardrop',
   '/sanctuary': 'sanctuary',
 }
 
@@ -33,14 +34,15 @@ export function SiteNav() {
     <header
       className="sticky top-0 z-50 flex shrink-0 items-center justify-between gap-3 border-b border-pearl-border/50 bg-pearl/90 px-4 py-3.5 backdrop-blur-md sm:px-6"
     >
-      <Link
-        href="/"
-        className="font-[family-name:var(--font-fraunces,serif)] text-lg font-semibold tracking-tight text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:text-xl"
-      >
-        {t('brand')}
-      </Link>
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-4">
-        <nav className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-3" aria-label={t('mainNav')}>
+      <div className="flex min-w-0 items-center gap-3 sm:gap-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-[family-name:var(--font-fraunces,serif)] text-lg font-semibold tracking-tight text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-coral sm:text-xl"
+        >
+          <img src="/icon.svg" alt="Soundie" width={24} height={24} aria-hidden className="h-12 w-12 shrink-0" />
+          {t('brand')}
+        </Link>
+        <nav className="flex min-w-0 items-center gap-1.5 sm:gap-3" aria-label={t('mainNav')}>
           {HREFS.map((href) => {
             const on = pathMatches(pathname, href)
             return (
@@ -60,6 +62,8 @@ export function SiteNav() {
             )
           })}
         </nav>
+      </div>
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-4">
 
         {status !== 'loading' && (
           isLoggedIn ? (

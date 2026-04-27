@@ -24,6 +24,7 @@ function mapTeardropPublic(
     id: string
     slug: string
     name: string
+    emotionId: string | null
     texts: Array<{ locale: string; field: string; content: string }>
   },
   locale: string,
@@ -37,6 +38,7 @@ function mapTeardropPublic(
     id: card.id,
     slug: card.slug,
     name: card.name,
+    emotionId: card.emotionId,
     ...(affirmation ? { affirmation } : {}),
     ...(tagline ? { tagline } : {}),
   }

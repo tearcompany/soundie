@@ -1,10 +1,10 @@
 {
   "the-seed": {
-    "tagline": "Początek jest ukryty, ale prawdziwy.",
-    "description": "To potencjał, który jeszcze nie wie, że już istnieje. Ziarno nie zna drzewa, ale niesie jego całość. Karta mówi o wewnętrznej gotowości bez formy – o prawdzie, która jeszcze nie została wypowiedziana.",
-    "meaningUpright": "Czysta intencja\nNiewidoczne źródło ruchu\nNapięcie przed startem",
-    "meaningShadow": "Brak wiary w sens\nOpór przed początkiem\nUtrata kontaktu z potencjałem",
-    "affirmation": "Noszę przyszłość, nawet jeśli jej jeszcze nie widzę."
+    "tagline": "Początek to decyzja, nie plan.",
+    "description": "Nasiono nie wie, że stanie się drzewem. Ale mówi: „tak”.",
+    "meaningUpright": "Inicjacja\nIntuicyjna decyzja\nWiara bez dowodu",
+    "meaningShadow": "Strach przed startem\nPotrzeba kontroli\nOdkładanie",
+    "affirmation": "Zaczynam, zanim zrozumiem."
   },
   "the-soil": {
     "tagline": "To, co przyjmuje, nie jest bierne.",
@@ -210,11 +210,11 @@
     "affirmation": "Wystarczy, że słyszę. I to już mnie przemienia."
   },
   "the-path": {
-    "tagline": "Idź. Już jesteś gotowy.",
-    "description": "„The Path” to miejsce decyzji. Nie chodzi już o to, co czujesz, ale o to, co zrobisz. Każda ścieżka coś daje i coś odbiera. Ta karta jest jak rozstaj: jedno wyjście prowadzi do życia, drugie do zamknięcia w znanym. Bóg nie wymusza wyboru — tylko zaprasza.",
-    "meaningUpright": "Klarowność wyboru\nWewnętrzne TAK wobec nieznanego\nDojrzałość duchowa",
-    "meaningShadow": "Lęk przed błędem\nSabotowanie własnego postępu\nZwlekanie, które udaje pokorę",
-    "affirmation": "Nie muszę widzieć końca drogi, by zrobić pierwszy krok."
+    "tagline": "Nie miejsce, ale sposób bycia.",
+    "description": "Ścieżka to więcej niż trasa – to relacja z ruchem. Podróż to sposób myślenia.",
+    "meaningUpright": "Proces\nOtwartość\nIntuicyjna nawigacja",
+    "meaningShadow": "Zagubienie\nPorównywanie dróg\nOdcięcie od celu",
+    "affirmation": "Idę, bo jestem."
   },
   "the-crossing": {
     "tagline": "Jeśli umrzesz — będziesz żyć.",
@@ -231,18 +231,18 @@
     "affirmation": "Mogę być niewidoczny — i całkowicie prawdziwy."
   },
   "the-echo": {
-    "tagline": "Co naprawdę słyszysz?",
-    "description": "Echo nie jest głosem — jest jego cieniem. „The Echo” przypomina, że wiele naszych decyzji to reakcje, nie wybory. Ta karta pyta: czy to, co robisz, jest naprawdę twoje? Hod to miejsce odbicia, komunikacji, ale i iluzji języka. Kiedy powtarzasz — czy pamiętasz, co było pierwotne?",
-    "meaningUpright": "Głębokie słuchanie\nRozróżnianie głosu serca od zewnętrznych narracji\nPokora wobec Słowa",
-    "meaningShadow": "Powtarzanie duchowych fraz bez doświadczenia\nŻycie cudzym głosem\nDuchowe echa zamiast obecności",
-    "affirmation": "Nie chcę więcej odbić — tylko prawdy."
+    "tagline": "To, co wysyłasz, wraca inaczej.",
+    "description": "Echo to odpowiedź świata na Twój głos. Nie taka sama – ale spokrewniona.",
+    "meaningUpright": "Zrozumienie wpływu\nDuchowa komunikacja\nZnak od eteru",
+    "meaningShadow": "Brak słuchania\nLęk przed odpowiedzią\nPowtórzenie błędów",
+    "affirmation": "To, co słyszę, jest odpowiedzią na moje wołanie."
   },
   "the-pulse": {
-    "tagline": "Czujesz to?",
-    "description": "„The Pulse” jest ruchem ukrytym pod powierzchnią. Nie musisz nic mówić — wystarczy, że jesteś. Yesod to fundament, miejsce kontaktu z życiem przed słowem. Puls tej karty przypomina bicie serca Boga — obecne, ciche, stałe. Czy umiesz zaufać czemuś, czego nie możesz uchwycić?",
-    "meaningUpright": "Zestrojenie z wewnętrznym rytmem\nPraca z energią ciała i duszy\nWrażliwość duchowa bez potrzeby „rozumienia”",
-    "meaningShadow": "Zablokowany przepływ – stagnacja\nIgnorowanie sygnałów ciała i emocji\nDuchowa bezruchowość pod przykrywką spokoju",
-    "affirmation": "Nie muszę rozumieć. Wystarczy, że czuję."
+    "tagline": "Rytm to obecność serca.",
+    "description": "Puls to nie tylko tętno – to duchowy beat. Synchronizacja z Życiem.",
+    "meaningUpright": "Życiowa energia\nSynchronizacja\nOdczuwanie rytmu",
+    "meaningShadow": "Przebodźcowanie\nNierówność rytmu\nUtrata kontaktu z ciałem",
+    "affirmation": "Biję w rytmie Życia."
   },
   "the-flame": {
     "tagline": "Nie jestem bezpieczny. Jestem prawdziwy.",
@@ -252,18 +252,18 @@
     "affirmation": "Nie boję się płomienia. On zna moje imię."
   },
   "the-watcher": {
-    "tagline": "Patrzę i nie odwracam wzroku.",
-    "description": "„The Watcher” to ten, kto widzi — nie dla osądu, lecz dla zrozumienia. Tiferet jest centrum drzewa, sercem równowagi. Ta karta wzywa do spojrzenia prawdzie w oczy, nie uciekając. Patrzenie to akt miłości — nawet jeśli boli. Nawet jeśli wszystko się zmienia.",
-    "meaningUpright": "Wgląd bez lęku\nDuchowa obecność wobec cienia\nZdolność do zobaczenia „całości”",
-    "meaningShadow": "Bierność pod pozorem uważności\nEmocjonalna separacja\nDuchowe obserwatorstwo bez zaangażowania",
-    "affirmation": "Patrzę z serca. I to wystarcza."
+    "tagline": "Widzę. Nie oceniam.",
+    "description": "Świadek nie interweniuje – czuwa. Widzenie bez osądu to akt miłości.",
+    "meaningUpright": "Głębokie zrozumienie\nSpokój\nObecność",
+    "meaningShadow": "Bierność\nUkryta osądzająca postawa\nLęk przed zaangażowaniem",
+    "affirmation": "Patrzę sercem. Nic nie muszę robić."
   },
   "the-wave": {
-    "tagline": "Nie muszę się bronić.",
-    "description": "„The Wave” to fala łaski — nieprzewidywalna, ale zawsze niosąca. Chesed to miłość, która się nie cofa, nawet gdy jest odrzucona. Ta karta przypomina: jesteś niesiony. Nie musisz wszystkiego kontrolować. Otwórz ręce. Fala cię nie pochłonie — jeśli się jej poddasz.",
-    "meaningUpright": "Przyjęcie bezwarunkowej miłości\nUzdrowienie przez poddanie\nUwolnienie od potrzeby kontroli",
-    "meaningShadow": "Naiwność wobec zranień\nPragnienie zbawienia przez innych\nPasywność udająca zaufanie",
-    "affirmation": "Nie zatrzymuję łaski. Pozwalam jej płynąć."
+    "tagline": "Poddaj się. Jesteś falą, nie barierą.",
+    "description": "Nie zatrzymuj – przepuść. Fala to ruch przez Ciebie, nie z Ciebie.",
+    "meaningUpright": "Zgoda\nPrzepływ emocji\nZaufanie",
+    "meaningShadow": "Opór\nKontrola\nTłumienie",
+    "affirmation": "Pozwalam, by fala przeszła."
   },
   "the-weaver": {
     "tagline": "To wszystko jest ze sobą połączone.",
@@ -287,11 +287,11 @@
     "affirmation": "Odsłaniam się, patrząc na ciebie."
   },
   "the-return": {
-    "tagline": "Wracasz nie po to, by być taki sam.",
-    "description": "„The Return” to moment powrotu — nie do miejsca, lecz do serca. Tiferet jako centrum drzewa życia przywołuje do równowagi po czasie rozproszenia. To nie jest cofnięcie się — to głębszy poziom kręgu. Kiedy wracasz naprawdę, coś w tobie jest już inne. Karta ta pojawia się, gdy trzeba odzyskać utraconą część siebie — ale nie na starych warunkach.",
-    "meaningUpright": "Duchowy powrót do tego, co istotne\nUzdrowienie relacji lub tożsamości\nIntegracja przeszłości z teraźniejszością",
-    "meaningShadow": "Iluzja powrotu do „jak było”\nPróba reanimacji martwych struktur\nSentimentalizm zamiast transformacji",
-    "affirmation": "Wracam — ale nie jestem już tym samym człowiekiem."
+    "tagline": "Każdy powrót to nowe narodziny.",
+    "description": "Powrót nie jest cofnięciem – to odrodzenie z pamięcią. Gdy wracasz, jesteś kimś innym.",
+    "meaningUpright": "Reintegracja\nOdkrycie wartości przeszłości\nZgoda na własną drogę",
+    "meaningShadow": "Uwięzienie w nostalgii\nZaprzeczanie zmianie\nPustka po drodze",
+    "affirmation": "Wróciłem, by pamiętać, kim się stałem."
   },
   "the-bridge": {
     "tagline": "Nie należę już do tamtego miejsca. Ale jeszcze nie jestem tutaj.",
@@ -315,18 +315,18 @@
     "affirmation": "Zamknięcie drzwi może być najczystszą formą opieki."
   },
   "the-lightkeeper": {
-    "tagline": "Świeć nawet wtedy, gdy nikt nie patrzy.",
-    "description": "„The Lightkeeper” to ten, kto przechowuje światło — nie dla siebie, ale dla innych. Chesed to miłosierdzie, ofiarność, obecność. Ta karta przypomina o cichej służbie: kiedy światło nie przynosi chwały, ale wciąż jest potrzebne. Czasem jesteś latarnią, nie znając rozbitków, którzy cię odnaleźli.",
-    "meaningUpright": "Cicha obecność pełna miłości\nWierność bez uznania\nWewnętrzne światło, które nie zależy od zewnętrznych efektów",
-    "meaningShadow": "Wypalanie się w dawaniu bez granic\nCzekanie na wdzięczność\nDuchowe zmęczenie światłem",
-    "affirmation": "Światło nie potrzebuje widza, by być prawdziwe."
+    "tagline": "Światło się nie trzyma. Światło się niesie.",
+    "description": "Strażnik Światła nie gasi go dla siebie – ale po to, by ktoś inny mógł znaleźć drogę.",
+    "meaningUpright": "Przewodnictwo\nPokora\nNiosąca obecność",
+    "meaningShadow": "Poczucie wyższości\nWypalenie\nChęć kontroli",
+    "affirmation": "Nie jestem światłem – ale je niosę."
   },
   "the-spiral": {
-    "tagline": "To nie powrót. To głębiej.",
-    "description": "„The Spiral” nie jest linią — ani cyklem. To ruch ku głębi. Netzach jako trwałość wzywa cię do cierpliwości wobec pozornych powtórek. Czasem wracasz do tego samego miejsca — ale już jako ktoś inny. Karta ta pojawia się, gdy uczysz się ufać rytmowi duchowego rozwoju, nawet jeśli wygląda jak stagnacja.",
-    "meaningUpright": "Wierność procesowi przemiany\nUznanie, że wzrost nie jest liniowy\nPrzemiana przez pozorne powtórki",
-    "meaningShadow": "Lęk przed „kolejną rundą”\nZwątpienie w sens procesu\nDuchowe zniechęcenie",
-    "affirmation": "Nawet jeśli wracam — jestem głębiej."
+    "tagline": "Nie ma powrotu – jest tylko coraz głębiej.",
+    "description": "Symbol ciągłej ewolucji – ścieżki, która nigdy się nie kończy, lecz wciąż się pogłębia. Spiralna nauka to powtórka z nowym zrozumieniem.",
+    "meaningUpright": "Rozwój duszy\nIntegracja doświadczeń\nRuch ku centrum",
+    "meaningShadow": "Błądzenie w powtórkach\nLęk przed zmianą\nUcieczka od głębi",
+    "affirmation": "Kręcę się, ale nie błądzę. Wracam – głębiej."
   },
   "the-teardrop": {
     "tagline": "Ta łza zna twoje imię.",
@@ -343,10 +343,10 @@
     "affirmation": "Nie muszę robić nic więcej. Jestem."
   },
   "the-vessel": {
-    "tagline": "Nie jestem pełny — ale gotowy.",
-    "description": "„The Vessel” nie wybiera, co przyjmie. Jest pusty, ale gotowy. Yesod jako pojemność na światło mówi: twoją rolą nie jest stworzenie sensu, lecz przyjęcie go. Karta ta wzywa do otwartości — bez warunków. I do zaufania, że puste może być święte.",
-    "meaningUpright": "Zgoda na przyjęcie bez kontroli\nPojemność duchowa\nPrzestrzeń gotowości",
-    "meaningShadow": "Lęk przed wypełnieniem\nPustka jako chroniczny brak\nDuchowa pasywność",
-    "affirmation": "Nie wiem, co nadejdzie. Ale jestem gotowy."
+    "tagline": "Naczynie pamięta to, czego umysł jeszcze nie rozumie.",
+    "description": "Ta karta odsłania wewnętrzne napięcie między ciszą a słuchaniem. To wezwanie do odczytania własnego wnętrza, ale też zaproszenie do zatrzymania.",
+    "meaningUpright": "Wewnętrzne prowadzenie\nPrzebudzenie intencji\nPrzestrzeń prawdy",
+    "meaningShadow": "Zatrzymanie w iluzji\nRozproszenie światła\nLęk przed zobaczeniem",
+    "affirmation": "Nawet gdy wątpię, pozostaję wierny prawdzie."
   }
 }

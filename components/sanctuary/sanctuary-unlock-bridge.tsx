@@ -16,6 +16,7 @@ type Reveal = {
     id: string
     slug: string
     name: string
+    emotionId?: string | null
     affirmation?: string
     tagline?: string
   } | null
@@ -73,12 +74,14 @@ export function SanctuaryUnlockBridge() {
             name: 'teardrop_open',
             playerId,
             meta: {
+              surface: 'daily_gift_dialog',
               source: 'sanctuary_enter',
               noteId: data.noteId,
               claimDate: data.claimDate,
               isNew: data.isNew,
               teardropId: data.teardrop?.id ?? null,
               teardropSlug: data.teardrop?.slug ?? null,
+              teardropEmotionId: data.teardrop?.emotionId ?? null,
             },
           })
         },

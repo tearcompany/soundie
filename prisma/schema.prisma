@@ -67,6 +67,9 @@ model Player {
   dailyClaims     DailyClaim[]
   moodEntries     MoodEntry[]
   analyticsEvents AnalyticsEvent[]
+  teardropFocusSessions TeardropFocusSession[]
+  teardropUnlocks TeardropCardUnlock[]
+  teardropProgress TeardropProgress?
 }
 
 model Soundie {
@@ -122,6 +125,24 @@ model TeardropDeck {
   updatedAt DateTime @updatedAt
 
   cards     TeardropCard[]
+  phases    TeardropPhase[]
+}
+
+model TeardropPhase {
+  id          String   @id @default(cuid())
+  deckId      String
+  slug        String
+  titlePl     String
+  titleEn     String
+  unlockOrder Int
+  xpPerUnlock Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deck        TeardropDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@unique([deckId, slug])
+  @@index([deckId, unlockOrder])
 }
 
 model TeardropCard {
@@ -145,13 +166,65 @@ model TeardropCard {
   texts       TeardropCardText[]
   noteLinks   NoteTeardropCard[]
   dailyClaims DailyClaim[]
+  focusSessions TeardropFocusSession[]
   outgoing    TeardropCardRelation[] @relation("TeardropOutgoing")
   incoming    TeardropCardRelation[] @relation("TeardropIncoming")
+  unlocks     TeardropCardUnlock[]
 
   @@unique([deckId, slug])
   @@index([emotionId])
   @@index([slug])
   @@index([phase, phaseOrder])
+}
+
+model TeardropProgress {
+  id            String   @id @default(cuid())
+  playerId      String   @unique
+  xp            Int      @default(0)
+  unlockedCards Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  player        Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model TeardropCardUnlock {
+  id         String   @id @default(cuid())
+  playerId   String
+  noteId     String
+  cardId     String
+  phase      String
+  phaseOrder Int?
+  xpAwarded  Int
+  createdAt  DateTime @default(now())
+
+  player     Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note       Note         @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  card       TeardropCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, noteId, cardId])
+  @@index([playerId, noteId, createdAt])
+  @@index([playerId, createdAt])
+}
+
+model TeardropFocusSession {
+  id         String   @id @default(cuid())
+  playerId   String
+  noteId     String
+  cardId     String
+  durationMs Int
+  startedAt  DateTime
+  endedAt    DateTime
+  source     String?
+  createdAt  DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  card   TeardropCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, createdAt])
+  @@index([playerId, noteId, createdAt])
+  @@index([playerId, cardId, createdAt])
 }
 
 model TeardropCardText {
@@ -259,6 +332,8 @@ model Note {
   captions           NoteCaption[]
   soundies           Soundie[]
   teardropCards      NoteTeardropCard[]
+  teardropFocusSessions TeardropFocusSession[]
+  teardropUnlocks    TeardropCardUnlock[]
   dailyClaims        DailyClaim[]
   moodEntries        MoodEntry[]
 

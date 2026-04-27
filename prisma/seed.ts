@@ -18,6 +18,16 @@ type MessagesShape = {
   noteCreature: {
     lore: Record<string, string[]>
   }
+  teardropDeck?: Record<
+    string,
+    {
+      tagline: string
+      description: string
+      meaningUpright: string
+      meaningShadow: string
+      affirmation: string
+    }
+  >
 }
 
 const CAPTIONS_BY_LOCALE: Record<'en' | 'pl', Record<string, string[]>> = {
@@ -30,6 +40,9 @@ const LORE_BY_LOCALE = {
   pl: (plMessages as MessagesShape).noteCreature.lore,
 } as const
 
+const TEARDROP_EN_FROM_MESSAGES =
+  ((enMessages as MessagesShape).teardropDeck as Record<string, TeardropTextBlock> | undefined) ?? {}
+
 type TeardropTextBlock = {
   tagline: string
   description: string
@@ -37,6 +50,14 @@ type TeardropTextBlock = {
   meaningShadow: string
   affirmation: string
 }
+
+const TEARDROP_PHASES = [
+  { slug: 'roots', titlePl: 'Korzenie', titleEn: 'Roots', unlockOrder: 1, xpPerUnlock: 10 },
+  { slug: 'flow', titlePl: 'Przepływ', titleEn: 'Flow', unlockOrder: 2, xpPerUnlock: 15 },
+  { slug: 'void', titlePl: 'Pustka', titleEn: 'Void', unlockOrder: 3, xpPerUnlock: 20 },
+  { slug: 'light', titlePl: 'Światło', titleEn: 'Light', unlockOrder: 4, xpPerUnlock: 25 },
+  { slug: 'archetypes', titlePl: 'Archetypy', titleEn: 'Archetypes', unlockOrder: 5, xpPerUnlock: 35 },
+] as const
 
 const NOTE_TEARDROP_PLAYLIST: Record<string, string[]> = {
   C:   ['the-vessel', 'the-seed', 'the-core', 'the-anchor', 'the-path'],
@@ -142,6 +163,26 @@ async function main() {
 
   console.log(`[seed] deck: ${deck.id}`)
 
+  for (const phase of TEARDROP_PHASES) {
+    await prisma.teardropPhase.upsert({
+      where: { deckId_slug: { deckId: deck.id, slug: phase.slug } },
+      create: {
+        deckId: deck.id,
+        slug: phase.slug,
+        titlePl: phase.titlePl,
+        titleEn: phase.titleEn,
+        unlockOrder: phase.unlockOrder,
+        xpPerUnlock: phase.xpPerUnlock,
+      },
+      update: {
+        titlePl: phase.titlePl,
+        titleEn: phase.titleEn,
+        unlockOrder: phase.unlockOrder,
+        xpPerUnlock: phase.xpPerUnlock,
+      },
+    })
+  }
+
   assertTeardropEmotionMapMatchesDeck(TEARDROP_CARDS.map((c) => c.slug))
 
   const teardropCardIdBySlug = new Map<string, string>()
@@ -206,9 +247,9 @@ async function main() {
       }
     }
 
-    const enBlock = (teardropCardTextsEn as Record<string, TeardropTextBlock>)[
-      card.slug
-    ]
+    const enFromMessages = TEARDROP_EN_FROM_MESSAGES[card.slug]
+    const enFromData = (teardropCardTextsEn as Record<string, TeardropTextBlock>)[card.slug]
+    const enBlock = enFromMessages ?? enFromData
     if (enBlock) {
       const enFields = [
         ['tagline', enBlock.tagline],

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { useSoundieStore } from '@/lib/soundie-store'
@@ -37,10 +37,27 @@ export function useNoteSelection() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const bellsRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    const audio = new Audio('/bells.wav')
+    audio.preload = 'auto'
+    audio.volume = 0.35
+    bellsRef.current = audio
+    return () => {
+      bellsRef.current = null
+    }
+  }, [])
 
   const setNote = useCallback(
     (id: string) => {
       if (!isValidNoteId(id)) return
+      const bells = bellsRef.current
+      if (bells) {
+        bells.pause()
+        bells.currentTime = 0
+        bells.play().catch(() => undefined)
+      }
       setActiveNote(id)
       const key = urlKeyForNoteId(id)
       const next = new URLSearchParams(searchParams.toString())

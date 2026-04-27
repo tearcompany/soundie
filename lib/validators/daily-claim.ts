@@ -23,6 +23,7 @@ const teardropOut = z
     id: z.string().min(1),
     slug: z.string().min(1),
     name: z.string().min(1),
+    emotionId: z.string().nullable().optional(),
     affirmation: z.string().optional(),
     tagline: z.string().optional(),
   })

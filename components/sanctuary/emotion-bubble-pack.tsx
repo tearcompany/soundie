@@ -3,24 +3,29 @@
 import * as d3 from 'd3'
 import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
+import { NOTE_LIST } from '@/lib/notes'
 
 export type EmotionReleaseRow = {
   emotionId: string
   namePl: string
   nameEn: string | null
+  listenSeconds: number
+  teardropFocusSeconds: number
+  teardropClaims: number
   seconds: number
 }
 
 type PackChild = EmotionReleaseRow & { name: string; v: number }
 type PackNode = { name: 'root'; v: 0; children: PackChild[] } | PackChild
 
-function hueFor(id: string, i: number) {
-  return (i * 27 + (id.codePointAt(0) ?? 0) * 5) % 360
-}
-
 function labelText(d: EmotionReleaseRow, locale: 'en' | 'pl') {
   if (locale === 'pl') return d.namePl
   return d.nameEn || d.namePl
+}
+
+function colorForEmotion(emotionId: string) {
+  const note = NOTE_LIST.find((n) => n.emotionId === emotionId)
+  return note?.chromaHex ?? '#8b7b6a'
 }
 
 export function EmotionBubblePack({
@@ -82,17 +87,21 @@ export function EmotionBubblePack({
     cell
       .append('circle')
       .attr('r', (d) => d.r)
-      .attr('fill', (d, i) => `hsl(${hueFor(d.data.emotionId, i)} 34% 90%)`)
-      .attr('stroke', 'rgba(26,20,16,0.11)')
+      .attr('fill', (d) => `${colorForEmotion(d.data.emotionId)}33`)
+      .attr('stroke', (d) => `${colorForEmotion(d.data.emotionId)}88`)
     cell
       .append('title')
       .text((d) => {
-        const m = Math.floor((d.data.seconds || 0) / 60)
-        const sec = (d.data.seconds || 0) % 60
-        return t('tooltipEmotion', {
+        const total = d.data.seconds || 0
+        const m = Math.floor(total / 60)
+        const sec = total % 60
+        return t('tooltipEmotionWithTeardrop', {
           name: labelText(d.data, locale),
           minutes: m,
           seconds: sec,
+          listenMinutes: Math.floor((d.data.listenSeconds || 0) / 60),
+          teardropMinutes: Math.floor((d.data.teardropFocusSeconds || 0) / 60),
+          teardropClaims: d.data.teardropClaims || 0,
         })
       })
     cell

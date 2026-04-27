@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc/react'
 import { useSoundieStore } from '@/lib/soundie-store'
 import { localCalendarStringFromDate } from '@/lib/calendar-day'
-import { getNoteById } from '@/lib/notes'
+import { DEFAULT_NOTE_ID, getNoteById } from '@/lib/notes'
 import {
   Dialog,
   DialogContent,
@@ -183,7 +183,7 @@ export function ReturnEngineBridge() {
     }
   }
 
-  const def = getNoteById(activeNoteId) ?? getNoteById('C')
+  const def = getNoteById(activeNoteId) ?? getNoteById(DEFAULT_NOTE_ID)
   const chromaForGift = def?.chromaHex ?? '#8b7b6a'
 
   const onGiftListen = () => {

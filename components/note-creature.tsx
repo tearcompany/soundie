@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useSoundieStore } from '@/lib/soundie-store'
-import { getEmotionById, getNoteById } from '@/lib/notes'
+import { DEFAULT_NOTE_ID, getEmotionById, getNoteById } from '@/lib/notes'
 import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
 import { getTeardropVesselBookPrimarySlug } from '@/lib/teardrop-ksiega'
@@ -23,6 +23,10 @@ import {
 } from '@/components/ui/carousel'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { CircleHelp } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface AudioContextType {
   ctx: AudioContext | null
@@ -31,8 +35,47 @@ interface AudioContextType {
   convolver: ConvolverNode | null
 }
 
+type DealerTeardropCard = {
+  id: string
+  phase: string | null
+  phaseOrder: number | null
+}
+
 const LORE_STAGES = MAX_LORE_FRAGMENTS
 const MIRACLE_SESSION_SECONDS = 180
+const SESSION_REPETITIONS = 3
+const SESSION_TOTAL_SECONDS = MIRACLE_SESSION_SECONDS * SESSION_REPETITIONS
+const DEALER_PACE_MS = 800
+const PHASE_PRIORITY = ['roots', 'flow', 'void', 'light', 'archetypes'] as const
+
+function groupCardsByPhase<T extends DealerTeardropCard>(cards: T[]) {
+  const groups = new Map<string, T[]>()
+  for (const card of cards) {
+    const phaseKey = card.phase ?? 'archetypes'
+    const bucket = groups.get(phaseKey)
+    if (bucket) {
+      bucket.push(card)
+    } else {
+      groups.set(phaseKey, [card])
+    }
+  }
+  const rank = new Map<string, number>(PHASE_PRIORITY.map((p, i) => [p, i]))
+  const phaseOrder = Array.from(groups.keys()).sort((a, b) => {
+    const ar = rank.get(a) ?? Number.MAX_SAFE_INTEGER
+    const br = rank.get(b) ?? Number.MAX_SAFE_INTEGER
+    if (ar !== br) return ar - br
+    return a.localeCompare(b)
+  })
+  return phaseOrder.map((phase) => ({
+    phase,
+    cards: [...(groups.get(phase) ?? [])].sort((a, b) => {
+      const ao = a.phaseOrder ?? Number.MAX_SAFE_INTEGER
+      const bo = b.phaseOrder ?? Number.MAX_SAFE_INTEGER
+      if (ao !== bo) return ao - bo
+      return a.id.localeCompare(b.id)
+    }),
+  }))
+}
 
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
@@ -54,6 +97,11 @@ export function NoteCreature() {
   )
   const sessionMoodReaction = useSoundieStore((s) => s.sessionMoodReaction)
   const [growthPulse, setGrowthPulse] = useState(false)
+  const [sessionWhisper, setSessionWhisper] = useState<string | null>(null)
+  const [ambientShimmer, setAmbientShimmer] = useState(false)
+  const [pulseDepth, setPulseDepth] = useState(0)
+  const [orbEvolution, setOrbEvolution] = useState(0)
+  const [sacredClimax, setSacredClimax] = useState(false)
   const noteQuery = trpc.note.getById.useQuery(
     { id: activeNoteId, locale },
     { retry: false }
@@ -68,12 +116,13 @@ export function NoteCreature() {
     { enabled: !!playerId, staleTime: 10_000, retry: false },
   )
   const teardropPlaylistQuery = trpc.teardrop.getMappedForNote.useQuery(
-    { noteId: activeNoteId, locale },
-    { staleTime: 30_000, retry: false },
+    { noteId: activeNoteId, locale, playerId: playerId ?? undefined },
+    { enabled: Boolean(playerId), staleTime: 30_000, retry: false },
   )
 
   const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
   const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
+  const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation()
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
     onSuccess: (result) => {
       const row = result.soundie
@@ -85,7 +134,7 @@ export function NoteCreature() {
       sessionsQuery.refetch()
     },
   })
-  const fallbackDef = getNoteById(activeNoteId) ?? getNoteById('C')
+  const fallbackDef = getNoteById(activeNoteId) ?? getNoteById(DEFAULT_NOTE_ID)
   const def = noteQuery.data ?? fallbackDef
   const showNoteLoadError =
     noteQuery.isError && !noteQuery.data && !fallbackDef && !noteQuery.isFetching
@@ -106,6 +155,16 @@ export function NoteCreature() {
     dailyGiftForNoteId === activeNoteId && dailyGiftCaption
   )
   const lineCaption = useDailyRareCaption ? dailyGiftCaption : activeCaption
+  const minuteMilestoneText = useMemo(
+    () => [
+      t('minuteEventTone'),
+      t('minuteEventEvolution'),
+      t('minuteEventShimmer'),
+      t('minuteEventPulse'),
+      t('minuteEventAwakened'),
+    ],
+    [t],
+  )
 
   const emotion = getEmotionById(noteQuery.data?.emotionId ?? def.emotionId ?? '')
   const healingStyle = noteQuery.data?.healingStyle ?? def.healingStyle
@@ -161,15 +220,16 @@ export function NoteCreature() {
   }, [loreFragments])
 
   const [loreCarouselApi, setLoreCarouselApi] = useState<CarouselApi | null>(null)
-  const [teardropCarouselApi, setTeardropCarouselApi] = useState<CarouselApi | null>(null)
-  const [teardropSnap, setTeardropSnap] = useState(0)
-  const [teardropSnapCount, setTeardropSnapCount] = useState(0)
   const [selectedLoreIndex, setSelectedLoreIndex] = useState(0)
   const [justUnlocked, setJustUnlocked] = useState<number | null>(null)
   const [unlockBanner, setUnlockBanner] = useState<{
     primaryOneBased: number
   } | null>(null)
   const [selectedTeardropCardId, setSelectedTeardropCardId] = useState<string | null>(null)
+  const [dealerRevealCount, setDealerRevealCount] = useState(0)
+  const teardropFocusStartAtRef = useRef<number | null>(null)
+  const teardropFocusCardIdRef = useRef<string | null>(null)
+  const teardropFocusNoteIdRef = useRef<string | null>(null)
   const loreStatus = useMemo(
     () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
     [effectiveTotalListenTime]
@@ -180,14 +240,38 @@ export function NoteCreature() {
 
   const loreStageUnlocked = (index: number) => index < unlockedLoreCount
 
+  const teardropCards = teardropPlaylistQuery.data?.cards ?? []
+  const teardropCardsLoading = teardropPlaylistQuery.isLoading
+  const teardropPhasesMeta = teardropPlaylistQuery.data?.phases ?? []
+  const phaseTitleBySlug = useMemo(() => {
+    const map: Record<string, { pl: string; en: string }> = {}
+    for (const p of teardropPhasesMeta) {
+      map[p.slug] = { pl: p.titlePl, en: p.titleEn }
+    }
+    return map
+  }, [teardropPhasesMeta])
+  const teardropPhaseGroups = useMemo(() => groupCardsByPhase(teardropCards), [teardropCards])
+  const teardropCardsInDealerOrder = useMemo(
+    () => teardropPhaseGroups.flatMap((g) => g.cards),
+    [teardropPhaseGroups],
+  )
+  const revealedTeardropCards = useMemo(
+    () => teardropCardsInDealerOrder.slice(0, dealerRevealCount),
+    [teardropCardsInDealerOrder, dealerRevealCount],
+  )
+  const dealerLine =
+    dealerRevealCount === 0
+      ? 'The deck remembers you.'
+      : dealerRevealCount === 1
+        ? 'A card steps forward.'
+        : 'Another truth arrives.'
   const selectedTeardropCard = useMemo(() => {
-    const cards = teardropPlaylistQuery.data ?? []
-    if (cards.length === 0 || !selectedTeardropCardId) return null
-    return cards.find((card) => card.id === selectedTeardropCardId) ?? null
-  }, [teardropPlaylistQuery.data, selectedTeardropCardId])
-
-  const teardropCards = teardropPlaylistQuery.data ?? []
+    if (revealedTeardropCards.length === 0 || !selectedTeardropCardId) return null
+    return revealedTeardropCards.find((card) => card.id === selectedTeardropCardId) ?? null
+  }, [revealedTeardropCards, selectedTeardropCardId])
   const lastLoreEventKeyRef = useRef<string | null>(null)
+  const minuteMilestoneRef = useRef(0)
+  const climaxDoneRef = useRef(false)
 
   const selectedTeardropTexts = useMemo(() => {
     if (!selectedTeardropCard) {
@@ -222,7 +306,13 @@ export function NoteCreature() {
   useEffect(() => {
     const cards = teardropCards
     if (!cards?.length) return
-    if (teardropShelfOpen && selectedTeardropCardId != null) return
+    if (
+      teardropShelfOpen &&
+      selectedTeardropCardId != null &&
+      cards.some((c) => c.id === selectedTeardropCardId)
+    ) {
+      return
+    }
     const unlockedCount = Math.max(1, unlockedLoreCount)
     const cappedLoreIndex = Math.max(
       0,
@@ -246,26 +336,73 @@ export function NoteCreature() {
   ])
 
   useEffect(() => {
-    if (!teardropCarouselApi || !selectedTeardropCardId || teardropCards.length === 0) return
-    const idx = teardropCards.findIndex((c) => c.id === selectedTeardropCardId)
-    if (idx < 0) return
-    teardropCarouselApi.scrollTo(idx, true)
-  }, [teardropCarouselApi, teardropCards, selectedTeardropCardId])
+    if (!teardropShelfOpen) {
+      setDealerRevealCount(0)
+      return
+    }
+    const total = teardropCardsInDealerOrder.length
+    if (total === 0) {
+      setDealerRevealCount(0)
+      return
+    }
+    setDealerRevealCount(1)
+    if (total === 1) return
+    const timer = setInterval(() => {
+      setDealerRevealCount((prev) => {
+        if (prev >= total) return total
+        return prev + 1
+      })
+    }, DEALER_PACE_MS)
+    return () => clearInterval(timer)
+  }, [teardropShelfOpen, teardropCardsInDealerOrder])
+
 
   useEffect(() => {
-    if (!teardropCarouselApi) return
-    const sync = () => {
-      setTeardropSnap(teardropCarouselApi.selectedScrollSnap())
-      setTeardropSnapCount(teardropCarouselApi.scrollSnapList().length)
+    const prevCardId = teardropFocusCardIdRef.current
+    const prevStartedAt = teardropFocusStartAtRef.current
+    const prevNoteId = teardropFocusNoteIdRef.current
+    if (playerId && prevCardId && prevStartedAt && prevNoteId) {
+      const durationMs = Date.now() - prevStartedAt
+      if (durationMs >= 1500) {
+        recordTeardropFocus({
+          playerId,
+          noteId: prevNoteId,
+          cardId: prevCardId,
+          durationMs,
+          source: 'note_creature',
+        })
+      }
     }
-    sync()
-    teardropCarouselApi.on('select', sync)
-    teardropCarouselApi.on('reInit', sync)
+
+    if (playerId && teardropShelfOpen && selectedTeardropCardId) {
+      teardropFocusCardIdRef.current = selectedTeardropCardId
+      teardropFocusStartAtRef.current = Date.now()
+      teardropFocusNoteIdRef.current = activeNoteId
+    } else {
+      teardropFocusCardIdRef.current = null
+      teardropFocusStartAtRef.current = null
+      teardropFocusNoteIdRef.current = null
+    }
+  }, [playerId, activeNoteId, teardropShelfOpen, selectedTeardropCardId, recordTeardropFocus])
+
+  useEffect(() => {
     return () => {
-      teardropCarouselApi.off('select', sync)
-      teardropCarouselApi.off('reInit', sync)
+      const prevCardId = teardropFocusCardIdRef.current
+      const prevStartedAt = teardropFocusStartAtRef.current
+      const prevNoteId = teardropFocusNoteIdRef.current
+      if (!playerId || !prevCardId || !prevStartedAt || !prevNoteId) return
+      const durationMs = Date.now() - prevStartedAt
+      if (durationMs < 1500) return
+      recordTeardropFocus({
+        playerId,
+        noteId: prevNoteId,
+        cardId: prevCardId,
+        durationMs,
+        source: 'note_creature',
+      })
     }
-  }, [teardropCarouselApi])
+  }, [playerId, recordTeardropFocus])
+
 
   useEffect(() => {
     if (!playerId) return
@@ -422,7 +559,7 @@ export function NoteCreature() {
     setIsPlaying(true)
 
     if (!currentSession.active) {
-      startSession(MIRACLE_SESSION_SECONDS)
+      startSession(SESSION_TOTAL_SECONDS)
       const pid = useSoundieStore.getState().playerId
       const nid = useSoundieStore.getState().activeNoteId
       const fromGift = useSoundieStore.getState().pendingListenFromDailyGift
@@ -564,7 +701,48 @@ export function NoteCreature() {
     }
   }, [isPlaying, currentSession.active])
 
+  useEffect(() => {
+    if (!currentSession.active) {
+      minuteMilestoneRef.current = 0
+      climaxDoneRef.current = false
+      setSessionWhisper(null)
+      setAmbientShimmer(false)
+      setPulseDepth(0)
+      setOrbEvolution(0)
+      setSacredClimax(false)
+      return
+    }
+    const currentMilestone = Math.floor(currentSession.elapsed / 60)
+    if (currentMilestone > minuteMilestoneRef.current) {
+      for (let step = minuteMilestoneRef.current + 1; step <= currentMilestone; step += 1) {
+        const text = minuteMilestoneText[(step - 1) % minuteMilestoneText.length] ?? minuteMilestoneText[0]
+        setSessionWhisper(text)
+        setAmbientShimmer(true)
+        setTimeout(() => setAmbientShimmer(false), 1800)
+        setPulseDepth((p) => Math.min(5, p + 1))
+        setOrbEvolution((v) => Math.min(5, v + 1))
+      }
+      minuteMilestoneRef.current = currentMilestone
+    }
+    if (!climaxDoneRef.current && currentSession.elapsed >= MIRACLE_SESSION_SECONDS) {
+      climaxDoneRef.current = true
+      const sacredLine = t('sacredLine')
+      setSessionWhisper(sacredLine)
+      setSacredClimax(true)
+      setTimeout(() => setSacredClimax(false), 2200)
+      toast.success(sacredLine, { duration: 3200 })
+    }
+  }, [currentSession.active, currentSession.elapsed, minuteMilestoneText, t])
+
   const progressPercent = (currentSession.elapsed / currentSession.duration) * 100
+  const currentRepetition = Math.min(
+    SESSION_REPETITIONS,
+    Math.floor(currentSession.elapsed / MIRACLE_SESSION_SECONDS) + 1,
+  )
+  const repetitionProgress = Math.min(
+    1,
+    (currentSession.elapsed % MIRACLE_SESSION_SECONDS) / MIRACLE_SESSION_SECONDS,
+  )
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -592,13 +770,13 @@ export function NoteCreature() {
         </p>
         <p className="font-mono text-xs text-ink-muted mt-1">{def.frequency} Hz</p> */}
 
-        {lineCaption && (
+        {(sessionWhisper ?? lineCaption) && (
           <p
             key={useDailyRareCaption ? 'daily' : captionIndex}
             className="font-mono text-xs italic text-ink-muted mb-3 max-w-xs mx-auto leading-relaxed transition-opacity duration-700"
             style={{ color: hexToRgba(c, 0.7) }}
           >
-            {lineCaption}
+            {sessionWhisper ?? lineCaption}
           </p>
         )}
         {sessionMoodReaction && (
@@ -614,27 +792,62 @@ export function NoteCreature() {
       <div className="w-full max-w-md flex flex-col gap-4">
         <div className="lore-card">
           <div className="mb-5 flex justify-center">
-            <span
-              className={cn(
-                'h-12 w-12 rounded-full border-2 border-pearl bg-pearl shadow-sm transition-all duration-700',
-                hadQualifyingSession && 'scale-110',
-                growthPulse && 'scale-[1.18]',
-                dailyGiftForNoteId === activeNoteId &&
-                  dailyGiftGlow &&
-                  `daily-glow--${dailyGiftGlow}`,
+            <div className="relative inline-flex items-center justify-center">
+              {ambientShimmer && (
+                <span
+                  className="pointer-events-none absolute -inset-3 rounded-full animate-pulse"
+                  style={{ backgroundColor: hexToRgba(c, 0.12) }}
+                />
               )}
-              style={
-                dailyGiftForNoteId === activeNoteId && dailyGiftGlow
-                  ? { ['--glow' as string]: c, boxShadow: 'none' }
-                  : { boxShadow: `0 0 0 4px ${hexToRgba(c, 0.2)}` }
-              }
-              aria-hidden
-            >
+              {sacredClimax && (
+                <>
+                  <span
+                    className="pointer-events-none absolute -inset-5 rounded-full"
+                    style={{ boxShadow: `0 0 36px ${hexToRgba(c, 0.6)}` }}
+                  />
+                  <span className="pointer-events-none absolute -inset-8 flex items-center justify-center">
+                    {Array.from({ length: 10 }, (_, i) => (
+                      <span
+                        key={i}
+                        className="absolute h-1 w-1 rounded-full"
+                        style={{
+                          backgroundColor: hexToRgba(c, 0.65),
+                          transform: `rotate(${i * 36}deg) translateY(-28px)`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                </>
+              )}
               <span
-                className="block h-full w-full rounded-full"
-                style={{ backgroundColor: c }}
-              />
-            </span>
+                className={cn(
+                  'inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-pearl bg-pearl font-mono text-[0.62rem] font-bold uppercase tracking-wide text-white shadow-sm transition-all duration-700',
+                  hadQualifyingSession && 'scale-110',
+                  growthPulse && 'scale-[1.18]',
+                  dailyGiftForNoteId === activeNoteId &&
+                    dailyGiftGlow &&
+                    `daily-glow--${dailyGiftGlow}`,
+                )}
+                style={
+                  dailyGiftForNoteId === activeNoteId && dailyGiftGlow
+                    ? {
+                        ['--glow' as string]: c,
+                        backgroundColor: c,
+                        boxShadow: 'none',
+                        animationDuration: `${Math.max(1.4, 3 - pulseDepth * 0.25)}s`,
+                      }
+                    : {
+                        backgroundColor: c,
+                        boxShadow: `${sacredClimax ? `0 0 0 7px ${hexToRgba(c, 0.28)}` : `0 0 0 4px ${hexToRgba(c, 0.2)}`}`,
+                        transform: `scale(${1 + orbEvolution * 0.025})`,
+                        animationDuration: `${Math.max(1.4, 3 - pulseDepth * 0.25)}s`,
+                      }
+                }
+                aria-label={def.name}
+              >
+                {def.short}
+              </span>
+            </div>
           </div>
           <div className="mb-6 text-center">
             <h2 className="text-lora text-lg font-semibold text-ink">{def.name}</h2>
@@ -760,16 +973,25 @@ export function NoteCreature() {
                   />
                 </div>
               </Carousel>
-              {teardropPlaylistQuery.data && teardropPlaylistQuery.data.length > 0 && (
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setTeardropShelfOpen(!teardropShelfOpen)}
-                    className="font-mono text-[0.65rem] text-ink-muted underline-offset-4 hover:underline"
-                    aria-expanded={teardropShelfOpen}
-                  >
-                    {teardropShelfOpen ? t('shelfClose') : t('shelfOpen')}
-                  </button>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (teardropCards.length === 0) return
+                    setTeardropShelfOpen(!teardropShelfOpen)
+                  }}
+                  className="font-mono text-[0.65rem] text-ink-muted underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-expanded={teardropShelfOpen}
+                  disabled={teardropCards.length === 0}
+                >
+                  {teardropShelfOpen ? t('shelfClose') : t('shelfOpen')}
+                </button>
+                {teardropCards.length === 0 && (
+                  <p className="mt-1 font-mono text-[0.62rem] text-ink-muted/80">
+                    {teardropCardsLoading ? '...' : '—'}
+                  </p>
+                )}
+                {teardropCards.length > 0 && (
                   <div
                     className={cn(
                       'grid transition-all duration-500 ease-out',
@@ -779,90 +1001,89 @@ export function NoteCreature() {
                     )}
                   >
                     <div className="overflow-hidden">
-                      <Carousel
-                        setApi={setTeardropCarouselApi}
-                        opts={{ align: 'start' }}
-                        className="w-full"
-                      >
-                        <CarouselContent>
-                          {teardropCards.map((card) => {
-                            const isVesselBook =
-                              vesselBookSlug !== null && card.slug === vesselBookSlug
-                            return (
-                              <CarouselItem key={card.id} className="basis-1/2 lg:basis-1/3">
-                                <div className="p-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedTeardropCardId(card.id)
-                                      const idx = teardropCards.findIndex((x) => x.id === card.id)
-                                      if (idx >= 0 && loreCarouselApi) {
-                                        const unlockedMax = Math.max(0, unlockedLoreCount - 1)
-                                        loreCarouselApi.scrollTo(Math.min(idx, unlockedMax), true)
-                                      }
-                                    }}
-                                    aria-label={
-                                      isVesselBook
-                                        ? `${card.name} — ${t('shelfVesselBookAria')}`
-                                        : undefined
-                                    }
-                                    className="w-full"
-                                  >
-                                    <Card
-                                      className="bg-transparent py-2 shadow-none"
-                                      style={{
-                                        borderColor:
-                                          selectedTeardropCard?.id === card.id
-                                            ? hexToRgba(c, 0.65)
-                                            : isVesselBook
-                                              ? hexToRgba(c, 0.5)
-                                              : hexToRgba(c, 0.35),
-                                        boxShadow: isVesselBook
-                                          ? `0 0 0 1px ${hexToRgba(c, 0.4)}`
-                                          : undefined,
+                      <p className="mb-3 text-center font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted/80">
+                        {dealerLine}
+                      </p>
+                      <div className="space-y-4">
+                        {teardropPhaseGroups.map((group) => {
+                          const groupRevealed = group.cards.filter((card) =>
+                            revealedTeardropCards.some((r) => r.id === card.id)
+                          )
+                          if (groupRevealed.length === 0) return null
+                          const phaseTitle = phaseTitleBySlug[group.phase]
+                          const phaseLabelText = locale === 'pl'
+                            ? (phaseTitle?.pl ?? group.phase)
+                            : (phaseTitle?.en ?? group.phase)
+                          return (
+                            <div key={group.phase} className="space-y-1.5">
+                              <p
+                                className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.14em]"
+                                style={{ color: c }}
+                              >
+                                {phaseLabelText}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {groupRevealed.map((card, idx) => {
+                                  const isVesselBook =
+                                    vesselBookSlug !== null && card.slug === vesselBookSlug
+                                  return (
+                                    <motion.button
+                                      key={card.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedTeardropCardId(card.id)
+                                        const cardIdx = teardropCardsInDealerOrder.findIndex((x) => x.id === card.id)
+                                        if (cardIdx >= 0 && loreCarouselApi) {
+                                          const unlockedMax = Math.max(0, unlockedLoreCount - 1)
+                                          loreCarouselApi.scrollTo(Math.min(cardIdx, unlockedMax), true)
+                                        }
                                       }}
+                                      aria-label={
+                                        isVesselBook
+                                          ? `${card.name} — ${t('shelfVesselBookAria')}`
+                                          : card.name
+                                      }
+                                      initial={{ opacity: 0, y: -8, scale: 0.96, rotateZ: idx % 2 === 0 ? -1 : 1 }}
+                                      animate={{ opacity: 1, y: 0, scale: 1, rotateZ: 0 }}
+                                      transition={{ duration: 0.24, ease: 'easeOut' }}
                                     >
-                                      <CardContent
-                                        className="flex h-4 items-center justify-center px-2 py-1 text-center font-mono text-[0.62rem] lowercase tracking-wide"
-                                        style={{ color: c }}
+                                      <div
+                                        className="rounded-md border px-2.5 py-1.5 font-mono text-[0.6rem] lowercase tracking-wide transition-all"
+                                        style={{
+                                          borderColor:
+                                            selectedTeardropCard?.id === card.id
+                                              ? hexToRgba(c, 0.65)
+                                              : isVesselBook
+                                                ? hexToRgba(c, 0.5)
+                                                : hexToRgba(c, 0.3),
+                                          color: c,
+                                          backgroundColor:
+                                            selectedTeardropCard?.id === card.id
+                                              ? hexToRgba(c, 0.1)
+                                              : isVesselBook
+                                                ? hexToRgba(c, 0.06)
+                                                : 'transparent',
+                                          boxShadow: isVesselBook
+                                            ? `0 0 0 1px ${hexToRgba(c, 0.35)}`
+                                            : undefined,
+                                        }}
                                       >
                                         {card.name}
-                                      </CardContent>
-                                    </Card>
-                                  </button>
-                                </div>
-                              </CarouselItem>
-                            )
-                          })}
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
-                      {teardropSnapCount > 1 && (
-                        <div className="mt-2 flex items-center justify-center gap-1.5">
-                          {Array.from({ length: teardropSnapCount }, (_, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => teardropCarouselApi?.scrollTo(i)}
-                              className="h-1.5 rounded-full transition-all"
-                              style={{
-                                width: i === teardropSnap ? 18 : 6,
-                                backgroundColor:
-                                  i === teardropSnap ? hexToRgba(c, 0.8) : hexToRgba(c, 0.3),
-                              }}
-                              aria-label={`Go to teardrop page ${i + 1}`}
-                              aria-current={i === teardropSnap}
-                            />
-                          ))}
-                        </div>
-                      )}
+                                      </div>
+                                    </motion.button>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
                       {selectedTeardropCard && (
                         <div
                           className="mt-4 rounded-xl border px-4 py-3 text-left"
                           style={{
                             borderColor: hexToRgba(c, 0.25),
-                            backgroundColor: 'transparent',
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
                           }}
                         >
                           <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
@@ -893,9 +1114,25 @@ export function NoteCreature() {
                             .map((l) => l.trim())
                             .filter(Boolean).length > 0 && (
                             <div className="mt-3">
-                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
-                                {t('shelfReadingUpright')}
-                              </p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                  {t('shelfReadingUpright')}
+                                </p>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="inline-flex h-4 w-4 items-center justify-center text-ink-muted/80 transition-colors hover:text-ink"
+                                      aria-label={t('shelfMeaningHintTrigger')}
+                                    >
+                                      <CircleHelp className="h-3.5 w-3.5" />
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-72 border-pearl-border bg-pearl p-3 text-[0.72rem] leading-relaxed text-ink/90">
+                                    {t('shelfReadingUprightHint')}
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
                               <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[0.75rem] leading-relaxed text-ink/90">
                                 {selectedTeardropTexts.meaningUpright
                                   .split('\n')
@@ -912,9 +1149,25 @@ export function NoteCreature() {
                             .map((l) => l.trim())
                             .filter(Boolean).length > 0 && (
                             <div className="mt-3">
-                              <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
-                                {t('shelfReadingShadow')}
-                              </p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
+                                  {t('shelfReadingShadow')}
+                                </p>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="inline-flex h-4 w-4 items-center justify-center text-ink-muted/80 transition-colors hover:text-ink"
+                                      aria-label={t('shelfMeaningHintTrigger')}
+                                    >
+                                      <CircleHelp className="h-3.5 w-3.5" />
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-72 border-pearl-border bg-pearl p-3 text-[0.72rem] leading-relaxed text-ink/90">
+                                    {t('shelfReadingShadowHint')}
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
                               <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[0.75rem] leading-relaxed text-ink/80">
                                 {selectedTeardropTexts.meaningShadow
                                   .split('\n')
@@ -940,14 +1193,53 @@ export function NoteCreature() {
                       )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
             </div>
           </div>
 
           <div className="border-t border-pearl-border pt-5 text-center">
             <p className="font-mono text-xs text-ink-muted mb-3">{t('listeningSession')}</p>
+            {currentSession.active && (
+              <div className="mb-3">
+                <div className="bg-pearl rounded-full h-1 overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-100"
+                    style={{ width: `${progressPercent}%`, backgroundColor: c }}
+                  />
+                </div>
+                <p className="text-xs text-ink-muted text-center mt-2 font-mono">
+                  {formatTime(currentSession.elapsed)} / {formatTime(currentSession.duration)}
+                </p>
+                <p className="text-[0.65rem] text-ink-muted/80 text-center mt-1 font-mono">
+                  {t('sessionRepetition', {
+                    current: currentRepetition,
+                    total: SESSION_REPETITIONS,
+                  })}
+                </p>
+                <div className="mt-2 flex items-center justify-center gap-1.5">
+                  {Array.from({ length: SESSION_REPETITIONS }, (_, i) => {
+                    const segment = i + 1
+                    const isPast = segment < currentRepetition
+                    const isCurrent = segment === currentRepetition
+                    const fillPercent = isPast ? 100 : isCurrent ? repetitionProgress * 100 : 0
+                    return (
+                      <div
+                        key={segment}
+                        className="h-1.5 w-12 overflow-hidden rounded-full bg-pearl-border/70"
+                        aria-hidden
+                      >
+                        <div
+                          className="h-full transition-all duration-300 ease-out"
+                          style={{ width: `${fillPercent}%`, backgroundColor: c }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
             <button
               onClick={toggleAudio}
               className={`
@@ -960,20 +1252,6 @@ export function NoteCreature() {
             >
               {isPlaying ? t('stopListening') : t('beginSession')}
             </button>
-
-            {currentSession.active && (
-              <div className="mt-3">
-                <div className="bg-pearl rounded-full h-1 overflow-hidden">
-                  <div
-                    className="h-full transition-all duration-100"
-                    style={{ width: `${progressPercent}%`, backgroundColor: c }}
-                  />
-                </div>
-                <p className="text-xs text-ink-muted text-center mt-2 font-mono">
-                  {formatTime(currentSession.elapsed)} / {formatTime(currentSession.duration)}
-                </p>
-              </div>
-            )}
           </div>
         </div>
 

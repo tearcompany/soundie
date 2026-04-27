@@ -5,11 +5,23 @@ import {
 } from '@/lib/validators/sanctuary'
 import { getNoteById } from '@/lib/notes'
 
+function pickLocaleForTexts(
+  texts: Array<{ locale: string; field: string; content: string }>,
+  locale: string,
+) {
+  const exact = texts.filter((t) => t.locale === locale)
+  if (exact.length > 0) return exact
+  const en = texts.filter((t) => t.locale === 'en')
+  if (en.length > 0) return en
+  return texts
+}
+
 export const sanctuaryRouter = router({
   getDiagramData: publicProcedure
     .input(sanctuaryDiagramInput)
     .output(sanctuaryDiagramOutput)
     .query(async ({ ctx, input }) => {
+      const locale = input.locale ?? 'en'
       const player = await ctx.db.player.findUnique({ where: { id: input.playerId } })
       if (!player) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Player not found' })
@@ -18,7 +30,16 @@ export const sanctuaryRouter = router({
       since.setDate(since.getDate() - input.rangeDays)
       since.setHours(0, 0, 0, 0)
 
-      const [sessions, moodRows, soundies] = await Promise.all([
+      const dbWithOptionalTeardropFocus = ctx.db as unknown as {
+        teardropFocusSession?: {
+          findMany: (args: {
+            where: { playerId: string; createdAt: { gte: Date } }
+            select: { durationMs: true; card: { select: { emotionId: true } } }
+          }) => Promise<Array<{ durationMs: number; card: { emotionId: string | null } }>>
+        }
+      }
+      const teardropFocusDelegate = dbWithOptionalTeardropFocus.teardropFocusSession
+      const [sessions, moodRows, soundies, latestClaim, teardropFocusRows, teardropClaimRows] = await Promise.all([
         ctx.db.listenSession.findMany({
           where: { playerId: input.playerId, completedAt: { gte: since } },
           select: {
@@ -37,15 +58,43 @@ export const sanctuaryRouter = router({
           orderBy: { note: { sortOrder: 'asc' } },
           include: { note: { select: { id: true, name: true } } },
         }),
+        ctx.db.dailyClaim.findFirst({
+          where: { playerId: input.playerId },
+          orderBy: { createdAt: 'desc' },
+          include: { teardropCard: { include: { texts: true } } },
+        }),
+        teardropFocusDelegate
+          ? teardropFocusDelegate.findMany({
+              where: { playerId: input.playerId, createdAt: { gte: since } },
+              select: { durationMs: true, card: { select: { emotionId: true } } },
+            })
+          : Promise.resolve([]),
+        ctx.db.dailyClaim.findMany({
+          where: { playerId: input.playerId, createdAt: { gte: since } },
+          select: { teardropCard: { select: { emotionId: true } } },
+        }),
       ])
 
-      const byEmotion = new Map<string, number>()
+      const listenByEmotion = new Map<string, number>()
+      const teardropFocusByEmotion = new Map<string, number>()
+      const teardropClaimsByEmotion = new Map<string, number>()
       let totalSecondsInRange = 0
       for (const s of sessions) {
         const eid = s.soundie.note.emotionId
         totalSecondsInRange += s.duration
         if (!eid) continue
-        byEmotion.set(eid, (byEmotion.get(eid) ?? 0) + s.duration)
+        listenByEmotion.set(eid, (listenByEmotion.get(eid) ?? 0) + s.duration)
+      }
+      for (const row of teardropFocusRows) {
+        const eid = row.card.emotionId
+        if (!eid) continue
+        const durationSec = Math.max(0, Math.floor(row.durationMs / 1000))
+        teardropFocusByEmotion.set(eid, (teardropFocusByEmotion.get(eid) ?? 0) + durationSec)
+      }
+      for (const row of teardropClaimRows) {
+        const eid = row.teardropCard.emotionId
+        if (!eid) continue
+        teardropClaimsByEmotion.set(eid, (teardropClaimsByEmotion.get(eid) ?? 0) + 1)
       }
 
       const emotions = await ctx.db.emotion.findMany()
@@ -54,7 +103,10 @@ export const sanctuaryRouter = router({
           emotionId: e.id,
           namePl: e.namePl,
           nameEn: e.nameEn,
-          seconds: byEmotion.get(e.id) ?? 0,
+          listenSeconds: listenByEmotion.get(e.id) ?? 0,
+          teardropFocusSeconds: teardropFocusByEmotion.get(e.id) ?? 0,
+          teardropClaims: teardropClaimsByEmotion.get(e.id) ?? 0,
+          seconds: (listenByEmotion.get(e.id) ?? 0) + (teardropFocusByEmotion.get(e.id) ?? 0),
         }))
         .sort((a, b) => b.seconds - a.seconds)
 
@@ -86,12 +138,40 @@ export const sanctuaryRouter = router({
         }
       }
 
+      const todayClaim = latestClaim
+        ? (() => {
+            const texts = pickLocaleForTexts(latestClaim.teardropCard.texts, locale)
+            const tagline = texts.find((t) => t.field === 'tagline')?.content?.trim() ?? ''
+            const affirmation = texts.find((t) => t.field === 'affirmation')?.content?.trim() ?? ''
+            const meaningUpright =
+              texts.find((t) => t.field === 'meaning_upright')?.content?.trim() ?? ''
+            const meaningShadow =
+              texts.find((t) => t.field === 'meaning_shadow')?.content?.trim() ?? ''
+            return {
+              claimDate: latestClaim.claimDate,
+              noteId: latestClaim.noteId,
+              rareCaption: latestClaim.rareCaption,
+              teardrop: {
+                id: latestClaim.teardropCard.id,
+                slug: latestClaim.teardropCard.slug,
+                name: latestClaim.teardropCard.name,
+                emotionId: latestClaim.teardropCard.emotionId,
+                ...(tagline ? { tagline } : {}),
+                ...(affirmation ? { affirmation } : {}),
+                ...(meaningUpright ? { meaningUpright } : {}),
+                ...(meaningShadow ? { meaningShadow } : {}),
+              },
+            }
+          })()
+        : null
+
       return {
         releaseByEmotion,
         moodInRange,
         minutesToday,
         totalSecondsInRange,
         soundieProgress,
+        todayClaim,
       }
     }),
 })
