@@ -11,6 +11,7 @@ import {
   getNewlyUnlockedLoreFragmentIndices,
   loreUnlockedCountFromTotalMinutes,
 } from '@/lib/progress'
+import { applyTeardropUnlocksAfterSession } from '@/lib/teardrop-unlock'
 
 const playerNoteInput = z.object({
   playerId: z.string().cuid(),
@@ -283,6 +284,8 @@ export const soundieRouter = router({
             lastSeenAt: new Date(),
           },
         })
+
+        await applyTeardropUnlocksAfterSession(tx, input.playerId, input.noteId, newTotalSeconds)
 
         const session = await tx.listenSession.create({
           data: {

@@ -1,6 +1,7 @@
 import { TRPCError, publicProcedure, router } from '../init'
 import { isValidYyyyMmDd, previousCalendarDay } from '@/lib/calendar-day'
 import { djb2U32 } from '@/lib/deterministic-pick'
+import type { ReturnStory } from '@/lib/validators/returnEngine'
 import { logVisitInput, logVisitOutput } from '@/lib/validators/returnEngine'
 import { revealDailyClaimInput, revealDailyClaimOutput } from '@/lib/validators/daily-claim'
 
@@ -114,6 +115,13 @@ export const returnEngineRouter = router({
         newRowForToday && distinctBeforeToday === 1,
       )
 
+      let returnStory: ReturnStory = 'none'
+      if (newRowForToday) {
+        if (wasFirstVisitEver) returnStory = 'first_day'
+        else if (distinctBeforeToday === 1) returnStory = 'second_day'
+        else returnStory = 'returning'
+      }
+
       let noteShort: string | undefined
       if (activeNoteId) {
         const n = await ctx.db.note.findUnique({
@@ -126,6 +134,7 @@ export const returnEngineRouter = router({
       return {
         streakNights,
         shouldShowWelcomeBack,
+        returnStory,
         isFirstVisitEver: Boolean(newRowForToday && wasFirstVisitEver),
         noteShort,
       }

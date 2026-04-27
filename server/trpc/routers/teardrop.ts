@@ -1,6 +1,10 @@
 import { z } from 'zod'
+import type { PrismaClient } from '@prisma/client'
 import { TRPCError, publicProcedure, router } from '../init'
-import { Prisma } from '@prisma/client'
+import {
+  TEARDROP_DECK_SLUG,
+  sortedByPhaseOrder,
+} from '@/lib/teardrop-unlock'
 
 const localeInput = z.string().min(2).max(8).optional()
 const deckSlugInput = z.object({ deckSlug: z.string().min(1), locale: localeInput })
@@ -21,30 +25,6 @@ const progressInput = z.object({
   playerId: z.string().cuid(),
   noteId: z.string().min(1),
 })
-
-function unlockedTeardropCount(totalListenSeconds: number): number {
-  const firstUnlockThresholdSeconds = 540
-  if (totalListenSeconds < firstUnlockThresholdSeconds) return 0
-  const mins = Math.max(0, Math.floor(totalListenSeconds / 60))
-  return Math.max(1, 1 + Math.floor(mins / 60))
-}
-
-const TEARDROP_DECK_SLUG = 'teardrop-oracle-deck-v0'
-
-function sortedByPhaseOrder<T extends { phase: string | null; phaseOrder: number | null }>(
-  items: T[],
-  phaseOrderBySlug: Record<string, number>
-) {
-  return [...items].sort((a, b) => {
-    const aPhase = a.phase ? (phaseOrderBySlug[a.phase] ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER
-    const bPhase = b.phase ? (phaseOrderBySlug[b.phase] ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER
-    if (aPhase !== bPhase) return aPhase - bPhase
-    const aOrder = a.phaseOrder ?? Number.MAX_SAFE_INTEGER
-    const bOrder = b.phaseOrder ?? Number.MAX_SAFE_INTEGER
-    if (aOrder !== bOrder) return aOrder - bOrder
-    return 0
-  })
-}
 
 const textItemSchema = z.object({
   locale: z.string(),
@@ -91,6 +71,7 @@ const unlockedCollectionInput = z.object({
 })
 const unlockedCollectionOutput = z.object({
   cards: z.array(teardropCardSchema),
+  phases: z.array(phaseInfoSchema),
   unlockedCards: z.number().int().nonnegative(),
   totalDeckCards: z.number().int().nonnegative(),
 })
@@ -106,6 +87,31 @@ function pickLocaleTexts(
   return texts.filter((t) => t.locale === 'pl')
 }
 
+async function phasesMetaForDeck(db: Pick<PrismaClient, 'teardropPhase'>, deckId: string) {
+  return db.teardropPhase.findMany({
+    where: { deckId },
+    orderBy: { unlockOrder: 'asc' },
+    select: { slug: true, titlePl: true, titleEn: true, unlockOrder: true },
+  })
+}
+
+async function cardUnlockIdsForPlayer(db: Pick<PrismaClient, 'teardropCardUnlock'>, playerId: string) {
+  const rows = await db.teardropCardUnlock.findMany({
+    where: { playerId },
+    orderBy: { createdAt: 'asc' },
+    select: { cardId: true },
+  })
+  const seen = new Set<string>()
+  const ids: string[] = []
+  for (const r of rows) {
+    if (!seen.has(r.cardId)) {
+      seen.add(r.cardId)
+      ids.push(r.cardId)
+    }
+  }
+  return ids
+}
+
 export const teardropRouter = router({
   getUnlockedCollection: publicProcedure
     .input(unlockedCollectionInput)
@@ -117,25 +123,16 @@ export const teardropRouter = router({
         select: { id: true },
       })
       if (!deck) {
-        return { cards: [], unlockedCards: 0, totalDeckCards: 0 }
+        return { cards: [], phases: [], unlockedCards: 0, totalDeckCards: 0 }
       }
-      const [phases, totalDeckCards, unlocks] = await Promise.all([
-        ctx.db.teardropPhase.findMany({
-          where: { deckId: deck.id },
-          select: { slug: true, unlockOrder: true },
-        }),
+      const [phases, totalDeckCards, unlockedIds] = await Promise.all([
+        phasesMetaForDeck(ctx.db, deck.id),
         ctx.db.teardropCard.count({ where: { deckId: deck.id } }),
-        ctx.db.teardropCardUnlock.findMany({
-          where: { playerId: input.playerId },
-          orderBy: { createdAt: 'asc' },
-          distinct: ['cardId'],
-          select: { cardId: true },
-        }),
+        cardUnlockIdsForPlayer(ctx.db, input.playerId),
       ])
       const phaseOrderBySlug = Object.fromEntries(phases.map((p) => [p.slug, p.unlockOrder]))
-      const unlockedIds = unlocks.map((u) => u.cardId)
       if (unlockedIds.length === 0) {
-        return { cards: [], unlockedCards: 0, totalDeckCards }
+        return { cards: [], phases, unlockedCards: 0, totalDeckCards }
       }
       const cards = await ctx.db.teardropCard.findMany({
         where: { deckId: deck.id, id: { in: unlockedIds } },
@@ -145,7 +142,7 @@ export const teardropRouter = router({
         ...c,
         texts: pickLocaleTexts(c.texts, locale),
       }))
-      return { cards: ordered, unlockedCards: ordered.length, totalDeckCards }
+      return { cards: ordered, phases, unlockedCards: ordered.length, totalDeckCards }
     }),
 
   getProgress: publicProcedure
@@ -163,22 +160,10 @@ export const teardropRouter = router({
         }),
       ])
       const totalXp = allUnlocks.reduce((sum, u) => sum + u.xpAwarded, 0)
-      const totalUnlockedGlobal = allUnlocks.length
-      let noteUnlocks = noteUnlockCount
-      if (noteUnlocks === 0) {
-        const [soundie, claimBonus] = await Promise.all([
-          ctx.db.soundie.findUnique({
-            where: { playerId_noteId: { playerId: input.playerId, noteId: input.noteId } },
-            select: { totalListenTime: true },
-          }),
-          ctx.db.dailyClaim.count({ where: { playerId: input.playerId, noteId: input.noteId } }),
-        ])
-        noteUnlocks = Math.min(noteLinks, unlockedTeardropCount(soundie?.totalListenTime ?? 0) + claimBonus)
-      }
       return {
         xp: totalXp,
-        unlockedCardsGlobal: totalUnlockedGlobal,
-        unlockedCardsForNote: noteUnlocks,
+        unlockedCardsGlobal: allUnlocks.length,
+        unlockedCardsForNote: noteUnlockCount,
         totalCardsForNote: noteLinks,
       }
     }),
@@ -260,97 +245,22 @@ export const teardropRouter = router({
         where: { slug: TEARDROP_DECK_SLUG },
         select: { id: true },
       })
-      const allPhases = deckForPhases
-        ? await ctx.db.teardropPhase.findMany({
-            where: { deckId: deckForPhases.id },
-            orderBy: { unlockOrder: 'asc' },
-            select: { slug: true, titlePl: true, titleEn: true, unlockOrder: true },
-          })
-        : []
+      const allPhases = deckForPhases ? await phasesMetaForDeck(ctx.db, deckForPhases.id) : []
 
       if (!input.playerId) {
         const ordered = sortedByPhaseOrder(cards, {})
         return { cards: ordered.slice(0, 1), totalCards, phases: allPhases }
       }
       const playerId = input.playerId
-
-      const { visibleIds, phaseOrderBySlug } = await ctx.db.$transaction(async (tx) => {
-        const soundie = await tx.soundie.findUnique({
-          where: { playerId_noteId: { playerId, noteId: input.noteId } },
-          select: { totalListenTime: true },
-        })
-        const totalListenTime = soundie?.totalListenTime ?? 0
-        const baseCount = unlockedTeardropCount(totalListenTime)
-        const claimBonus = await tx.dailyClaim.count({
-          where: { playerId, noteId: input.noteId },
-        })
-        const targetCount = Math.min(totalCards, baseCount + claimBonus)
-
-        const deck = await tx.teardropDeck.findUnique({
-          where: { slug: TEARDROP_DECK_SLUG },
-          select: { id: true },
-        })
-        const phases = deck
-          ? await tx.teardropPhase.findMany({
-              where: { deckId: deck.id },
-              select: { slug: true, unlockOrder: true, xpPerUnlock: true },
-            })
-          : []
-        const phaseOrderBySlug = Object.fromEntries(phases.map((p) => [p.slug, p.unlockOrder]))
-        const phaseXpBySlug = Object.fromEntries(phases.map((p) => [p.slug, p.xpPerUnlock]))
-
-        const orderedCards = sortedByPhaseOrder(cards, phaseOrderBySlug)
-        const existingUnlocks = await tx.teardropCardUnlock.findMany({
-          where: { playerId, noteId: input.noteId },
-          select: { cardId: true },
-        })
-        const unlockedSet = new Set(existingUnlocks.map((u) => u.cardId))
-        const needToUnlock = Math.max(0, targetCount - unlockedSet.size)
-
-        if (needToUnlock > 0) {
-          const toUnlock = orderedCards
-            .filter((c) => !unlockedSet.has(c.id))
-            .slice(0, needToUnlock)
-          for (const card of toUnlock) {
-            const phaseSlug = card.phase ?? 'archetypes'
-            const xpAwarded = phaseXpBySlug[phaseSlug] ?? 10
-            try {
-              await tx.teardropCardUnlock.create({
-                data: {
-                  playerId,
-                  noteId: input.noteId,
-                  cardId: card.id,
-                  phase: phaseSlug,
-                  phaseOrder: card.phaseOrder,
-                  xpAwarded,
-                },
-              })
-              await tx.teardropProgress.upsert({
-                where: { playerId },
-                create: { playerId, xp: xpAwarded, unlockedCards: 1 },
-                update: { xp: { increment: xpAwarded }, unlockedCards: { increment: 1 } },
-              })
-              unlockedSet.add(card.id)
-            } catch (error) {
-              if (
-                error instanceof Prisma.PrismaClientKnownRequestError &&
-                error.code === 'P2002'
-              ) {
-                unlockedSet.add(card.id)
-                continue
-              }
-              throw error
-            }
-          }
-        }
-
-        const visibleIds = new Set(orderedCards.slice(0, targetCount).map((c) => c.id))
-        return { visibleIds, phaseOrderBySlug }
-      })
-
+      const phaseOrderBySlug = Object.fromEntries(allPhases.map((p) => [p.slug, p.unlockOrder]))
       const ordered = sortedByPhaseOrder(cards, phaseOrderBySlug)
-      const visibleCards = ordered.filter((card) => visibleIds.has(card.id))
+
+      const existingUnlocks = await ctx.db.teardropCardUnlock.findMany({
+        where: { playerId, noteId: input.noteId },
+        select: { cardId: true },
+      })
+      const unlockedSet = new Set(existingUnlocks.map((u) => u.cardId))
+      const visibleCards = ordered.filter((card) => unlockedSet.has(card.id))
       return { cards: visibleCards, totalCards, phases: allPhases }
     }),
 })
-

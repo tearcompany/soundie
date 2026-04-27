@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import type { ReturnStory } from '@/lib/validators/returnEngine'
 import {
   Dialog,
   DialogContent,
@@ -41,12 +42,40 @@ type Props = {
   onOpenChange: (open: boolean) => void
   gift: Gift
   onListen: () => void
+  returnStory?: ReturnStory
+  whisperNoteShort?: string | null
+  streakNights?: number
 }
 
-export function DailyGiftDialog({ open, onOpenChange, gift, onListen }: Props) {
+export function DailyGiftDialog({
+  open,
+  onOpenChange,
+  gift,
+  onListen,
+  returnStory = 'none',
+  whisperNoteShort,
+  streakNights = 0,
+}: Props) {
   const t = useTranslations('returnEngine.dailyGift')
+  const tRe = useTranslations('returnEngine')
   const c = gift.chromaHex
   const teardropQuote = gift.teardrop?.affirmation || gift.teardrop?.tagline || null
+  const title =
+    returnStory === 'second_day'
+      ? t('titleSecondDay')
+      : returnStory === 'returning'
+        ? t('titleReturning', { n: streakNights })
+        : returnStory === 'first_day'
+          ? t('titleFirstDay')
+          : t('title')
+  const sub =
+    returnStory === 'second_day'
+      ? t('subSecondDay')
+      : returnStory === 'returning'
+        ? t('subReturning', { n: streakNights })
+        : returnStory === 'first_day'
+          ? t('subFirstDay')
+          : t('sub')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -78,16 +107,41 @@ export function DailyGiftDialog({ open, onOpenChange, gift, onListen }: Props) {
               />
             ))}
           </div>
-          <DialogHeader className="relative z-10">
+          <DialogHeader className="relative z-10 space-y-4">
+            {returnStory === 'second_day' && (
+              <div className="space-y-2 border-b border-pearl-border/60 pb-4 text-center">
+                <p className="text-lora text-lg font-normal leading-snug text-ink">{tRe('welcomeBack')}</p>
+                {whisperNoteShort && (
+                  <p className="text-lora text-base leading-relaxed text-ink/90">
+                    {tRe('dailyWhisper', { note: whisperNoteShort })}
+                  </p>
+                )}
+                {streakNights > 0 && (
+                  <p className="font-mono text-xs uppercase tracking-widest text-ink-muted">
+                    {tRe('streakLabel', { n: streakNights })}
+                  </p>
+                )}
+              </div>
+            )}
+            {returnStory === 'returning' && streakNights > 0 && (
+              <p className="border-b border-pearl-border/60 pb-4 text-center font-mono text-xs uppercase tracking-widest text-ink-muted">
+                {t('rhythmLead', { n: streakNights })}
+              </p>
+            )}
+            {returnStory === 'first_day' && (
+              <p className="border-b border-pearl-border/60 pb-4 text-center text-lora text-sm italic text-ink/85">
+                {t('firstEvening')}
+              </p>
+            )}
             <DialogTitle className="text-lora text-center text-base font-normal leading-snug text-ink">
-              {t('title')}
+              {title}
             </DialogTitle>
             <DialogDescription
               className="text-lora text-center text-sm leading-relaxed text-ink/80"
               id="daily-gift-body"
               asChild
             >
-              <p>{t('sub')}</p>
+              <p>{sub}</p>
             </DialogDescription>
           </DialogHeader>
           <div className="relative z-10 flex flex-col items-center gap-5">

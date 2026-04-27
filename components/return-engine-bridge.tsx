@@ -1,20 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
 import { trpc } from '@/lib/trpc/react'
 import { useSoundieStore } from '@/lib/soundie-store'
 import { localCalendarStringFromDate } from '@/lib/calendar-day'
 import { DEFAULT_NOTE_ID, getNoteById } from '@/lib/notes'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import type { ReturnStory } from '@/lib/validators/returnEngine'
 import { DailyGiftDialog } from '@/components/daily-gift-dialog'
 
 type Reveal = {
@@ -36,8 +28,35 @@ function visitStorageKey(playerId: string, day: string) {
   return `reLog:${playerId}:${day}`
 }
 
+function visitContextKey(playerId: string, day: string) {
+  return `reCtx:${playerId}:${day}`
+}
+
+type VisitCtx = { streakNights: number; returnStory: ReturnStory; whisper: string | null }
+
+function readVisitCtx(playerId: string, day: string): VisitCtx | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.sessionStorage.getItem(visitContextKey(playerId, day))
+    if (!raw) return null
+    const p = JSON.parse(raw) as VisitCtx
+    if (typeof p.streakNights !== 'number' || typeof p.returnStory !== 'string') return null
+    return p
+  } catch {
+    return null
+  }
+}
+
+function writeVisitCtx(playerId: string, day: string, ctx: VisitCtx) {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.setItem(visitContextKey(playerId, day), JSON.stringify(ctx))
+  } catch {
+    return
+  }
+}
+
 export function ReturnEngineBridge() {
-  const t = useTranslations('returnEngine')
   const locale = useLocale() as 'en' | 'pl'
   const hasHydrated = useSoundieStore((s) => s.hasHydrated)
   const playerId = useSoundieStore((s) => s.playerId)
@@ -51,26 +70,29 @@ export function ReturnEngineBridge() {
 
   const day = useMemo(() => localCalendarStringFromDate(new Date()), [])
   const [visitReady, setVisitReady] = useState(false)
-  const welcomeForGiftRef = useRef(false)
-  const firstRevealAfterLogRef = useRef(false)
   const visitLogInitKey = useRef<string | null>(null)
 
-  const [open, setOpen] = useState(false)
   const [giftOpen, setGiftOpen] = useState(false)
   const [giftPayload, setGiftPayload] = useState<Reveal | null>(null)
-  const [pendingAfterWelcome, setPendingAfterWelcome] = useState(false)
   const [whisperNote, setWhisperNote] = useState<string | null>(null)
   const [streakNights, setStreakNights] = useState(0)
+  const [returnStory, setReturnStory] = useState<ReturnStory>('none')
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined' || !playerId) return
     if (window.sessionStorage.getItem(visitStorageKey(playerId, day)) === '1') {
+      const prev = readVisitCtx(playerId, day)
+      if (prev) {
+        setStreakNights(prev.streakNights)
+        setReturnStory(prev.returnStory)
+        setWhisperNote(prev.whisper)
+      }
       setVisitReady(true)
     }
   }, [playerId, day])
 
   const onRevealSuccess = useCallback(
-    (d: Reveal, fromWelcome: boolean) => {
+    (d: Reveal) => {
       const currentActive = useSoundieStore.getState().activeNoteId
       if (d.noteId === currentActive) {
         applyDailyClaim(
@@ -88,10 +110,6 @@ export function ReturnEngineBridge() {
         return
       }
       setGiftPayload(d)
-      if (fromWelcome) {
-        setPendingAfterWelcome(true)
-        return
-      }
       setGiftOpen(true)
     },
     [applyDailyClaim]
@@ -99,29 +117,26 @@ export function ReturnEngineBridge() {
 
   const autoRevealFiredKeyRef = useRef<string | null>(null)
 
-  const runReveal = useCallback(
-    (useWelcomeInReveal: boolean) => {
-      if (!playerId) return
-      const k = `${playerId}:${day}`
-      if (autoRevealFiredKeyRef.current === k) {
-        return
+  const runReveal = useCallback(() => {
+    if (!playerId) return
+    const k = `${playerId}:${day}`
+    if (autoRevealFiredKeyRef.current === k) {
+      return
+    }
+    const noteId = useSoundieStore.getState().activeNoteId
+    autoRevealFiredKeyRef.current = k
+    revealClaim.mutate(
+      { playerId, claimDate: day, noteId, locale },
+      {
+        onError: () => {
+          if (autoRevealFiredKeyRef.current === k) {
+            autoRevealFiredKeyRef.current = null
+          }
+        },
+        onSuccess: (d) => onRevealSuccess(d as Reveal),
       }
-      const noteId = useSoundieStore.getState().activeNoteId
-      autoRevealFiredKeyRef.current = k
-      revealClaim.mutate(
-        { playerId, claimDate: day, noteId, locale },
-        {
-          onError: () => {
-            if (autoRevealFiredKeyRef.current === k) {
-              autoRevealFiredKeyRef.current = null
-            }
-          },
-          onSuccess: (d) => onRevealSuccess(d as Reveal, useWelcomeInReveal),
-        }
-      )
-    },
-    [day, locale, onRevealSuccess, playerId, revealClaim]
-  )
+    )
+  }, [day, locale, onRevealSuccess, playerId, revealClaim])
 
   useEffect(() => {
     if (!hasHydrated || !playerId) return
@@ -145,13 +160,15 @@ export function ReturnEngineBridge() {
           } catch {
             return
           }
+          const whisper = v.noteShort ? v.noteShort : null
           setStreakNights(v.streakNights)
-          setWhisperNote(v.noteShort ? v.noteShort : null)
-          welcomeForGiftRef.current = v.shouldShowWelcomeBack
-          if (v.shouldShowWelcomeBack) {
-            setOpen(true)
-          }
-          firstRevealAfterLogRef.current = true
+          setReturnStory(v.returnStory)
+          setWhisperNote(whisper)
+          writeVisitCtx(playerId, day, {
+            streakNights: v.streakNights,
+            returnStory: v.returnStory,
+            whisper,
+          })
           setVisitReady(true)
         },
       }
@@ -165,23 +182,8 @@ export function ReturnEngineBridge() {
     if (window.sessionStorage.getItem(visitStorageKey(playerId, day)) !== '1') {
       return
     }
-    const isFirst = firstRevealAfterLogRef.current
-    if (isFirst) {
-      firstRevealAfterLogRef.current = false
-    }
-    const w = isFirst && welcomeForGiftRef.current
-    runReveal(!!w)
+    runReveal()
   }, [day, hasHydrated, playerId, runReveal, visitReady, moodEntranceCleared])
-
-  const handleWelcomeOpenChange = (v: boolean) => {
-    setOpen(v)
-    if (!v && pendingAfterWelcome && giftPayload) {
-      setPendingAfterWelcome(false)
-      requestAnimationFrame(() => {
-        setGiftOpen(true)
-      })
-    }
-  }
 
   const def = getNoteById(activeNoteId) ?? getNoteById(DEFAULT_NOTE_ID)
   const chromaForGift = def?.chromaHex ?? '#8b7b6a'
@@ -200,43 +202,14 @@ export function ReturnEngineBridge() {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleWelcomeOpenChange}>
-        <DialogContent className="border-ink/10 bg-pearl sm:max-w-md" showCloseButton>
-          <DialogHeader>
-            <DialogTitle className="text-lora text-center text-lg font-normal text-ink">
-              {t('welcomeBack')}
-            </DialogTitle>
-            {whisperNote && (
-              <DialogDescription asChild>
-                <p className="text-lora text-center text-base leading-relaxed text-ink/90">
-                  {t('dailyWhisper', { note: whisperNote })}
-                </p>
-              </DialogDescription>
-            )}
-          </DialogHeader>
-          {streakNights > 0 && (
-            <p className="text-center font-mono text-xs uppercase tracking-widest text-ink-muted">
-              {t('streakLabel', { n: streakNights })}
-            </p>
-          )}
-          <DialogFooter className="sm:justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => setOpen(false)}
-            >
-              {t('continue')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {giftPayload && (
         <DailyGiftDialog
           open={giftOpen}
           onOpenChange={setGiftOpen}
           onListen={onGiftListen}
+          returnStory={giftPayload.isNew ? returnStory : 'none'}
+          whisperNoteShort={whisperNote}
+          streakNights={streakNights}
           gift={{
             rareCaption: giftPayload.rareCaption,
             glowKey: giftPayload.glowKey,

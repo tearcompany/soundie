@@ -295,7 +295,7 @@ export function SoundieLanding() {
           </span>
         </div>
 
-        <p className="mt-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted">
+        <p className="mt-10 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-muted">
           {t('tapHint')}
         </p>
 
@@ -348,7 +348,7 @@ export function SoundieLanding() {
           })}
         </div>
 
-        <div className="mt-14 flex flex-col items-center gap-5">
+        <div className="mt-10 flex flex-col items-center gap-5">
           <section className="w-full max-w-md rounded-2xl border border-pearl-border/60 bg-pearl/70 p-5 text-left shadow-sm backdrop-blur-sm">
             <p className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-coral">
               {t('inviteKicker')}
@@ -376,9 +376,115 @@ export function SoundieLanding() {
           </section>
         </div>
 
-        <p className="mx-auto mt-16 max-w-md text-center font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink-muted">
-          {t('closing')}
-        </p>
+        <section className="mx-auto mt-20 max-w-xl space-y-10 border-t border-pearl-border/50 pt-12 text-left">
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
+              {t('narrativeWhatKicker')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink">
+              {t('narrativeWhatP1')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink/90">
+              {t('narrativeWhatP2')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink/90">
+              {t('narrativeWhatP3')}
+            </p>
+          </div>
+
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
+              {t('narrativeHowKicker')}
+            </p>
+            <div className="mt-4 rounded-xl border border-pearl-border/80 bg-pearl/60 px-4 py-3 font-mono text-[0.72rem] leading-relaxed text-ink/90">
+              {t('narrativeHowFlow')}
+            </div>
+            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm text-ink/85">
+              {t('narrativeHowIntro')}
+            </p>
+            <ul className="mt-3 space-y-2.5 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
+                <span>{t('narrativeHowBullet1')}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
+                <span>{t('narrativeHowBullet2')}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
+                <span>{t('narrativeHowBullet3')}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
+                <span>{t('narrativeHowBullet4')}</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
+                <span>{t('narrativeHowBullet5')}</span>
+              </li>
+            </ul>
+            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm italic text-ink-muted">
+              {t('narrativeHowClosing')}
+            </p>
+          </div>
+
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
+              {t('narrativeTeardropKicker')}
+            </p>
+            <div className="mt-4 rounded-xl border border-pearl-border/80 bg-pearl/60 px-4 py-3 font-mono text-[0.68rem] leading-relaxed text-ink/90">
+              {t('narrativeTeardropPhases')}
+            </div>
+            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeTeardropP1')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeTeardropP2')}
+            </p>
+          </div>
+
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
+              {t('narrativeDifferentKicker')}
+            </p>
+            <blockquote className="mt-4 border-l-4 border-coral/70 pl-4 font-[family-name:var(--font-lora,serif)] text-base italic leading-relaxed text-ink">
+              {t('narrativeDifferentQuote')}
+            </blockquote>
+            <ul className="mt-4 space-y-2 font-mono text-[0.68rem] leading-relaxed text-ink-muted">
+              <li>{t('narrativeDifferent1')}</li>
+              <li>{t('narrativeDifferent2')}</li>
+              <li>{t('narrativeDifferent3')}</li>
+              <li>{t('narrativeDifferent4')}</li>
+            </ul>
+            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeDifferentClosing')}
+            </p>
+          </div>
+
+          <div>
+            <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
+              {t('narrativeWorldKicker')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeWorldP1')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeWorldP2')}
+            </p>
+            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+              {t('narrativeWorldP3')}
+            </p>
+          </div>
+        </section>
+
+        <div className="mx-auto mt-16 max-w-md space-y-4 text-center">
+          <p className="font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink-muted">
+            {t('closing')}
+          </p>
+          <p className="font-mono text-[0.6rem] leading-relaxed text-ink-muted/80">{t('narrativeStack')}</p>
+          <p className="font-[family-name:var(--font-fraunces,serif)] text-lg text-coral">{t('narrativeSignoff')}</p>
+        </div>
       </main>
 
       <footer className="relative z-10 border-t border-pearl-border/40 px-6 py-7">

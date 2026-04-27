@@ -13,9 +13,13 @@ export const logVisitInput = z.object({
   activeNoteId: noteIdInput.optional(),
 })
 
+export const returnStorySchema = z.enum(['none', 'first_day', 'second_day', 'returning'])
+export type ReturnStory = z.infer<typeof returnStorySchema>
+
 export const logVisitOutput = z.object({
   streakNights: z.number().int().min(0),
   shouldShowWelcomeBack: z.boolean(),
+  returnStory: returnStorySchema,
   isFirstVisitEver: z.boolean(),
   noteShort: z.string().min(1).max(4).optional(),
 })
