@@ -122,7 +122,7 @@ Players don't collect monsters. They **awaken Acoustic Archetypes** — living e
 >
 > Not a meditation app. Not a game. Something new.
 >
-> `soundie.app` 🌱
+> `soundie.world` 🌱
 
 ---
 
