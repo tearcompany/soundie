@@ -6,6 +6,7 @@ import { usePathname, useRouter } from '@/i18n/navigation'
 import { useSoundieStore } from '@/lib/soundie-store'
 import { isValidNoteId, noteIdFromUrlKey, urlKeyForNoteId } from '@/lib/notes'
 import { trpc } from '@/lib/trpc/react'
+import { shouldPlayBellOnTouchDevice } from '@/lib/bell-feedback'
 
 export function useSoundieUrlToStore() {
   const searchParams = useSearchParams()
@@ -53,7 +54,7 @@ export function useNoteSelection() {
     (id: string) => {
       if (!isValidNoteId(id)) return
       const bells = bellsRef.current
-      if (bells) {
+      if (bells && shouldPlayBellOnTouchDevice()) {
         bells.pause()
         bells.currentTime = 0
         bells.play().catch(() => undefined)

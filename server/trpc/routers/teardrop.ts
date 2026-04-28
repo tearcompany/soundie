@@ -61,6 +61,11 @@ const mappedTeardropResponse = z.object({
 const recordFocusOutput = z.object({ ok: z.boolean() })
 const progressOutput = z.object({
   xp: z.number().int().nonnegative(),
+  xpBySource: z.object({
+    cycle: z.number().int().nonnegative(),
+    teardropUnlock: z.number().int().nonnegative(),
+    event: z.number().int().nonnegative(),
+  }),
   unlockedCardsGlobal: z.number().int().nonnegative(),
   unlockedCardsForNote: z.number().int().nonnegative(),
   totalCardsForNote: z.number().int().nonnegative(),
@@ -149,7 +154,16 @@ export const teardropRouter = router({
     .input(progressInput)
     .output(progressOutput)
     .query(async ({ ctx, input }) => {
-      const [noteLinks, allUnlocks, noteUnlockCount] = await Promise.all([
+      const xpEventSourceClient = ctx.db as typeof ctx.db & {
+        teardropXpEvent: {
+          groupBy: (args: {
+            by: ['source']
+            where: { playerId: string }
+            _sum: { amount: true }
+          }) => Promise<Array<{ source: 'cycle' | 'teardrop_unlock' | 'event'; _sum: { amount: number | null } }>>
+        }
+      }
+      const [noteLinks, allUnlocks, noteUnlockCount, progressRow, xpEvents] = await Promise.all([
         ctx.db.noteTeardropCard.count({ where: { noteId: input.noteId } }),
         ctx.db.teardropCardUnlock.findMany({
           where: { playerId: input.playerId },
@@ -158,11 +172,34 @@ export const teardropRouter = router({
         ctx.db.teardropCardUnlock.count({
           where: { playerId: input.playerId, noteId: input.noteId },
         }),
+        ctx.db.teardropProgress.findUnique({
+          where: { playerId: input.playerId },
+          select: { xp: true, unlockedCards: true },
+        }),
+        xpEventSourceClient.teardropXpEvent.groupBy({
+          by: ['source'],
+          where: { playerId: input.playerId },
+          _sum: { amount: true },
+        }),
       ])
-      const totalXp = allUnlocks.reduce((sum, u) => sum + u.xpAwarded, 0)
+      const unlockXp = allUnlocks.reduce((sum: number, u: { xpAwarded: number }) => sum + u.xpAwarded, 0)
+      const xpBySource = {
+        cycle: 0,
+        teardropUnlock: 0,
+        event: 0,
+      }
+      for (const row of xpEvents) {
+        if (row.source === 'cycle') xpBySource.cycle = row._sum.amount ?? 0
+        if (row.source === 'teardrop_unlock') xpBySource.teardropUnlock = row._sum.amount ?? 0
+        if (row.source === 'event') xpBySource.event = row._sum.amount ?? 0
+      }
+      const xpFromEvents = xpBySource.cycle + xpBySource.teardropUnlock + xpBySource.event
+      const totalXp = xpFromEvents > 0 ? xpFromEvents : (progressRow?.xp ?? unlockXp)
+      const unlockedCardsGlobal = progressRow?.unlockedCards ?? allUnlocks.length
       return {
         xp: totalXp,
-        unlockedCardsGlobal: allUnlocks.length,
+        xpBySource,
+        unlockedCardsGlobal,
         unlockedCardsForNote: noteUnlockCount,
         totalCardsForNote: noteLinks,
       }

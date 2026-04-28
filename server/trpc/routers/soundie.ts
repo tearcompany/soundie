@@ -19,6 +19,8 @@ const playerNoteInput = z.object({
 })
 
 const calcLoreUnlocked = loreUnlockedCountFromTotalMinutes
+const SESSION_CYCLE_SECONDS = 180
+const SESSION_CYCLE_XP_AWARD = 10
 
 const NOTE_UNLOCK_REQUIREMENTS: Record<number, number> = {
   2: 15,
@@ -271,6 +273,9 @@ export const soundieRouter = router({
         const prevTotalMinutes = Math.floor(current.totalListenTime / 60)
         const newTotalSeconds = current.totalListenTime + input.durationSeconds
         const newTotalMinutes = Math.floor(newTotalSeconds / 60)
+        const previousCompletedCycles = Math.floor(current.totalListenTime / SESSION_CYCLE_SECONDS)
+        const newCompletedCycles = Math.floor(newTotalSeconds / SESSION_CYCLE_SECONDS)
+        const newlyCompletedCycles = Math.max(0, newCompletedCycles - previousCompletedCycles)
         const previousLoreLevel = current.loreUnlocked
         const newLoreLevel = calcLoreUnlocked(newTotalMinutes)
         const newLevel = calcLevel(newTotalMinutes)
@@ -285,7 +290,36 @@ export const soundieRouter = router({
           },
         })
 
-        await applyTeardropUnlocksAfterSession(tx, input.playerId, input.noteId, newTotalSeconds)
+        await applyTeardropUnlocksAfterSession(
+          tx,
+          input.playerId,
+          input.noteId,
+          Math.min(5, newLoreLevel)
+        )
+        if (newlyCompletedCycles > 0) {
+          const cycleXp = newlyCompletedCycles * SESSION_CYCLE_XP_AWARD
+          await tx.teardropProgress.upsert({
+            where: { playerId: input.playerId },
+            create: {
+              playerId: input.playerId,
+              xp: cycleXp,
+              unlockedCards: 0,
+            },
+            update: {
+              xp: { increment: cycleXp },
+            },
+          })
+          await (tx as typeof tx & {
+            teardropXpEvent: { create: (args: { data: { playerId: string; noteId: string; source: 'cycle'; amount: number } }) => Promise<unknown> }
+          }).teardropXpEvent.create({
+            data: {
+              playerId: input.playerId,
+              noteId: input.noteId,
+              source: 'cycle',
+              amount: cycleXp,
+            },
+          })
+        }
 
         const session = await tx.listenSession.create({
           data: {

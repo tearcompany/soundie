@@ -1,23 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   applyTeardropUnlocksAfterSession,
-  FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS,
   sortedByPhaseOrder,
   unlockedTeardropCount,
 } from '@/lib/teardrop-unlock'
 
 describe('unlockedTeardropCount', () => {
-  it('returns 0 below first unlock threshold', () => {
+  it('returns 0 when no lore fragments are unlocked', () => {
     expect(unlockedTeardropCount(0)).toBe(0)
-    expect(unlockedTeardropCount(FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS - 1)).toBe(0)
   })
 
-  it('returns at least one slot at threshold', () => {
-    expect(unlockedTeardropCount(FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS)).toBeGreaterThanOrEqual(1)
+  it('returns one card per unlocked lore fragment', () => {
+    expect(unlockedTeardropCount(1)).toBe(1)
+    expect(unlockedTeardropCount(3)).toBe(3)
   })
 
-  it('scales with additional hour buckets after threshold', () => {
-    expect(unlockedTeardropCount(3600)).toBeGreaterThan(unlockedTeardropCount(FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS))
+  it('caps at five cards', () => {
+    expect(unlockedTeardropCount(6)).toBe(5)
   })
 })
 
@@ -35,7 +34,7 @@ describe('sortedByPhaseOrder', () => {
 })
 
 describe('applyTeardropUnlocksAfterSession', () => {
-  it('does not create unlocks when listen total is below threshold', async () => {
+  it('does not create unlocks when no lore fragments are unlocked', async () => {
     const unlockCreate = vi.fn()
     const tx = {
       noteTeardropCard: {
@@ -57,14 +56,14 @@ describe('applyTeardropUnlocksAfterSession', () => {
           { slug: 'p1', unlockOrder: 1, xpPerUnlock: 10 },
         ]),
       },
-      dailyClaim: { count: vi.fn().mockResolvedValue(0) },
       teardropCardUnlock: {
         findMany: vi.fn().mockResolvedValue([]),
         create: unlockCreate,
       },
+      teardropXpEvent: { create: vi.fn() },
       teardropProgress: { upsert: vi.fn() },
     }
-    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', 100)
+    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', 0)
     expect(unlockCreate).not.toHaveBeenCalled()
   })
 
@@ -91,19 +90,14 @@ describe('applyTeardropUnlocksAfterSession', () => {
           { slug: 'p1', unlockOrder: 1, xpPerUnlock: 12 },
         ]),
       },
-      dailyClaim: { count: vi.fn().mockResolvedValue(0) },
       teardropCardUnlock: {
         findMany: vi.fn().mockResolvedValue([]),
         create: unlockCreate,
       },
+      teardropXpEvent: { create: vi.fn() },
       teardropProgress: { upsert },
     }
-    await applyTeardropUnlocksAfterSession(
-      tx as never,
-      'player1',
-      'note1',
-      FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS
-    )
+    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', 1)
     expect(unlockCreate).toHaveBeenCalledTimes(1)
     expect(upsert).toHaveBeenCalledTimes(1)
   })

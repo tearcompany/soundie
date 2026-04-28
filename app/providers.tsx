@@ -21,6 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const playBell = (event: PointerEvent) => {
       if (event.button !== 0) return
+      if (event.pointerType === 'touch') return
       const audio = bellAudioRef.current
       if (!audio) return
       audio.currentTime = 0

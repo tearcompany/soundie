@@ -70,6 +70,7 @@ model Player {
   teardropFocusSessions TeardropFocusSession[]
   teardropUnlocks TeardropCardUnlock[]
   teardropProgress TeardropProgress?
+  teardropXpEvents TeardropXpEvent[]
   mindfulMoments MindfulMomentLog[]
 }
 
@@ -208,6 +209,28 @@ model TeardropCardUnlock {
   @@index([playerId, createdAt])
 }
 
+enum TeardropXpSource {
+  cycle
+  teardrop_unlock
+  event
+}
+
+model TeardropXpEvent {
+  id        String           @id @default(cuid())
+  playerId  String
+  noteId    String?
+  source    TeardropXpSource
+  amount    Int
+  createdAt DateTime         @default(now())
+
+  player    Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  note      Note?            @relation(fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([playerId, createdAt])
+  @@index([playerId, source, createdAt])
+  @@index([noteId, createdAt])
+}
+
 model TeardropFocusSession {
   id         String   @id @default(cuid())
   playerId   String
@@ -335,6 +358,7 @@ model Note {
   teardropCards      NoteTeardropCard[]
   teardropFocusSessions TeardropFocusSession[]
   teardropUnlocks    TeardropCardUnlock[]
+  teardropXpEvents   TeardropXpEvent[]
   dailyClaims        DailyClaim[]
   moodEntries        MoodEntry[]
 

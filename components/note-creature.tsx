@@ -77,70 +77,6 @@ function groupCardsByPhase<T extends DealerTeardropCard>(cards: T[]) {
   }))
 }
 
-interface SessionShareBlockProps {
-  noteId: string
-  locale: string
-  color: string
-  onDismiss: () => void
-  trackShare: (args: { name: 'share_click' | 'share_complete' | 'share_copy_fallback'; playerId?: string | null; meta?: unknown }) => void
-  playerId: string | null
-  tShare: string
-  tDone: string
-  tCopied: string
-}
-
-function SessionShareBlock({ noteId, locale, color, onDismiss, trackShare, playerId, tShare, tDone, tCopied }: SessionShareBlockProps) {
-  const [done, setDone] = useState(false)
-  const url = typeof window !== 'undefined'
-    ? `${window.location.origin}/${locale}`
-    : `/${locale}`
-  const meta = { noteId, surface: 'session_complete' }
-
-  const handleShare = async () => {
-    trackShare({ name: 'share_click', playerId, meta })
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Soundie', text: tShare, url })
-        trackShare({ name: 'share_complete', playerId, meta })
-        setDone(true)
-      } catch {
-        // user cancelled
-      }
-    } else {
-      await navigator.clipboard.writeText(url)
-      trackShare({ name: 'share_copy_fallback', playerId, meta })
-      setDone(true)
-      toast.success(tCopied, { duration: 2000 })
-    }
-  }
-
-  if (done) {
-    return (
-      <p className="mb-3 font-mono text-xs text-ink-muted animate-in fade-in duration-300">
-        {tDone}
-      </p>
-    )
-  }
-
-  return (
-    <div className="mb-4 flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <button
-        onClick={handleShare}
-        className="w-full rounded-full px-6 py-2.5 font-mono text-sm font-semibold transition-all duration-200"
-        style={{ backgroundColor: color, color: '#fff' }}
-      >
-        {tShare}
-      </button>
-      <button
-        onClick={onDismiss}
-        className="font-mono text-[0.65rem] text-ink-muted hover:text-ink transition-colors"
-      >
-        ✕
-      </button>
-    </div>
-  )
-}
-
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
   const t = useTranslations('noteCreature')
@@ -166,7 +102,6 @@ export function NoteCreature() {
   const [pulseDepth, setPulseDepth] = useState(0)
   const [orbEvolution, setOrbEvolution] = useState(0)
   const [sacredClimax, setSacredClimax] = useState(false)
-  const [sessionJustCompleted, setSessionJustCompleted] = useState(false)
   const noteQuery = trpc.note.getById.useQuery(
     { id: activeNoteId, locale },
     { retry: false }
@@ -187,7 +122,6 @@ export function NoteCreature() {
 
   const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
   const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
-  const { mutate: trackShare } = trpc.analytics.record.useMutation()
   const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation()
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
     onSuccess: (result) => {
@@ -334,7 +268,7 @@ export function NoteCreature() {
   }, [revealedTeardropCards, selectedTeardropCardId])
   const lastLoreEventKeyRef = useRef<string | null>(null)
   const minuteMilestoneRef = useRef(0)
-  const climaxDoneRef = useRef(false)
+  const sacredCycleRef = useRef(0)
 
   const selectedTeardropTexts = useMemo(() => {
     if (!selectedTeardropCard) {
@@ -702,7 +636,6 @@ export function NoteCreature() {
         const credited = d
         updateSessionElapsed(credited)
         completeSession()
-        setSessionJustCompleted(true)
         if (credited >= MIRACLE_SESSION_SECONDS) {
           setGrowthPulse(true)
           setTimeout(() => setGrowthPulse(false), 1400)
@@ -768,7 +701,7 @@ export function NoteCreature() {
   useEffect(() => {
     if (!currentSession.active) {
       minuteMilestoneRef.current = 0
-      climaxDoneRef.current = false
+      sacredCycleRef.current = 0
       setSessionWhisper(null)
       setAmbientShimmer(false)
       setPulseDepth(0)
@@ -788,13 +721,19 @@ export function NoteCreature() {
       }
       minuteMilestoneRef.current = currentMilestone
     }
-    if (!climaxDoneRef.current && currentSession.elapsed >= MIRACLE_SESSION_SECONDS) {
-      climaxDoneRef.current = true
-      const sacredLine = t('sacredLine')
-      setSessionWhisper(sacredLine)
-      setSacredClimax(true)
-      setTimeout(() => setSacredClimax(false), 2200)
-      toast.success(sacredLine, { duration: 3200 })
+    const completedCycles = Math.min(
+      SESSION_REPETITIONS,
+      Math.floor(currentSession.elapsed / MIRACLE_SESSION_SECONDS),
+    )
+    if (completedCycles > sacredCycleRef.current) {
+      for (let cycle = sacredCycleRef.current + 1; cycle <= completedCycles; cycle += 1) {
+        const sacredLine = t('sacredLine')
+        setSessionWhisper(sacredLine)
+        setSacredClimax(true)
+        setTimeout(() => setSacredClimax(false), 2200)
+        toast.success(sacredLine, { duration: 3200 })
+      }
+      sacredCycleRef.current = completedCycles
     }
   }, [currentSession.active, currentSession.elapsed, minuteMilestoneText, t])
 
@@ -1262,19 +1201,6 @@ export function NoteCreature() {
 
           <div className="border-t border-pearl-border pt-5 text-center">
             <p className="font-mono text-xs text-ink-muted mb-3">{t('listeningSession')}</p>
-            {sessionJustCompleted && !currentSession.active && (
-              <SessionShareBlock
-                noteId={activeNoteId}
-                locale={locale}
-                color={c}
-                onDismiss={() => setSessionJustCompleted(false)}
-                trackShare={trackShare}
-                playerId={playerId}
-                tShare={t('sessionDoneShare')}
-                tDone={t('sessionDoneShareDone')}
-                tCopied={t('sessionDoneShareCopied')}
-              />
-            )}
             {currentSession.active && (
               <div className="mb-3">
                 <div className="bg-pearl rounded-full h-1 overflow-hidden">

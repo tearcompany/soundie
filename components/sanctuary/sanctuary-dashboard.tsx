@@ -246,6 +246,24 @@ export function SanctuaryDashboard() {
         <div className="mt-10 space-y-10">
 
           <div>
+            <div className="mb-3 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onShareToday}
+                className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted underline decoration-ink/30 underline-offset-4 hover:text-ink"
+              >
+                {t('shareCta')}
+              </button>
+              {shareFeedback !== 'idle' && (
+                <p className="text-lora text-xs text-ink/70">
+                  {shareFeedback === 'done'
+                    ? t('shareDone')
+                    : shareFeedback === 'copied'
+                      ? t('shareCopied')
+                      : t('shareFailed')}
+                </p>
+              )}
+            </div>
             <h2 className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
               {t('releaseTitle')}
             </h2>
@@ -270,24 +288,6 @@ export function SanctuaryDashboard() {
                   ? t('todayMinutes', { m: q.data.minutesToday })
                   : t('todayMinutesUnknown')}
               </p>
-              <div className="mt-3 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={onShareToday}
-                  className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted underline decoration-ink/30 underline-offset-4 hover:text-ink"
-                >
-                  {t('shareCta')}
-                </button>
-                {shareFeedback !== 'idle' && (
-                  <p className="text-lora text-xs text-ink/70">
-                    {shareFeedback === 'done'
-                      ? t('shareDone')
-                      : shareFeedback === 'copied'
-                        ? t('shareCopied')
-                        : t('shareFailed')}
-                  </p>
-                )}
-              </div>
             </div>
           )}
 
@@ -314,6 +314,19 @@ export function SanctuaryDashboard() {
                 title: phaseTitleBySlug[slug] ?? slug,
                 cards,
               }))
+            const shadowGroups = groups
+              .map((group) => ({
+                ...group,
+                cards: group.cards
+                  .map((card) => ({
+                    id: card.id,
+                    name: card.name,
+                    shadow:
+                      card.texts.find((x) => x.field === 'meaningShadow')?.content?.trim() ?? '',
+                  }))
+                  .filter((card) => card.shadow.length > 0),
+              }))
+              .filter((group) => group.cards.length > 0)
             return (
               <div className="lore-card border-0">
                 <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
@@ -358,6 +371,34 @@ export function SanctuaryDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                {shadowGroups.length > 0 && (
+                  <div className="mt-5 border-t border-pearl-border pt-4">
+                    <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-ink-muted">
+                      {t('teardropShadowByPhaseTitle')}
+                    </p>
+                    <div className="mt-3 space-y-4">
+                      {shadowGroups.map((group) => (
+                        <div key={`${group.slug}-shadow`}>
+                          <p className="font-mono text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-ink">
+                            {group.title}
+                          </p>
+                          <div className="mt-1.5 space-y-2">
+                            {group.cards.map((card) => (
+                              <div key={`${card.id}-shadow`} className="rounded-md border border-pearl-border/70 bg-white/55 px-2.5 py-2">
+                                <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-ink-muted">
+                                  {card.name}
+                                </p>
+                                <p className="mt-1 whitespace-pre-line font-mono text-[0.62rem] leading-relaxed text-ink/70">
+                                  {card.shadow}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

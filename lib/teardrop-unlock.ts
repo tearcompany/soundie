@@ -1,14 +1,11 @@
 import type { Prisma } from '@prisma/client'
 import { Prisma as PrismaNamespace } from '@prisma/client'
+import { MAX_LORE_FRAGMENTS } from '@/lib/progress'
 
 export const TEARDROP_DECK_SLUG = 'teardrop-oracle-deck-v0'
 
-export const FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS = 540
-
-export function unlockedTeardropCount(totalListenSeconds: number): number {
-  if (totalListenSeconds < FIRST_TEARDROP_UNLOCK_TOTAL_LISTEN_SECONDS) return 0
-  const mins = Math.max(0, Math.floor(totalListenSeconds / 60))
-  return Math.max(1, 1 + Math.floor(mins / 60))
+export function unlockedTeardropCount(loreUnlocked: number): number {
+  return Math.max(0, Math.min(MAX_LORE_FRAGMENTS, loreUnlocked))
 }
 
 export function sortedByPhaseOrder<T extends { phase: string | null; phaseOrder: number | null }>(
@@ -30,7 +27,7 @@ export async function applyTeardropUnlocksAfterSession(
   tx: Prisma.TransactionClient,
   playerId: string,
   noteId: string,
-  totalListenSeconds: number
+  loreUnlocked: number
 ) {
   const links = await tx.noteTeardropCard.findMany({
     where: { noteId },
@@ -57,10 +54,7 @@ export async function applyTeardropUnlocksAfterSession(
   const cards = links.map((l) => l.card).filter(Boolean) as NonNullable<(typeof links)[number]['card']>[]
   const orderedCards = sortedByPhaseOrder(cards, phaseOrderBySlug)
 
-  const claimBonus = await tx.dailyClaim.count({
-    where: { playerId, noteId },
-  })
-  const targetCount = Math.min(totalCards, unlockedTeardropCount(totalListenSeconds) + claimBonus)
+  const targetCount = Math.min(totalCards, unlockedTeardropCount(loreUnlocked))
 
   const existingUnlocks = await tx.teardropCardUnlock.findMany({
     where: { playerId, noteId },
@@ -90,6 +84,16 @@ export async function applyTeardropUnlocksAfterSession(
         where: { playerId },
         create: { playerId, xp: xpAwarded, unlockedCards: 1 },
         update: { xp: { increment: xpAwarded }, unlockedCards: { increment: 1 } },
+      })
+      await (tx as Prisma.TransactionClient & {
+        teardropXpEvent: { create: (args: { data: { playerId: string; noteId: string; source: 'teardrop_unlock'; amount: number } }) => Promise<unknown> }
+      }).teardropXpEvent.create({
+        data: {
+          playerId,
+          noteId,
+          source: 'teardrop_unlock',
+          amount: xpAwarded,
+        },
       })
       unlockedSet.add(card.id)
     } catch (error) {
