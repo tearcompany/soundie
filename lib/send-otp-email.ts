@@ -1,5 +1,4 @@
 import { Resend } from 'resend'
-import nodemailer from 'nodemailer'
 
 function buildHtml(code: string, expiryMinutes: number) {
   return `
@@ -12,52 +11,34 @@ function buildHtml(code: string, expiryMinutes: number) {
 }
 
 function resolveFrom(): string {
-  const direct = process.env.EMAIL_FROM?.trim()
-  if (direct) return direct
-  const smtpUser = process.env.SMTP_USER?.trim()
-  if (smtpUser && smtpUser.includes('@')) return `Soundie <${smtpUser}>`
-  const domain = process.env.RESEND_FROM_DOMAIN?.trim()
-  if (domain) return `Soundie <no-reply@${domain}>`
-  return 'Soundie <onboarding@resend.dev>'
+  return process.env.EMAIL_FROM?.trim() ?? 'Soundie <me@soundie.world>'
 }
 
 export async function sendOtpEmail(input: { to: string; code: string; expiryMinutes: number }) {
   const { to, code, expiryMinutes } = input
-  const subject = `Twój kod logowania — ${code}`
-  const html = buildHtml(code, expiryMinutes)
-  const from = resolveFrom()
 
-  if (process.env.SMTP_HOST) {
-    const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 465
-    const secure = process.env.SMTP_SECURE
-      ? process.env.SMTP_SECURE === 'true' || process.env.SMTP_SECURE === '1'
-      : port === 465
-    const connMs = Number(process.env.SMTP_CONNECTION_TIMEOUT_MS)
-    const connectionTimeout = Number.isFinite(connMs) && connMs > 0 ? connMs : 25_000
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port,
-      secure,
-      connectionTimeout,
-      greetingTimeout: Math.min(connectionTimeout, 25_000),
-      socketTimeout: Math.min(connectionTimeout + 15_000, 60_000),
-      auth: {
-        user: process.env.SMTP_USER ?? '',
-        pass: process.env.SMTP_PASS ?? '',
-      },
-    })
-    await transporter.sendMail({ from, to, subject, html })
-    return
-  }
-
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const out = await resend.emails.send({ from, to, subject, html })
-    if (out.error) {
-      throw new Error(out.error.message)
+  if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[OTP dev] ${to} → ${code}`)
+      return
     }
-    return
+    throw new Error('RESEND_API_KEY not configured')
   }
 
-  console.log(`[OTP dev] code for ${to}: ${code}`)
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const out = await resend.emails.send({
+    from: resolveFrom(),
+    to,
+    subject: `Twój kod logowania — ${code}`,
+    html: buildHtml(code, expiryMinutes),
+  })
+
+  if (out.error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[OTP] Resend failed:', out.error.message)
+      console.log(`[OTP dev] ${to} → ${code}`)
+      return
+    }
+    throw new Error(out.error.message)
+  }
 }

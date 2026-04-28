@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { isOtpEmailConfigured } from '@/lib/otp-mail'
 import { sendOtpEmail } from '@/lib/send-otp-email'
-import { classifySmtpFailure } from '@/lib/smtp-error'
 import { publicProcedure, router, TRPCError } from '../init'
 
 const OTP_EXPIRY_MINUTES = 15
@@ -54,12 +53,8 @@ export const otpRouter = router({
     try {
       await sendOtpEmail({ to: email, code, expiryMinutes: OTP_EXPIRY_MINUTES })
     } catch (e) {
-      console.error(e)
-      const kind = classifySmtpFailure(e)
-      throw new TRPCError({
-        code: 'BAD_GATEWAY',
-        message: kind,
-      })
+      console.error('[OTP] email send error:', e)
+      throw new TRPCError({ code: 'BAD_GATEWAY', message: 'email_send_failed' })
     }
 
     await db.verificationToken.create({

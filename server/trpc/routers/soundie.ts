@@ -364,16 +364,6 @@ export const soundieRouter = router({
           }
         }
 
-        if (input.durationSeconds >= 180) {
-          await tx.analyticsEvent.create({
-            data: {
-              name: 'session_180_complete',
-              playerId: input.playerId,
-              meta: { noteId: input.noteId, durationSeconds: input.durationSeconds },
-            },
-          })
-        }
-
         return {
           soundie,
           session: {
@@ -393,7 +383,17 @@ export const soundieRouter = router({
             unlockedNextNote,
           },
         }
-      })
+      }, { maxWait: 10_000, timeout: 20_000 })
+
+      if (input.durationSeconds >= 180) {
+        await ctx.db.analyticsEvent.create({
+          data: {
+            name: 'session_180_complete',
+            playerId: input.playerId,
+            meta: { noteId: input.noteId, durationSeconds: input.durationSeconds },
+          },
+        })
+      }
 
       return updated
     }),
