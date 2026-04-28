@@ -6,15 +6,14 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { cn } from '@/lib/utils'
 import { useSession, signOut } from 'next-auth/react'
 
-const HREFS = ['/', '/play', '/teardrop', '/sanctuary'] as const
+const HREFS = ['/', '/play', '/teardrop'] as const
 
 type Href = (typeof HREFS)[number]
 
-const KEYS: Record<Href, 'home' | 'play' | 'teardrop' | 'sanctuary'> = {
+const KEYS: Record<Href, 'home' | 'play' | 'teardrop'> = {
   '/': 'home',
   '/play': 'play',
   '/teardrop': 'teardrop',
-  '/sanctuary': 'sanctuary',
 }
 
 function pathMatches(pathname: string, href: Href) {
@@ -22,6 +21,10 @@ function pathMatches(pathname: string, href: Href) {
     return pathname === '/' || pathname === ''
   }
   return pathname === href
+}
+
+function pathMatchesSanctuary(pathname: string) {
+  return pathname === '/sanctuary'
 }
 
 export function SiteNav() {
@@ -64,6 +67,18 @@ export function SiteNav() {
         </nav>
       </div>
       <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-4">
+        <Link
+          href="/sanctuary"
+          aria-current={pathMatchesSanctuary(pathname) ? 'page' : undefined}
+          className={cn(
+            'shrink-0 whitespace-nowrap font-mono text-[0.65rem] tracking-wide transition-colors sm:text-xs',
+            pathMatchesSanctuary(pathname)
+              ? 'text-ink font-semibold'
+              : 'text-ink/55 hover:text-ink/90',
+          )}
+        >
+          {t('sanctuary')}
+        </Link>
 
         {status !== 'loading' && (
           isLoggedIn ? (

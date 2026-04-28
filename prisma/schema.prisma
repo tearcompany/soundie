@@ -70,6 +70,7 @@ model Player {
   teardropFocusSessions TeardropFocusSession[]
   teardropUnlocks TeardropCardUnlock[]
   teardropProgress TeardropProgress?
+  mindfulMoments MindfulMomentLog[]
 }
 
 model Soundie {
@@ -364,6 +365,19 @@ model NoteCaption {
 
   @@unique([noteId, locale, orderIndex])
   @@index([noteId])
+}
+
+model MindfulMomentLog {
+  id          String   @id @default(cuid())
+  playerId    String
+  type        String   @default("fly")
+  noteId      String?
+  completedAt DateTime @default(now())
+
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, completedAt])
+  @@index([playerId, type])
 }
 
 model LoreFragment {

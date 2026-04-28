@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useSoundieStore } from '@/lib/soundie-store'
+import { EMPTY_NOTE_PROGRESS, useSoundieStore } from '@/lib/soundie-store'
 import { DEFAULT_NOTE_ID, getEmotionById, getNoteById } from '@/lib/notes'
 import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
@@ -77,18 +77,82 @@ function groupCardsByPhase<T extends DealerTeardropCard>(cards: T[]) {
   }))
 }
 
+interface SessionShareBlockProps {
+  noteId: string
+  locale: string
+  color: string
+  onDismiss: () => void
+  trackShare: (args: { name: 'share_click' | 'share_complete' | 'share_copy_fallback'; playerId?: string | null; meta?: unknown }) => void
+  playerId: string | null
+  tShare: string
+  tDone: string
+  tCopied: string
+}
+
+function SessionShareBlock({ noteId, locale, color, onDismiss, trackShare, playerId, tShare, tDone, tCopied }: SessionShareBlockProps) {
+  const [done, setDone] = useState(false)
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}/${locale}`
+    : `/${locale}`
+  const meta = { noteId, surface: 'session_complete' }
+
+  const handleShare = async () => {
+    trackShare({ name: 'share_click', playerId, meta })
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Soundie', text: tShare, url })
+        trackShare({ name: 'share_complete', playerId, meta })
+        setDone(true)
+      } catch {
+        // user cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(url)
+      trackShare({ name: 'share_copy_fallback', playerId, meta })
+      setDone(true)
+      toast.success(tCopied, { duration: 2000 })
+    }
+  }
+
+  if (done) {
+    return (
+      <p className="mb-3 font-mono text-xs text-ink-muted animate-in fade-in duration-300">
+        {tDone}
+      </p>
+    )
+  }
+
+  return (
+    <div className="mb-4 flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <button
+        onClick={handleShare}
+        className="w-full rounded-full px-6 py-2.5 font-mono text-sm font-semibold transition-all duration-200"
+        style={{ backgroundColor: color, color: '#fff' }}
+      >
+        {tShare}
+      </button>
+      <button
+        onClick={onDismiss}
+        className="font-mono text-[0.65rem] text-ink-muted hover:text-ink transition-colors"
+      >
+        ✕
+      </button>
+    </div>
+  )
+}
+
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
   const t = useTranslations('noteCreature')
 
-  const {
-    activeNoteId,
-    progress,
-    currentSession,
-    startSession,
-    updateSessionElapsed,
-    completeSession,
-  } = useSoundieStore()
+  const activeNoteId = useSoundieStore((s) => s.activeNoteId)
+  const progress = useSoundieStore(
+    (s) => s.progressByNoteId[s.activeNoteId] ?? EMPTY_NOTE_PROGRESS
+  )
+  const currentSession = useSoundieStore((s) => s.currentSession)
+  const startSession = useSoundieStore((s) => s.startSession)
+  const updateSessionElapsed = useSoundieStore((s) => s.updateSessionElapsed)
+  const completeSession = useSoundieStore((s) => s.completeSession)
   const dailyGiftGlow = useSoundieStore((s) => s.dailyGiftGlow)
   const dailyGiftForNoteId = useSoundieStore((s) => s.dailyGiftForNoteId)
   const dailyGiftCaption = useSoundieStore((s) => s.dailyGiftCaption)
@@ -102,6 +166,7 @@ export function NoteCreature() {
   const [pulseDepth, setPulseDepth] = useState(0)
   const [orbEvolution, setOrbEvolution] = useState(0)
   const [sacredClimax, setSacredClimax] = useState(false)
+  const [sessionJustCompleted, setSessionJustCompleted] = useState(false)
   const noteQuery = trpc.note.getById.useQuery(
     { id: activeNoteId, locale },
     { retry: false }
@@ -122,15 +187,19 @@ export function NoteCreature() {
 
   const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
   const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
+  const { mutate: trackShare } = trpc.analytics.record.useMutation()
   const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation()
   const { mutate: completeRemoteSession } = trpc.soundie.completeSession.useMutation({
     onSuccess: (result) => {
       const row = result.soundie
-      syncFromRemote({
-        totalListenTime: row.totalListenTime,
-        level: row.level,
-        loreUnlocked: row.loreUnlocked,
-      })
+      syncFromRemote(
+        {
+          totalListenTime: row.totalListenTime,
+          level: row.level,
+          loreUnlocked: row.loreUnlocked,
+        },
+        row.noteId
+      )
       sessionsQuery.refetch()
     },
   })
@@ -259,12 +328,6 @@ export function NoteCreature() {
     () => teardropCardsInDealerOrder.slice(0, dealerRevealCount),
     [teardropCardsInDealerOrder, dealerRevealCount],
   )
-  const dealerLine =
-    dealerRevealCount === 0
-      ? 'The deck remembers you.'
-      : dealerRevealCount === 1
-        ? 'A card steps forward.'
-        : 'Another truth arrives.'
   const selectedTeardropCard = useMemo(() => {
     if (revealedTeardropCards.length === 0 || !selectedTeardropCardId) return null
     return revealedTeardropCards.find((card) => card.id === selectedTeardropCardId) ?? null
@@ -639,6 +702,7 @@ export function NoteCreature() {
         const credited = d
         updateSessionElapsed(credited)
         completeSession()
+        setSessionJustCompleted(true)
         if (credited >= MIRACLE_SESSION_SECONDS) {
           setGrowthPulse(true)
           setTimeout(() => setGrowthPulse(false), 1400)
@@ -1001,9 +1065,6 @@ export function NoteCreature() {
                     )}
                   >
                     <div className="overflow-hidden">
-                      <p className="mb-3 text-center font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted/80">
-                        {dealerLine}
-                      </p>
                       <div className="space-y-4">
                         {teardropPhaseGroups.map((group) => {
                           const groupRevealed = group.cards.filter((card) =>
@@ -1201,6 +1262,19 @@ export function NoteCreature() {
 
           <div className="border-t border-pearl-border pt-5 text-center">
             <p className="font-mono text-xs text-ink-muted mb-3">{t('listeningSession')}</p>
+            {sessionJustCompleted && !currentSession.active && (
+              <SessionShareBlock
+                noteId={activeNoteId}
+                locale={locale}
+                color={c}
+                onDismiss={() => setSessionJustCompleted(false)}
+                trackShare={trackShare}
+                playerId={playerId}
+                tShare={t('sessionDoneShare')}
+                tDone={t('sessionDoneShareDone')}
+                tCopied={t('sessionDoneShareCopied')}
+              />
+            )}
             {currentSession.active && (
               <div className="mb-3">
                 <div className="bg-pearl rounded-full h-1 overflow-hidden">

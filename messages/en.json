@@ -146,6 +146,9 @@
     "sacredLine": "You stayed. The note remembers.",
     "stopListening": "Stop",
     "beginSession": "Listen",
+    "sessionDoneShare": "Share your resonance",
+    "sessionDoneShareDone": "Shared.",
+    "sessionDoneShareCopied": "Link copied.",
     "journey": "Journey",
     "sessions": "sessions",
     "totalListened": "total listened",
@@ -404,6 +407,27 @@
       "hopeful": "Hopeful"
     }
   },
+  "echoMoment": {
+    "kicker": "A visitor",
+    "invite": "A small being returned to your space.",
+    "inviteSub": "Can you remain kind for one minute?",
+    "begin": "Begin echo moment",
+    "later": "Later",
+    "text0": "It trusts your stillness.",
+    "text1": "Do not chase what visits.",
+    "text2": "Notice movement without owning it.",
+    "text3": "Small lives also seek warmth.",
+    "doneTitle": "You remained present with something small.",
+    "doneReward": "+1 Echo resonance",
+    "close": "Close",
+    "momentsTitle": "Moments of presence",
+    "momentsWitnessed": "Moments witnessed",
+    "momentsLastVisitor": "Last visitor",
+    "momentsStillness": "Stillness offered",
+    "momentsStillnessValue": "{n} min",
+    "momentsFly": "Fly",
+    "momentsNone": "No moments yet."
+  },
   "teardropPage": {
     "kicker": "Teardrop Gallery",
     "title": "Artifacts of\n Presence",
@@ -416,6 +440,8 @@
     "progress": "Unlocked: {unlocked}/{total}",
     "empty": "Here story begins.",
     "unknownPhase": "phase",
-    "phaseCardCount": "Unlocked in this phase: {n}"
+    "phaseCardCount": "Unlocked in this phase: {n}",
+    "lightLabel": "In light",
+    "shadowLabel": "Shadow"
   }
 }

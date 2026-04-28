@@ -146,6 +146,9 @@
     "sacredLine": "You stayed. The note remembers.",
     "stopListening": "Stop",
     "beginSession": "Słuchaj",
+    "sessionDoneShare": "Podziel się rezonansem",
+    "sessionDoneShareDone": "Udostępniono.",
+    "sessionDoneShareCopied": "Link skopiowany.",
     "journey": "Podróż",
     "sessions": "sesji",
     "totalListened": "łącznie słuchania",
@@ -332,6 +335,27 @@
       "hopeful": "Nadzieja"
     }
   },
+  "echoMoment": {
+    "kicker": "Odwiedziny",
+    "invite": "Małe stworzenie wróciło w twoje miejsce.",
+    "inviteSub": "Czy potrafisz pozostać spokojny przez jedną minutę?",
+    "begin": "Rozpocznij chwilę obecności",
+    "later": "Później",
+    "text0": "Ufa twojemu spokojowi.",
+    "text1": "Nie gonisz tego, co odwiedza.",
+    "text2": "Zauważasz ruch bez przywłaszczania.",
+    "text3": "Małe życie też szuka ciepła.",
+    "doneTitle": "Pozostałeś obecny przy czymś małym.",
+    "doneReward": "+1 rezonans Echo",
+    "close": "Zamknij",
+    "momentsTitle": "Chwile obecności",
+    "momentsWitnessed": "Świadkowane momenty",
+    "momentsLastVisitor": "Ostatni gość",
+    "momentsStillness": "Cisza ofiarowana",
+    "momentsStillnessValue": "{n} min",
+    "momentsFly": "Mucha",
+    "momentsNone": "Jeszcze żadnych chwil."
+  },
   "teardropPage": {
     "kicker": "Galeria Teardrop",
     "title": "Artefakty oddechu",
@@ -344,6 +368,8 @@
     "progress": "Odblokowane: {unlocked}/{total}",
     "empty": "Tu zaczyna się historia.",
     "unknownPhase": "faza",
-    "phaseCardCount": "Odsłonięte w tej fazie: {n}"
+    "phaseCardCount": "Odsłonięte w tej fazie: {n}",
+    "lightLabel": "W świetle",
+    "shadowLabel": "Cień"
   }
 }

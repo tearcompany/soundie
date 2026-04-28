@@ -26,7 +26,7 @@ const DailyGiftGlowSchema = z.enum(['dawn', 'dusk', 'nocturne'])
 const SoundieStateSchema = z.object({
   activeNoteId: z.string(),
   playerId: z.string().cuid().nullable(),
-  progress: ProgressSchema,
+  progressByNoteId: z.record(z.string(), ProgressSchema),
   currentSession: SessionSchema,
   teardropShelfOpen: z.boolean(),
   dailyGiftGlow: DailyGiftGlowSchema.nullable(),
@@ -40,7 +40,7 @@ export type Session = z.infer<typeof SessionSchema>
 export type SoundieState = z.infer<typeof SoundieStateSchema>
 type PersistedSoundieState = Pick<
   SoundieState,
-  'activeNoteId' | 'playerId' | 'progress' | 'currentSession' | 'teardropShelfOpen'
+  'activeNoteId' | 'playerId' | 'progressByNoteId' | 'currentSession' | 'teardropShelfOpen'
 >
 
 interface SoundieStore extends SoundieState {
@@ -64,19 +64,24 @@ interface SoundieStore extends SoundieState {
   sessionMoodReaction: string | null
   setSessionMoodReaction: (v: string | null) => void
   markHydrated: () => void
-  syncFromRemote: (row: { totalListenTime: number; level: number; loreUnlocked: number } | null) => void
+  syncFromRemote: (
+    row: { totalListenTime: number; level: number; loreUnlocked: number } | null,
+    noteId: string
+  ) => void
   reset: () => void
 }
+
+export const EMPTY_NOTE_PROGRESS: Progress = Object.freeze({
+  level: 1,
+  totalListenTime: 0,
+  loreUnlocked: 0,
+  lastSeen: '1970-01-01T00:00:00.000Z',
+})
 
 const INITIAL_STATE: SoundieState = {
   activeNoteId: DEFAULT_NOTE_ID,
   playerId: null,
-  progress: {
-    level: 1,
-    totalListenTime: 0,
-    loreUnlocked: 0,
-    lastSeen: new Date().toISOString(),
-  },
+  progressByNoteId: {},
   currentSession: {
     active: false,
     startedAt: 0,
@@ -226,18 +231,23 @@ export const useSoundieStore = create<SoundieStore>()(
 
       completeSession: () => {
         const state = get()
+        const noteId = state.activeNoteId
         const sessionTime = state.currentSession.elapsed
-        const newTotalTime = state.progress.totalListenTime + sessionTime
+        const prev = state.progressByNoteId[noteId] ?? EMPTY_NOTE_PROGRESS
+        const newTotalTime = prev.totalListenTime + sessionTime
         const newLevel = levelFromTotalListenSeconds(newTotalTime)
         const newLoreUnlocked = loreUnlockedFromTotalListenSeconds(newTotalTime)
 
         set({
-          progress: {
-            ...state.progress,
-            totalListenTime: newTotalTime,
-            level: newLevel,
-            loreUnlocked: newLoreUnlocked,
-            lastSeen: new Date().toISOString(),
+          progressByNoteId: {
+            ...state.progressByNoteId,
+            [noteId]: {
+              ...prev,
+              totalListenTime: newTotalTime,
+              level: newLevel,
+              loreUnlocked: newLoreUnlocked,
+              lastSeen: new Date().toISOString(),
+            },
           },
           currentSession: {
             ...state.currentSession,
@@ -248,34 +258,50 @@ export const useSoundieStore = create<SoundieStore>()(
       },
 
       unlockLore: () => {
-        set((state) => ({
-          progress: {
-            ...state.progress,
-            loreUnlocked: Math.min(5, state.progress.loreUnlocked + 1),
-          },
-        }))
+        set((state) => {
+          const noteId = state.activeNoteId
+          const prev = state.progressByNoteId[noteId] ?? EMPTY_NOTE_PROGRESS
+          return {
+            progressByNoteId: {
+              ...state.progressByNoteId,
+              [noteId]: {
+                ...prev,
+                loreUnlocked: Math.min(5, prev.loreUnlocked + 1),
+              },
+            },
+          }
+        })
       },
 
       ensureLoreUnlockedAtLeast: (target: number) => {
-        set((state) => ({
-          progress: {
-            ...state.progress,
-            loreUnlocked: Math.max(
-              state.progress.loreUnlocked,
-              Math.min(5, Math.max(0, Math.floor(target))),
-            ),
-          },
-        }))
+        set((state) => {
+          const noteId = state.activeNoteId
+          const prev = state.progressByNoteId[noteId] ?? EMPTY_NOTE_PROGRESS
+          return {
+            progressByNoteId: {
+              ...state.progressByNoteId,
+              [noteId]: {
+                ...prev,
+                loreUnlocked: Math.max(
+                  prev.loreUnlocked,
+                  Math.min(5, Math.max(0, Math.floor(target))),
+                ),
+              },
+            },
+          }
+        })
       },
 
-      syncFromRemote: (row) => {
+      syncFromRemote: (row, noteId) => {
         set((state) => ({
-          progress: {
-            ...state.progress,
-            totalListenTime: row?.totalListenTime ?? 0,
-            level: row?.level ?? 1,
-            loreUnlocked: row?.loreUnlocked ?? 0,
-            lastSeen: new Date().toISOString(),
+          progressByNoteId: {
+            ...state.progressByNoteId,
+            [noteId]: {
+              totalListenTime: row?.totalListenTime ?? 0,
+              level: row?.level ?? 1,
+              loreUnlocked: row?.loreUnlocked ?? 0,
+              lastSeen: new Date().toISOString(),
+            },
           },
         }))
       },
@@ -293,11 +319,11 @@ export const useSoundieStore = create<SoundieStore>()(
     }),
     {
       name: 'soundie-storage',
-      version: 5,
+      version: 6,
       partialize: (state): PersistedSoundieState => ({
         activeNoteId: state.activeNoteId,
         playerId: state.playerId,
-        progress: state.progress,
+        progressByNoteId: state.progressByNoteId,
         currentSession: state.currentSession,
         teardropShelfOpen: state.teardropShelfOpen,
       }),
@@ -305,49 +331,64 @@ export const useSoundieStore = create<SoundieStore>()(
         state?.markHydrated()
       },
       migrate: (persisted, version) => {
+        let p: object = { ...(persisted as object) }
+
         if (version < 2) {
-          const p = persisted as V1StateSlice
-          const n = p?.note
-          return {
-            activeNoteId:
-              n?.id && isValidNoteId(n.id) ? n.id : DEFAULT_NOTE_ID,
+          const raw = persisted as V1StateSlice
+          const n = raw?.note
+          const activeNoteId =
+            n?.id && isValidNoteId(n.id) ? n.id : DEFAULT_NOTE_ID
+          const prog: Progress = {
+            level: n?.level ?? 1,
+            totalListenTime: n?.totalListenTime ?? 0,
+            loreUnlocked: n?.loreUnlocked ?? 0,
+            lastSeen: n?.lastSeen ?? new Date().toISOString(),
+          }
+          p = {
+            ...INITIAL_STATE,
+            activeNoteId,
             playerId: null,
-            progress: {
-              level: n?.level ?? 1,
-              totalListenTime: n?.totalListenTime ?? 0,
-              loreUnlocked: n?.loreUnlocked ?? 0,
-              lastSeen: n?.lastSeen ?? new Date().toISOString(),
-            },
-            currentSession: p?.currentSession ?? {
+            progressByNoteId: { [activeNoteId]: prog },
+            currentSession: raw?.currentSession ?? {
               ...INITIAL_STATE.currentSession,
             },
             teardropShelfOpen: false,
           }
         }
         if (version < 3) {
-          const p = persisted as SoundieState & { playerId?: string | null }
-          return { ...p, playerId: p.playerId ?? null, teardropShelfOpen: false }
+          const cur = p as SoundieState & { playerId?: string | null }
+          p = { ...cur, playerId: cur.playerId ?? null, teardropShelfOpen: false }
         }
         if (version < 4) {
-          const p = persisted as SoundieState & { teardropShelfOpen?: boolean }
-          return { ...p, teardropShelfOpen: p.teardropShelfOpen ?? false }
+          const cur = p as SoundieState & { teardropShelfOpen?: boolean }
+          p = { ...cur, teardropShelfOpen: cur.teardropShelfOpen ?? false }
         }
         if (version < 5) {
-          const p = persisted as SoundieState & {
+          const cur = p as SoundieState & {
             dailyGiftGlow?: null
             dailyGiftForNoteId?: null
             dailyGiftCaption?: null
             pendingListenFromDailyGift?: boolean
           }
-          return {
-            ...p,
-            dailyGiftGlow: p.dailyGiftGlow ?? null,
-            dailyGiftForNoteId: p.dailyGiftForNoteId ?? null,
-            dailyGiftCaption: p.dailyGiftCaption ?? null,
-            pendingListenFromDailyGift: p.pendingListenFromDailyGift ?? false,
+          p = {
+            ...cur,
+            dailyGiftGlow: cur.dailyGiftGlow ?? null,
+            dailyGiftForNoteId: cur.dailyGiftForNoteId ?? null,
+            dailyGiftCaption: cur.dailyGiftCaption ?? null,
+            pendingListenFromDailyGift: cur.pendingListenFromDailyGift ?? false,
           }
         }
-        return persisted as SoundieState
+        if (version < 6) {
+          const cur = p as SoundieState & { progress?: Progress }
+          const aid = cur.activeNoteId ?? DEFAULT_NOTE_ID
+          const next: Record<string, Progress> = { ...(cur.progressByNoteId ?? {}) }
+          if (cur.progress && next[aid] === undefined) {
+            next[aid] = cur.progress
+          }
+          const { progress: _drop, ...rest } = cur as SoundieState & { progress?: Progress }
+          p = { ...rest, progressByNoteId: next }
+        }
+        return p as SoundieState
       },
     }
   )

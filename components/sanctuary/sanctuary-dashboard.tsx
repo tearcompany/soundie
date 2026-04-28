@@ -5,18 +5,24 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { trpc } from '@/lib/trpc/react'
 import { useSoundieStore } from '@/lib/soundie-store'
-import { Link, usePathname } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { EmotionBubblePack } from '@/components/sanctuary/emotion-bubble-pack'
 import { NoteProgressCard } from '@/components/sanctuary/note-progress-card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import { EchoMomentFly } from '@/components/echo-moment-fly'
+import { useEchoMomentTrigger } from '@/hooks/use-echo-moment-trigger'
 
 export function SanctuaryDashboard() {
   const t = useTranslations('sanctuary')
+  const te = useTranslations('echoMoment')
   const locale = useLocale() as 'en' | 'pl'
   const playerId = useSoundieStore((s) => s.playerId)
+  const { shouldShow: showEchoMoment, acknowledge: dismissEchoMoment } = useEchoMomentTrigger()
+  const activeNoteId = useSoundieStore((s) => s.activeNoteId)
   const hasHydrated = useSoundieStore((s) => s.hasHydrated)
-  const pathname = usePathname()
   const searchParams = useSearchParams()
+  const highlightTeardropSlug = searchParams.get('teardrop')
+  const router = useRouter()
   const [bounds, setBounds] = useState<{ dayStartIso: string; dayEndIso: string } | null>(null)
   const [shareFeedback, setShareFeedback] = useState<'idle' | 'done' | 'copied' | 'failed'>('idle')
   const trackEvent = trpc.analytics.record.useMutation()
@@ -41,40 +47,39 @@ export function SanctuaryDashboard() {
       enabled: hasHydrated && Boolean(playerId) && Boolean(bounds),
     },
   )
+  const noteIdForTeardrop = q.data?.todayClaim?.noteId ?? activeNoteId
   const teardropMappedForNoteQuery = trpc.teardrop.getMappedForNote.useQuery(
     {
       playerId: playerId!,
-      noteId: q.data?.todayClaim?.noteId ?? 'C',
+      noteId: noteIdForTeardrop,
       locale,
     },
     {
-      enabled: hasHydrated && Boolean(playerId) && Boolean(q.data?.todayClaim?.noteId),
+      enabled: hasHydrated && Boolean(playerId),
       staleTime: 15_000,
     },
   )
   const teardropProgressQuery = trpc.teardrop.getProgress.useQuery(
     {
       playerId: playerId!,
-      noteId: q.data?.todayClaim?.noteId ?? 'C',
+      noteId: noteIdForTeardrop,
     },
     {
-      enabled: hasHydrated && Boolean(playerId) && Boolean(q.data?.todayClaim?.noteId),
+      enabled: hasHydrated && Boolean(playerId),
       staleTime: 15_000,
     },
+  )
+  const mindfulStatsQuery = trpc.mindfulMoment.getStats.useQuery(
+    { playerId: playerId! },
+    { enabled: hasHydrated && Boolean(playerId), staleTime: 60_000 },
   )
 
   const hasAnyTime = (q.data?.totalSecondsInRange ?? 0) > 0
   const hasNotes = (q.data?.soundieProgress.length ?? 0) > 0
   const todayClaimTrackRef = useRef<string | null>(null)
-  const todayTeardropHref =
-    q.data?.todayClaim?.teardrop?.slug
-      ? (() => {
-          const next = new URLSearchParams(searchParams.toString())
-          next.set('teardrop', q.data.todayClaim.teardrop.slug)
-          const qs = next.toString()
-          return qs ? `${pathname}?${qs}` : pathname
-        })()
-      : null
+  const todayTeardropHref = q.data?.todayClaim?.teardrop?.slug
+    ? `/teardrop?teardrop=${encodeURIComponent(q.data.todayClaim.teardrop.slug)}`
+    : null
 
   const onShareToday = async () => {
     if (!playerId || !q.data) return
@@ -142,6 +147,13 @@ export function SanctuaryDashboard() {
       },
     })
   }, [playerId, q.data?.todayClaim, trackEvent])
+
+  useEffect(() => {
+    if (!highlightTeardropSlug) return
+    router.replace(
+      `/teardrop?teardrop=${encodeURIComponent(highlightTeardropSlug)}`
+    )
+  }, [highlightTeardropSlug, router])
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-16 text-ink">
@@ -279,7 +291,7 @@ export function SanctuaryDashboard() {
             </div>
           )}
 
-          {q.data.todayClaim?.teardrop && teardropProgressQuery.data && teardropMappedForNoteQuery.data && (() => {
+          {teardropProgressQuery.data && teardropMappedForNoteQuery.data && (() => {
             const mappedData = teardropMappedForNoteQuery.data
             const phaseTitleBySlug = Object.fromEntries(
               mappedData.phases.map((p) => [p.slug, locale === 'pl' ? p.titlePl : p.titleEn])
@@ -366,9 +378,46 @@ export function SanctuaryDashboard() {
             </div>
           )}
 
+          {playerId && mindfulStatsQuery.data && (
+            <div>
+              <h2 className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
+                {te('momentsTitle')}
+              </h2>
+              {mindfulStatsQuery.data.count === 0 ? (
+                <p className="text-lora mt-2 text-sm text-ink/60">{te('momentsNone')}</p>
+              ) : (
+                <div className="mt-2 grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
+                      {te('momentsWitnessed')}
+                    </p>
+                    <p className="mt-0.5 text-lora text-2xl text-ink">{mindfulStatsQuery.data.count}</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
+                      {te('momentsLastVisitor')}
+                    </p>
+                    <p className="mt-0.5 text-lora text-sm text-ink/80">
+                      {mindfulStatsQuery.data.lastType === 'fly' ? te('momentsFly') : (mindfulStatsQuery.data.lastType ?? '—')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
+                      {te('momentsStillness')}
+                    </p>
+                    <p className="mt-0.5 text-lora text-sm text-ink/80">
+                      {te('momentsStillnessValue', { n: mindfulStatsQuery.data.totalMinutes })}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       )}
 
+      {showEchoMoment && <EchoMomentFly onDismiss={dismissEchoMoment} />}
     </div>
   )
 }

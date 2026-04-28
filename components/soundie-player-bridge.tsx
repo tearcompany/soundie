@@ -46,15 +46,18 @@ export function SoundiePlayerBridge() {
     if (!hasHydrated) return
     if (!progressQuery.isSuccess) return
     if (!progressQuery.data) {
-      syncFromRemote(null)
+      syncFromRemote(null, activeNoteId)
       return
     }
-    syncFromRemote({
-      totalListenTime: progressQuery.data.totalListenTime,
-      level: progressQuery.data.level,
-      loreUnlocked: progressQuery.data.loreUnlocked,
-    })
-  }, [hasHydrated, progressQuery.isSuccess, progressQuery.data, syncFromRemote])
+    syncFromRemote(
+      {
+        totalListenTime: progressQuery.data.totalListenTime,
+        level: progressQuery.data.level,
+        loreUnlocked: progressQuery.data.loreUnlocked,
+      },
+      activeNoteId
+    )
+  }, [hasHydrated, progressQuery.isSuccess, progressQuery.data, syncFromRemote, activeNoteId])
 
   return null
 }
