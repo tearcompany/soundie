@@ -45,7 +45,7 @@ export function SiteNav() {
           <img src="/icon.svg" alt="Soundie" width={24} height={24} aria-hidden className="h-12 w-12 shrink-0" />
           {t('brand')}
         </Link>
-        <nav className="flex min-w-0 items-center gap-1.5 sm:gap-3" aria-label={t('mainNav')}>
+        <nav className="hidden min-w-0 items-center gap-1.5 sm:flex sm:gap-3" aria-label={t('mainNav')}>
           {HREFS.map((href) => {
             const on = pathMatches(pathname, href)
             return (
@@ -71,7 +71,7 @@ export function SiteNav() {
           href="/sanctuary"
           aria-current={pathMatchesSanctuary(pathname) ? 'page' : undefined}
           className={cn(
-            'shrink-0 whitespace-nowrap font-mono text-[0.65rem] tracking-wide transition-colors sm:text-xs',
+            'hidden shrink-0 whitespace-nowrap font-mono text-[0.65rem] tracking-wide transition-colors sm:inline sm:text-xs',
             pathMatchesSanctuary(pathname)
               ? 'text-ink font-semibold'
               : 'text-ink/55 hover:text-ink/90',
@@ -85,7 +85,7 @@ export function SiteNav() {
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/' })}
-              className="shrink-0 font-mono text-[0.65rem] tracking-wide text-ink/45 transition-colors hover:text-ink/80 sm:text-xs"
+              className="hidden shrink-0 font-mono text-[0.65rem] tracking-wide text-ink/45 transition-colors hover:text-ink/80 sm:inline sm:text-xs"
             >
               {t('signOut')}
             </button>
@@ -93,7 +93,7 @@ export function SiteNav() {
             <Link
               href="/login"
               className={cn(
-                'shrink-0 font-mono text-[0.65rem] tracking-wide transition-colors sm:text-xs',
+                'hidden shrink-0 font-mono text-[0.65rem] tracking-wide transition-colors sm:inline sm:text-xs',
                 pathMatches(pathname, '/' as Href)
                   ? 'text-ink/55 hover:text-ink/90'
                   : 'text-ink/55 hover:text-ink/90',
