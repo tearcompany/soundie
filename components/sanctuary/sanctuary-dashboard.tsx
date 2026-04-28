@@ -11,6 +11,7 @@ import { NoteProgressCard } from '@/components/sanctuary/note-progress-card'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
 import { EchoMomentFly } from '@/components/echo-moment-fly'
 import { useEchoMomentTrigger } from '@/hooks/use-echo-moment-trigger'
+import { NoteHeatmap } from '@/components/sanctuary/note-heatmap'
 
 export function SanctuaryDashboard() {
   const t = useTranslations('sanctuary')
@@ -39,6 +40,7 @@ export function SanctuaryDashboard() {
     {
       playerId: playerId!,
       rangeDays: 14,
+      heatmapDays: 84,
       dayStartIso: bounds?.dayStartIso,
       dayEndIso: bounds?.dayEndIso,
       locale,
@@ -404,6 +406,22 @@ export function SanctuaryDashboard() {
               </div>
             )
           })()}
+
+          {q.data.noteHeatmap.notes.length > 0 && (
+            <div>
+              <h2 className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
+                {locale === 'pl' ? 'Aktywność nut · 12 tygodni' : 'Note activity · 12 weeks'}
+              </h2>
+              <div className="mt-3 rounded-xl border border-pearl-border bg-pearl-dark px-4 py-4">
+                <NoteHeatmap
+                  cells={q.data.noteHeatmap.cells}
+                  notes={q.data.noteHeatmap.notes}
+                  days={84}
+                  locale={locale}
+                />
+              </div>
+            </div>
+          )}
 
           {hasNotes && (
             <div>

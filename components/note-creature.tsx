@@ -476,75 +476,66 @@ export function NoteCreature() {
     prevLoreRef.current = unlockedLoreCount
   }, [unlockedLoreCount, loreCarouselApi])
 
-  // Initialize Web Audio
-  useEffect(() => {
-    const initAudio = async () => {
-      if (audioRef.current.ctx) return
+  const ensureAudioGraph = async (): Promise<boolean> => {
+    if (!audioRef.current.ctx) {
+      const AudioContextClass: typeof AudioContext =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const audioContext = new AudioContextClass()
 
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-
-      // Create gain node for volume control
       const gainNode = audioContext.createGain()
-      gainNode.gain.value = 0.2 // Soft volume
+      gainNode.gain.value = 0.2
       gainNode.connect(audioContext.destination)
 
-      // Create convolver for subtle reverb
       const convolverNode = audioContext.createConvolver()
       convolverNode.connect(gainNode)
 
-      // Create a simple impulse response for reverb
       const rate = audioContext.sampleRate
-      const length = rate * 2 // 2 seconds of reverb
+      const length = rate * 2
       const impulseResponse = audioContext.createBuffer(2, length, rate)
       const left = impulseResponse.getChannelData(0)
       const right = impulseResponse.getChannelData(1)
-
       for (let i = 0; i < length; i++) {
-        left[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2)
-        right[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2)
+        const decay = Math.pow(1 - i / length, 2)
+        left[i] = (Math.random() * 2 - 1) * decay
+        right[i] = (Math.random() * 2 - 1) * decay
       }
-
       convolverNode.buffer = impulseResponse
 
-      audioRef.current = {
-        ctx: audioContext,
-        oscillator: null,
-        gain: gainNode,
-        convolver: convolverNode,
-      }
+      audioRef.current = { ctx: audioContext, oscillator: null, gain: gainNode, convolver: convolverNode }
     }
 
-    initAudio().catch(console.error)
-  }, [])
+    const ctx = audioRef.current.ctx!
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume()
+      } catch {
+        return false
+      }
+    }
+    return true
+  }
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
   }, [isPlaying])
 
-  // Play/pause audio
   const toggleAudio = () => {
     if (isPlaying) {
       pauseAudio()
     } else {
-      playAudio()
+      void playAudio()
     }
   }
 
-  const playAudio = () => {
-    const ctx = audioRef.current.ctx
-    if (!ctx) return
+  const playAudio = async () => {
+    const ready = await ensureAudioGraph()
+    if (!ready) return
 
-    // Resume context if suspended
-    if (ctx.state === 'suspended') {
-      ctx.resume()
-    }
-
-    // Create new oscillator
+    const ctx = audioRef.current.ctx!
     const osc = ctx.createOscillator()
     osc.type = 'sine'
     osc.frequency.value = def.frequency
 
-    // Create envelope for smooth start
     const gain = audioRef.current.gain!
     gain.gain.setValueAtTime(0, ctx.currentTime)
     gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.5)
@@ -676,8 +667,7 @@ export function NoteCreature() {
   ])
 
   useEffect(() => {
-    const ctx = audioRef.current.ctx
-    const osc = audioRef.current.oscillator
+    const { ctx, oscillator: osc } = audioRef.current
     if (osc && ctx) {
       osc.frequency.setValueAtTime(def.frequency, ctx.currentTime)
     }

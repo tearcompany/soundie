@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { NOTE_LIST, EMOTIONS } from '../lib/notes'
 import { TEARDROP_VESSEL_BOOK_PRIMARY_SLUG } from '../lib/teardrop-ksiega'
 import enMessages from '../messages/en.json'
@@ -277,8 +277,23 @@ async function main() {
 
   let order = 0
   for (const n of NOTE_LIST) {
-    const noteData = {
+    const noteCreateData: Prisma.NoteUncheckedCreateInput = {
       id: n.id,
+      short: n.short,
+      name: n.name,
+      frequency: n.frequency,
+      urlKey: n.urlKey,
+      locked: n.locked,
+      healing: n.healing,
+      chromaHex: n.chromaHex,
+      synestheticTitlePl: n.synestheticTitlePl,
+      synestheticLinePl: n.synestheticLinePl,
+      element: n.element,
+      sortOrder: order,
+      emotionId: n.emotionId,
+      healingStyle: n.healingStyle,
+    }
+    const noteUpdateData: Prisma.NoteUncheckedUpdateInput = {
       short: n.short,
       name: n.name,
       frequency: n.frequency,
@@ -295,8 +310,8 @@ async function main() {
     }
     await prisma.note.upsert({
       where: { id: n.id },
-      create: noteData as any,
-      update: noteData as any,
+      create: noteCreateData,
+      update: noteUpdateData,
     })
 
     await prisma.$executeRaw`DELETE FROM "LoreFragment" WHERE "noteId" = ${n.id}`

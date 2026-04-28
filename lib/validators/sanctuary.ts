@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const sanctuaryDiagramInput = z.object({
   playerId: z.string().cuid(),
   rangeDays: z.number().int().min(3).max(90).default(14),
+  heatmapDays: z.number().int().min(7).max(168).default(84).optional(),
   dayStartIso: z.string().optional(),
   dayEndIso: z.string().optional(),
   locale: z.enum(['en', 'pl']).optional(),
@@ -52,11 +53,29 @@ const todayClaimOut = z
   })
   .nullable()
 
+export const noteHeatmapOutput = z.object({
+  cells: z.array(
+    z.object({
+      noteId: z.string(),
+      dateStr: z.string(),
+      minutes: z.number().int().nonnegative(),
+    })
+  ),
+  notes: z.array(
+    z.object({
+      noteId: z.string(),
+      shortName: z.string(),
+      chromaHex: z.string(),
+    })
+  ),
+})
+
 export const sanctuaryDiagramOutput = z.object({
   releaseByEmotion: z.array(emotionRowOut),
   moodInRange: z.array(moodPointOut),
   minutesToday: z.number().int().nonnegative().nullable(),
   totalSecondsInRange: z.number().int().nonnegative(),
   soundieProgress: z.array(soundieProgressRowOut),
+  noteHeatmap: noteHeatmapOutput,
   todayClaim: todayClaimOut,
 })

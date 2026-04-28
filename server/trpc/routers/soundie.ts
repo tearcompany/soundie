@@ -133,20 +133,26 @@ export const soundieRouter = router({
             noteId: input.noteId,
           },
         },
-        include: {
-          sessions: {
-            orderBy: { completedAt: 'desc' },
-            take: 50,
-            select: { id: true, duration: true, completedAt: true },
-          },
-        },
+        select: { id: true },
       })
       if (!soundie) return { sessions: [], totalCount: 0, totalSeconds: 0 }
-      const total = soundie.sessions.reduce((acc, s) => acc + s.duration, 0)
+      const [sessions, totals] = await Promise.all([
+        ctx.db.listenSession.findMany({
+          where: { soundieId: soundie.id },
+          orderBy: { completedAt: 'desc' },
+          take: 50,
+          select: { id: true, duration: true, completedAt: true },
+        }),
+        ctx.db.listenSession.aggregate({
+          where: { soundieId: soundie.id },
+          _count: { _all: true },
+          _sum: { duration: true },
+        }),
+      ])
       return {
-        sessions: soundie.sessions,
-        totalCount: soundie.sessions.length,
-        totalSeconds: total,
+        sessions,
+        totalCount: totals._count._all,
+        totalSeconds: totals._sum.duration ?? 0,
       }
     }),
 

@@ -3,7 +3,7 @@ import {
   sanctuaryDiagramInput,
   sanctuaryDiagramOutput,
 } from '@/lib/validators/sanctuary'
-import { getNoteById } from '@/lib/notes'
+import { getNoteById, NOTE_LIST } from '@/lib/notes'
 
 function pickLocaleForTexts(
   texts: Array<{ locale: string; field: string; content: string }>,
@@ -29,6 +29,10 @@ export const sanctuaryRouter = router({
       const since = new Date()
       since.setDate(since.getDate() - input.rangeDays)
       since.setHours(0, 0, 0, 0)
+      const heatmapDays = input.heatmapDays ?? 84
+      const sinceHeatmap = new Date()
+      sinceHeatmap.setDate(sinceHeatmap.getDate() - heatmapDays)
+      sinceHeatmap.setHours(0, 0, 0, 0)
 
       const dbWithOptionalTeardropFocus = ctx.db as unknown as {
         teardropFocusSession?: {
@@ -39,13 +43,21 @@ export const sanctuaryRouter = router({
         }
       }
       const teardropFocusDelegate = dbWithOptionalTeardropFocus.teardropFocusSession
-      const [sessions, moodRows, soundies, latestClaim, teardropFocusRows, teardropClaimRows] = await Promise.all([
+      const [sessions, heatmapSessions, moodRows, soundies, latestClaim, teardropFocusRows, teardropClaimRows] = await Promise.all([
         ctx.db.listenSession.findMany({
           where: { playerId: input.playerId, completedAt: { gte: since } },
           select: {
             duration: true,
             completedAt: true,
             soundie: { select: { note: { select: { emotionId: true } } } },
+          },
+        }),
+        ctx.db.listenSession.findMany({
+          where: { playerId: input.playerId, completedAt: { gte: sinceHeatmap } },
+          select: {
+            duration: true,
+            completedAt: true,
+            soundie: { select: { noteId: true } },
           },
         }),
         ctx.db.moodEntry.findMany({
@@ -124,6 +136,25 @@ export const sanctuaryRouter = router({
         }
       })
 
+      const heatmapBuckets = new Map<string, number>()
+      for (const s of heatmapSessions) {
+        const dateStr = s.completedAt.toISOString().slice(0, 10)
+        const key = `${s.soundie.noteId}::${dateStr}`
+        heatmapBuckets.set(key, (heatmapBuckets.get(key) ?? 0) + s.duration)
+      }
+      const activeNoteIds = new Set(heatmapSessions.map((s) => s.soundie.noteId))
+      const heatmapNotes = NOTE_LIST
+        .filter((n) => activeNoteIds.has(n.id))
+        .map((n) => ({ noteId: n.id, shortName: n.short, chromaHex: n.chromaHex }))
+      const heatmapCells = Array.from(heatmapBuckets.entries()).map(([key, seconds]) => {
+        const [noteId, dateStr] = key.split('::')
+        return {
+          noteId: noteId ?? '',
+          dateStr: dateStr ?? '',
+          minutes: Math.floor(seconds / 60),
+        }
+      })
+
       let minutesToday: number | null = null
       if (input.dayStartIso && input.dayEndIso) {
         const a = new Date(input.dayStartIso)
@@ -171,6 +202,7 @@ export const sanctuaryRouter = router({
         minutesToday,
         totalSecondsInRange,
         soundieProgress,
+        noteHeatmap: { cells: heatmapCells, notes: heatmapNotes },
         todayClaim,
       }
     }),
