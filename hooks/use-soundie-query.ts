@@ -9,14 +9,33 @@ import { getDualRitualEngine, registerDualRitualFromDb } from '@/lib/soundie-rit
 import { trpc } from '@/lib/trpc/react'
 import { shouldPlayBellOnTouchDevice } from '@/lib/bell-feedback'
 
+function resolveUnlockedRouteNoteId(
+  requestedId: string,
+  notes: Array<{ id: string; locked: boolean }> | undefined,
+): string {
+  if (!notes || notes.length === 0) return requestedId
+  const idx = notes.findIndex((n) => n.id === requestedId)
+  if (idx < 0) return requestedId
+  if (!notes[idx]?.locked) return requestedId
+  for (let i = idx - 1; i >= 0; i -= 1) {
+    if (!notes[i]?.locked) return notes[i]!.id
+  }
+  return notes[0]!.id
+}
+
 export function useSoundieUrlToStore() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+  const playerId = useSoundieStore((s) => s.playerId)
   const setActiveNote = useSoundieStore((s) => s.setActiveNote)
   const setActiveRitualId = useSoundieStore((s) => s.setActiveRitualId)
   const key = searchParams.get('note')
   const ritualParam = searchParams.get('ritual')
+  const notesQuery = trpc.note.list.useQuery(
+    playerId ? { playerId } : undefined,
+    { enabled: Boolean(playerId), staleTime: 30_000, retry: false },
+  )
   const ritualQ = trpc.ritual.getById.useQuery(
     { ritualId: ritualParam ?? '' },
     { enabled: Boolean(ritualParam), retry: false, staleTime: 60_000 },
@@ -60,11 +79,27 @@ export function useSoundieUrlToStore() {
   useEffect(() => {
     if (ritualParam) return
     if (!key) return
-    const id = noteIdFromUrlKey(key)
-    if (id && isValidNoteId(id)) {
-      setActiveNote(id)
+    const requestedId = noteIdFromUrlKey(key)
+    if (!requestedId || !isValidNoteId(requestedId)) return
+    // Explicit note route exits ritual context and resolves to nearest unlocked note.
+    setActiveRitualId(null)
+    const resolvedId = resolveUnlockedRouteNoteId(requestedId, notesQuery.data)
+    setActiveNote(resolvedId)
+    if (resolvedId !== requestedId) {
+      const next = new URLSearchParams(searchParams.toString())
+      next.set('note', urlKeyForNoteId(resolvedId))
+      router.replace(`${pathname}?${next.toString()}`, { scroll: false })
     }
-  }, [key, ritualParam, setActiveNote])
+  }, [
+    key,
+    ritualParam,
+    notesQuery.data,
+    pathname,
+    router,
+    searchParams,
+    setActiveNote,
+    setActiveRitualId,
+  ])
 }
 
 export function useNoteSelection() {

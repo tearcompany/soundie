@@ -7,6 +7,7 @@ import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
 import { type TimeOfDay } from '@/lib/affirmation-engine'
 import { toast } from 'sonner'
+import { MOOD_ID_LIST, type MoodId } from '@/lib/mood-reaction-texts'
 
 interface PostSessionModalProps {
   open: boolean
@@ -16,6 +17,7 @@ interface PostSessionModalProps {
   noteHex: string
   playerId: string | null
   mood: string | null
+  reflectionId: string | null
   timeOfDay: TimeOfDay
   streak: number
   sessionLengthSeconds: number
@@ -54,6 +56,7 @@ export function PostSessionModal({
   noteHex,
   playerId,
   mood,
+  reflectionId,
   timeOfDay,
   streak,
   sessionLengthSeconds,
@@ -61,7 +64,9 @@ export function PostSessionModal({
   onListenAgain,
 }: PostSessionModalProps) {
   const t = useTranslations('postSession')
+  const tMood = useTranslations('moodIntelligence')
   const [saved, setSaved] = useState(false)
+  const [afterMood, setAfterMood] = useState<MoodId | null>(null)
 
   const trpcUtils = trpc.useUtils()
   const { mutate: saveEcho, isPending: savePending } = trpc.echo.save.useMutation({
@@ -74,9 +79,18 @@ export function PostSessionModal({
       toast.error(t('saveError'))
     },
   })
+  const { mutate: saveMoodAfter, isPending: saveMoodAfterPending } =
+    trpc.sessionReflection.setMoodAfter.useMutation({
+      onSuccess: (_, vars) => {
+        setAfterMood(vars.moodAfter)
+      },
+    })
 
   useEffect(() => {
-    if (!open) setSaved(false)
+    if (!open) {
+      setSaved(false)
+      setAfterMood(null)
+    }
   }, [open])
 
   const handleSave = () => {
@@ -92,6 +106,15 @@ export function PostSessionModal({
       mood: mood ?? undefined,
       timeOfDay,
       streak,
+    })
+  }
+
+  const handleMoodAfter = (m: MoodId) => {
+    if (!playerId || !reflectionId || saveMoodAfterPending) return
+    saveMoodAfter({
+      playerId,
+      reflectionId,
+      moodAfter: m,
     })
   }
 
@@ -157,6 +180,31 @@ export function PostSessionModal({
                 >
                   {phrase}
                 </p>
+                {playerId && reflectionId && (
+                  <div className="mx-auto mt-4 w-full max-w-xs space-y-2 rounded-xl border border-pearl-border/55 bg-white/65 px-3 py-3">
+                    <p className="font-mono text-[0.56rem] uppercase tracking-[0.18em] text-ink-muted/70">
+                      {t('moodAfterPrompt')}
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {MOOD_ID_LIST.map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => handleMoodAfter(m)}
+                          disabled={saveMoodAfterPending}
+                          className="rounded-full border px-2.5 py-1 font-mono text-[0.56rem] transition-colors disabled:opacity-55"
+                          style={{
+                            borderColor: afterMood === m ? noteHex : hexToRgba(noteHex, 0.3),
+                            backgroundColor: afterMood === m ? hexToRgba(noteHex, 0.14) : 'transparent',
+                            color: afterMood === m ? noteHex : 'rgba(15,23,42,0.72)',
+                          }}
+                        >
+                          {tMood(`moods.${m}` as 'moods.anxious')}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
 
               <motion.div

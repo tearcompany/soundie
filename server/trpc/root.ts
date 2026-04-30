@@ -15,6 +15,7 @@ import { dailyMissionRouter } from './routers/dailyMission'
 import { todayRouter } from './routers/today'
 import { resonanceRouter } from './routers/resonance'
 import { ritualRouter } from './routers/ritual'
+import { sessionReflectionRouter } from './routers/sessionReflection'
 
 export const appRouter = router({
   admin: adminRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
   note: noteRouter,
   player: playerRouter,
   ritual: ritualRouter,
+  sessionReflection: sessionReflectionRouter,
   resonance: resonanceRouter,
   returnEngine: returnEngineRouter,
   soundie: soundieRouter,

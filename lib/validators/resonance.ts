@@ -12,6 +12,9 @@ export const resonanceTracePointSchema = z.object({
   echoPhrase: z.string().optional(),
   teardropAffirmation: z.string().optional(),
   profileAffirmation: z.string().optional(),
+  moodBefore: z.string().optional(),
+  moodAfter: z.string().optional(),
+  moodInferred: z.string().optional(),
   hasEcho: z.boolean(),
 })
 

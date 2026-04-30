@@ -32,6 +32,7 @@ export function MoodCheckInBridge() {
   const moodEntranceCleared = useSoundieStore((s) => s.moodEntranceCleared)
   const setMoodEntranceCleared = useSoundieStore((s) => s.setMoodEntranceCleared)
   const setSessionMoodReaction = useSoundieStore((s) => s.setSessionMoodReaction)
+  const setSessionMoodBefore = useSoundieStore((s) => s.setSessionMoodBefore)
   const saveEntry = trpc.mood.saveEntry.useMutation()
   const day = useMemo(() => localCalendarStringFromDate(new Date()), [])
   const [sessionRead, setSessionRead] = useState(false)
@@ -87,6 +88,7 @@ export function MoodCheckInBridge() {
       return
     }
     const text = reactionLine(activeNoteId, picked, locale)
+    setSessionMoodBefore(picked)
     setSessionMoodReaction(text)
     saveEntry.mutate(
       {
@@ -104,6 +106,7 @@ export function MoodCheckInBridge() {
   }
 
   const onNotNow = () => {
+    setSessionMoodBefore(null)
     closeGate(true)
   }
 

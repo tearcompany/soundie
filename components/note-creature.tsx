@@ -38,6 +38,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { PostSessionModal } from '@/components/post-session-modal'
 import { NoteTimeline } from '@/components/note-timeline'
+import { PixiNoteOrb } from '@/components/pixi-note-orb'
 import { deriveAffirmation, getTimeOfDay } from '@/lib/affirmation-engine'
 import type { RitualSealPayload } from '@/lib/soundie-rituals'
 import {
@@ -155,15 +156,11 @@ export function NoteCreature() {
       const pres = listeningPresenceForDualRitual(dual, currentSession.elapsed)
       return resolveListeningQueryNoteId(pres)
     }
-    if (ritualSeal && !currentSession.active) {
-      return ritualSeal.dominantNoteId
-    }
     return activeNoteId
   }, [
     dualEngineActive,
     currentSession.active,
     currentSession.elapsed,
-    ritualSeal,
     activeNoteId,
   ])
 
@@ -220,6 +217,10 @@ export function NoteCreature() {
     (s) => s.setPendingListenFromDailyGift
   )
   const sessionMoodReaction = useSoundieStore((s) => s.sessionMoodReaction)
+  const sessionMoodBefore = useSoundieStore((s) => s.sessionMoodBefore)
+  const setLastSessionReflection = useSoundieStore((s) => s.setLastSessionReflection)
+  const clearLastSessionReflection = useSoundieStore((s) => s.clearLastSessionReflection)
+  const lastReflectionId = useSoundieStore((s) => s.lastReflectionId)
   const [growthPulse, setGrowthPulse] = useState(false)
   const [sessionWhisper, setSessionWhisper] = useState<string | null>(null)
   const [ambientShimmer, setAmbientShimmer] = useState(false)
@@ -258,6 +259,7 @@ export function NoteCreature() {
   const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
   const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation()
   const { mutate: persistRitualEcho } = trpc.echo.save.useMutation()
+  const { mutateAsync: createSessionReflection } = trpc.sessionReflection.createForSession.useMutation()
   const trpcUtils = trpc.useUtils()
   const onRemoteSessionSynced = useCallback(
     (result: {
@@ -286,10 +288,35 @@ export function NoteCreature() {
   const { mutateAsync: pushRemoteListenSession } = trpc.soundie.completeSession.useMutation()
 
   const completeRemoteSession = useCallback(
-    (input: { playerId: string; noteId: string; durationSeconds: number }) => {
-      void pushRemoteListenSession(input).then(onRemoteSessionSynced).catch(() => {})
+    (
+      input: { playerId: string; noteId: string; durationSeconds: number },
+      moodBefore: import('@/lib/mood-reaction-texts').MoodId | null,
+      onReflection: (sessionId: string | null, reflectionId: string | null) => void,
+    ) => {
+      void pushRemoteListenSession(input)
+        .then(async (result) => {
+          onRemoteSessionSynced(result)
+          if (!moodBefore) {
+            onReflection(result.session.id, null)
+            return
+          }
+          try {
+            const reflection = await createSessionReflection({
+              playerId: input.playerId,
+              sessionId: result.session.id,
+              noteId: input.noteId,
+              moodBefore,
+            })
+            onReflection(result.session.id, reflection.reflection.id)
+          } catch {
+            onReflection(result.session.id, null)
+          }
+        })
+        .catch(() => {
+          onReflection(null, null)
+        })
     },
-    [pushRemoteListenSession, onRemoteSessionSynced],
+    [pushRemoteListenSession, onRemoteSessionSynced, createSessionReflection],
   )
   const fallbackDef = getNoteById(listeningNoteId) ?? getNoteById(DEFAULT_NOTE_ID)
   const def = noteQuery.data ?? fallbackDef
@@ -961,7 +988,9 @@ export function NoteCreature() {
       if (acc >= d) {
         const credited = d
         const ritualIdComplete = st.activeRitualId
+        const moodBeforeForSession = st.sessionMoodBefore
         updateSessionElapsed(credited)
+        clearLastSessionReflection()
 
         setIsPlaying(false)
         pauseAudio()
@@ -1002,6 +1031,8 @@ export function NoteCreature() {
                 },
               })
               const segs = ritualAttributionFor(ritualCfg.id)
+              let modalSessionId: string | null = null
+              let modalReflectionId: string | null = null
               for (const seg of segs) {
                 try {
                   const result = await pushRemoteListenSession({
@@ -1010,9 +1041,30 @@ export function NoteCreature() {
                     durationSeconds: seg.seconds,
                   })
                   onRemoteSessionSynced(result)
+                  if (moodBeforeForSession) {
+                    try {
+                      const reflection = await createSessionReflection({
+                        playerId: pidR,
+                        sessionId: result.session.id,
+                        noteId: seg.noteId,
+                        moodBefore: moodBeforeForSession,
+                      })
+                      if (seg.noteId === ritualCfg.dominantNoteId) {
+                        modalSessionId = result.session.id
+                        modalReflectionId = reflection.reflection.id
+                      }
+                    } catch {
+                      if (seg.noteId === ritualCfg.dominantNoteId) {
+                        modalSessionId = result.session.id
+                      }
+                    }
+                  } else if (seg.noteId === ritualCfg.dominantNoteId) {
+                    modalSessionId = result.session.id
+                  }
                 } catch {
                 }
               }
+              setLastSessionReflection(modalSessionId, modalReflectionId)
               const gs = useSoundieStore.getState()
               const domProg = gs.progressByNoteId[ritualCfg.dominantNoteId]
               const eco = buildRitualEchoMeta(ritualCfg, credited)
@@ -1059,6 +1111,8 @@ export function NoteCreature() {
             playerId: pid,
             noteId: nid,
             durationSeconds: credited,
+          }, moodBeforeForSession, (sessionId, reflectionId) => {
+            setLastSessionReflection(sessionId, reflectionId)
           })
         }
         const storeSnap = useSoundieStore.getState()
@@ -1107,6 +1161,9 @@ export function NoteCreature() {
     tRitual,
     trackAnalytics,
     persistRitualEcho,
+    createSessionReflection,
+    clearLastSessionReflection,
+    setLastSessionReflection,
   ])
 
   useEffect(() => {
@@ -1255,127 +1312,27 @@ export function NoteCreature() {
                   'soundie-hero-orb group relative mb-5 flex h-[6.75rem] w-[6.75rem] shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl',
                   isPlaying && 'soundie-hero-orb--playing',
                 )}
-                style={
-                  {
-                    ['--orb-breath' as string]: `${orbBreathSec}s`,
-                    ['--orb-color' as string]: c,
-                  } as CSSProperties
-                }
+                style={{ ['--orb-breath' as string]: `${orbBreathSec}s` } as CSSProperties}
                 aria-label={isPlaying ? t('stopListening') : t('beginSession')}
               >
-                <span
-                  className={cn(
-                    'pointer-events-none absolute inset-0 rounded-full soundie-orb-resonance-ring transition-opacity duration-500',
-                    isPlaying
-                      ? 'soundie-orb-resonance--play opacity-[0.72]'
-                      : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100',
-                    arrivalTransition && 'transition-[box-shadow] duration-[1.2s] ease-out',
-                  )}
-                  style={{
-                    boxShadow:
-                      arrivalTransition && ritualDominantHex
-                        ? `0 0 0 1px ${hexToRgba(c, 0.32)}, 0 0 36px ${hexToRgba(c, 0.2)}, 0 0 56px ${hexToRgba(ritualDominantHex, 0.26)}`
-                        : `0 0 0 1px ${hexToRgba(c, 0.35)}, 0 0 28px ${hexToRgba(c, 0.22)}`,
-                  }}
+                <PixiNoteOrb
+                  noteHex={c}
+                  partnerHex={orbPartnerHex}
+                  noteShort={def.short}
+                  frequencyHz={def.frequency}
+                  isPlaying={isPlaying}
+                  pulseDepth={pulseDepth}
+                  orbEvolution={orbEvolution}
+                  ambientShimmer={ambientShimmer}
+                  sacredClimax={sacredClimax}
+                  arrivalTransition={arrivalTransition}
                 />
-                <span
-                  className="pointer-events-none absolute inset-[-10px] rounded-full border soundie-orb-glow-ring transition-colors duration-[1.2s]"
-                  style={{
-                    borderColor:
-                      arrivalTransition && ritualDominantHex
-                        ? hexToRgba(ritualDominantHex, 0.22)
-                        : hexToRgba(c, 0.2),
-                  }}
-                />
-                <span
-                  className="pointer-events-none absolute inset-[-4px] rounded-full border soundie-orb-glow-ring-inner transition-colors duration-[1.2s]"
-                  style={{
-                    borderColor:
-                      arrivalTransition && ritualDominantHex
-                        ? hexToRgba(ritualDominantHex, 0.13)
-                        : hexToRgba(c, 0.12),
-                  }}
-                />
-                {ambientShimmer && (
+                {dailyGiftForNoteId === activeNoteId && dailyGiftGlow && (
                   <span
-                    className="pointer-events-none absolute -inset-2 rounded-full animate-pulse"
-                    style={{ backgroundColor: hexToRgba(c, 0.14) }}
+                    className={cn('pointer-events-none absolute inset-0 rounded-full', `daily-glow--${dailyGiftGlow}`)}
+                    style={{ ['--glow' as string]: c } as CSSProperties}
                   />
                 )}
-                {sacredClimax && (
-                  <>
-                    <span
-                      className="pointer-events-none absolute -inset-6 rounded-full"
-                      style={{ boxShadow: `0 0 40px ${hexToRgba(c, 0.55)}` }}
-                    />
-                    <span className="pointer-events-none absolute -inset-10 flex items-center justify-center">
-                      {Array.from({ length: 10 }, (_, i) => (
-                        <span
-                          key={i}
-                          className="absolute h-1 w-1 rounded-full soundie-orb-particle"
-                          style={{
-                            backgroundColor: hexToRgba(c, 0.7),
-                            transform: `rotate(${i * 36}deg) translateY(-36px)`,
-                            animationDelay: `${i * 0.12}s`,
-                          }}
-                        />
-                      ))}
-                    </span>
-                  </>
-                )}
-                {Array.from({ length: 7 }, (_, i) => (
-                  <span
-                    key={`p-${i}`}
-                    className="pointer-events-none absolute h-0.5 w-0.5 rounded-full soundie-orb-dust"
-                    style={{
-                      backgroundColor: hexToRgba(c, 0.55),
-                      left: `${18 + (i * 11) % 64}%`,
-                      top: `${12 + (i * 17) % 70}%`,
-                      animationDelay: `${i * 0.35}s`,
-                    }}
-                  />
-                ))}
-                <span
-                  className={cn(
-                    'relative z-10 inline-flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-2 border-white/25 bg-pearl font-mono text-sm font-bold uppercase tracking-wide text-white shadow-[0_8px_28px_-8px_rgba(0,0,0,0.35)] transition-transform duration-500 ease-out',
-                    dailyGiftForNoteId === activeNoteId &&
-                      dailyGiftGlow &&
-                      `daily-glow--${dailyGiftGlow}`,
-                  )}
-                  style={
-                    {
-                      transform: `scale(${(1 + orbEvolution * 0.02) * (growthPulse ? 1.08 : hadQualifyingSession ? 1.02 : 1)})`,
-                      ...(dailyGiftForNoteId === activeNoteId && dailyGiftGlow
-                        ? {
-                            ['--glow' as string]: c,
-                            backgroundColor: c,
-                            boxShadow: 'none',
-                            animationDuration: `${Math.max(1.4, 3 - pulseDepth * 0.25)}s`,
-                          }
-                        : arrivalTransition && ritualDominantHex
-                        ? {
-                            backgroundImage: `linear-gradient(152deg, ${c} 0%, ${hexToRgba(c, 0.95)} 38%, ${ritualDominantHex} 100%)`,
-                            boxShadow: `0 0 0 6px ${hexToRgba(ritualDominantHex, 0.14)}, 0 10px 32px -10px ${hexToRgba(ritualDominantHex, 0.38)}`,
-                            transition: 'background-image 1.2s ease-out, box-shadow 1.2s ease-out',
-                          }
-                        : orbPartnerHex
-                        ? {
-                            backgroundImage: `linear-gradient(142deg, ${c} 10%, ${orbPartnerHex} 92%)`,
-                            boxShadow: sacredClimax
-                              ? `0 0 0 8px ${hexToRgba(c, 0.22)}, 0 12px 32px -10px ${hexToRgba(c, 0.45)}`
-                              : `0 0 0 5px ${hexToRgba(c, 0.14)}, 0 10px 28px -12px ${hexToRgba(c, 0.35)}`,
-                          }
-                        : {
-                            backgroundColor: c,
-                            boxShadow: sacredClimax
-                              ? `0 0 0 8px ${hexToRgba(c, 0.22)}, 0 12px 32px -10px ${hexToRgba(c, 0.45)}`
-                              : `0 0 0 5px ${hexToRgba(c, 0.14)}, 0 10px 28px -12px ${hexToRgba(c, 0.35)}`,
-                          }),
-                    } as CSSProperties
-                  }
-                >
-                  {def.short}
-                </span>
               </button>
 
               <h2 className="text-lora text-2xl font-semibold tracking-tight text-ink md:text-[1.65rem]">
@@ -1721,6 +1678,14 @@ export function NoteCreature() {
                 sessions={streamQuery.data.sessions}
                 totalSeconds={streamQuery.data.totalSeconds}
                 windowHours={streamQuery.data.windowHours}
+                sessionElapsedSeconds={currentSession.elapsed}
+                sessionActive={currentSession.active}
+                isPlaying={isPlaying}
+                frequencyHz={def.frequency}
+                pulseDepth={pulseDepth}
+                sacredClimax={sacredClimax}
+                activeNoteHex={c}
+                activeNoteShort={def.short}
                 locale={locale as 'en' | 'pl'}
                 className="mb-4"
               />
@@ -1935,6 +1900,7 @@ export function NoteCreature() {
         }
         playerId={playerId}
         mood={null}
+        reflectionId={lastReflectionId}
         timeOfDay={getTimeOfDay()}
         streak={
           ritualSeal

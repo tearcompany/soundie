@@ -51,8 +51,15 @@ export const resonanceRouter = router({
           orderBy: { completedAt: 'asc' },
           take: 48,
           select: {
+            id: true,
             completedAt: true,
             duration: true,
+            reflection: {
+              select: {
+                moodBefore: true,
+                moodAfter: true,
+              },
+            },
             soundie: {
               select: {
                 note: {
@@ -118,6 +125,9 @@ export const resonanceRouter = router({
           echoPhrase: best?.phrase,
           teardropAffirmation,
           profileAffirmation,
+          moodBefore: s.reflection?.moodBefore ?? undefined,
+          moodAfter: s.reflection?.moodAfter ?? undefined,
+          moodInferred: treat,
           hasEcho: Boolean(best),
         }
       })

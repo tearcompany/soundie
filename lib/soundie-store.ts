@@ -26,6 +26,7 @@ const SessionSchema = z.object({
 })
 
 const DailyGiftGlowSchema = z.enum(['dawn', 'dusk', 'nocturne'])
+const SessionMoodBeforeSchema = z.enum(['anxious', 'numb', 'heavy', 'scattered', 'hopeful'])
 
 const RitualSealSchema = z.object({
   ritualKey: z.enum(['warmth', 'clarity', 'grounding', 'energy', 'release']),
@@ -50,6 +51,9 @@ const SoundieStateSchema = z.object({
   pendingListenFromDailyGift: z.boolean(),
   activeRitualId: z.string().nullable(),
   ritualSeal: RitualSealSchema.nullable(),
+  sessionMoodBefore: SessionMoodBeforeSchema.nullable(),
+  lastCompletedSessionId: z.string().cuid().nullable(),
+  lastReflectionId: z.string().cuid().nullable(),
 })
 
 export type Progress = z.infer<typeof ProgressSchema>
@@ -83,6 +87,9 @@ interface SoundieStore extends SoundieState {
   setMoodEntranceCleared: (v: boolean) => void
   sessionMoodReaction: string | null
   setSessionMoodReaction: (v: string | null) => void
+  setSessionMoodBefore: (v: z.infer<typeof SessionMoodBeforeSchema> | null) => void
+  setLastSessionReflection: (sessionId: string | null, reflectionId: string | null) => void
+  clearLastSessionReflection: () => void
   markHydrated: () => void
   syncFromRemote: (
     row: { totalListenTime: number; level: number; loreUnlocked: number } | null,
@@ -120,6 +127,9 @@ const INITIAL_STATE: SoundieState = {
   pendingListenFromDailyGift: false,
   activeRitualId: null,
   ritualSeal: null,
+  sessionMoodBefore: null,
+  lastCompletedSessionId: null,
+  lastReflectionId: null,
 }
 
 type V1StateSlice = {
@@ -233,6 +243,15 @@ export const useSoundieStore = create<SoundieStore>()(
       setSessionMoodReaction: (v: string | null) => {
         set({ sessionMoodReaction: v })
       },
+      setSessionMoodBefore: (v) => {
+        set({ sessionMoodBefore: v })
+      },
+      setLastSessionReflection: (sessionId: string | null, reflectionId: string | null) => {
+        set({ lastCompletedSessionId: sessionId, lastReflectionId: reflectionId })
+      },
+      clearLastSessionReflection: () => {
+        set({ lastCompletedSessionId: null, lastReflectionId: null })
+      },
 
       setPlayerId: (id: string | null) => {
         set({ playerId: id })
@@ -254,6 +273,8 @@ export const useSoundieStore = create<SoundieStore>()(
             duration: durationSeconds,
             elapsed: 0,
           },
+          lastCompletedSessionId: null,
+          lastReflectionId: null,
         })
       },
 
@@ -311,6 +332,8 @@ export const useSoundieStore = create<SoundieStore>()(
             active: false,
             elapsed: 0,
           },
+          lastCompletedSessionId: null,
+          lastReflectionId: null,
         })
       },
 

@@ -76,6 +76,7 @@ model Player {
   teardropXpEvents TeardropXpEvent[]
   mindfulMoments MindfulMomentLog[]
   echoEntries    EchoEntry[]
+  sessionReflections SessionReflection[]
 }
 
 model Ritual {
@@ -133,9 +134,28 @@ model ListenSession {
 
   player  Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
   soundie Soundie @relation(fields: [soundieId], references: [id], onDelete: Cascade)
+  reflection SessionReflection?
 
   @@index([playerId])
   @@index([soundieId])
+}
+
+model SessionReflection {
+  id         String   @id @default(cuid())
+  playerId   String
+  sessionId  String   @unique
+  noteId     String
+  moodBefore String
+  moodAfter  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  player     Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  session    ListenSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  note       Note         @relation(fields: [noteId], references: [id], onDelete: Restrict)
+
+  @@index([playerId, createdAt])
+  @@index([playerId, noteId, createdAt])
 }
 
 model Emotion {
@@ -396,6 +416,7 @@ model Note {
   dailyMissionItems  DailyMissionItem[]
   moodEntries        MoodEntry[]
   favoritePlayers    Player[] @relation("PlayerFavoriteNote")
+  sessionReflections SessionReflection[]
 
   @@index([sortOrder])
 }

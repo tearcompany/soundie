@@ -588,12 +588,23 @@
     }
   },
   "noteTimeline": {
-    "title": "Resonance",
-    "summary": "{minutes} min · {n, plural, one {# moment} other {# moments}}",
-    "hoverPath": "Hover a path to read the ritual",
-    "rituals": "rituals",
-    "ofRituals": "of {n, plural, one {# ritual} other {# rituals}}",
-    "empty": "Need at least one ritual to draw the wheel"
+    "title": "resonance",
+    "summary": "{minutes} min in resonance",
+    "streamMinutes": "{n, plural, one {# min stayed} other {# min stayed}}",
+    "centerLabel": "min",
+    "returnsLabel": "{n, plural, one {# return} other {# returns}}",
+    "ofPresence": "{n}% of presence",
+    "lastWindow": "min",
+    "segmentNow": "now",
+    "segmentEarlier": "earlier",
+    "segmentBefore": "before",
+    "empty": "Need at least one session to draw the flow",
+    "atTimestamp": "{when}",
+    "unlocking": "unlocking:",
+    "healing": "healing:",
+    "durationLabel": "{n, plural, one {# min in resonance} other {# min in resonance}}",
+    "unknownUnlock": "resistance",
+    "unknownHeal": "inner steadiness"
   },
   "ritualCard": {
     "title": "Note pairs",
@@ -697,6 +708,7 @@
   },
   "postSession": {
     "kicker": "Something arrived for you",
+    "moodAfterPrompt": "How are you now? (optional)",
     "saveToEchoes": "Save to Echoes",
     "saved": "Saved to Echoes",
     "saveError": "Could not save. Check your connection or run a database migration.",

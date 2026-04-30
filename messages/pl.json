@@ -516,12 +516,23 @@
     }
   },
   "noteTimeline": {
-    "title": "Rezonans",
-    "summary": "{minutes} min · {n, plural, one {# moment} few {# momenty} many {# momentów} other {# momentów}}",
-    "hoverPath": "Najedź na ścieżkę, by odczytać rytuał",
-    "rituals": "rytuałów",
-    "ofRituals": "z {n, plural, one {# rytuału} few {# rytuałów} many {# rytuałów} other {# rytuałów}}",
-    "empty": "Potrzeba przynajmniej jednego rytuału, by narysować koło"
+    "title": "rezonans",
+    "summary": "{minutes} min przy dźwięku",
+    "streamMinutes": "{n, plural, one {# min zostało} few {# min zostało} many {# min zostało} other {# min zostało}}",
+    "centerLabel": "min",
+    "returnsLabel": "{n, plural, one {# powrót} few {# powroty} many {# powrotów} other {# powrotu}}",
+    "ofPresence": "{n}% obecności",
+    "lastWindow": "min",
+    "segmentNow": "teraz",
+    "segmentEarlier": "wcześniej",
+    "segmentBefore": "jeszcze wcześniej",
+    "empty": "Potrzeba przynajmniej jednej sesji, by narysować przepływ",
+    "atTimestamp": "{when}",
+    "unlocking": "odblokowujesz:",
+    "healing": "uzdrawiasz:",
+    "durationLabel": "{n, plural, one {# min w rezonansie} few {# min w rezonansie} many {# min w rezonansie} other {# min w rezonansie}}",
+    "unknownUnlock": "opór",
+    "unknownHeal": "wewnętrzną stabilność"
   },
   "ritualCard": {
     "title": "Pary nut",
@@ -625,6 +636,7 @@
   },
   "postSession": {
     "kicker": "Coś do ciebie przyszło",
+    "moodAfterPrompt": "Jak jesteś teraz? (opcjonalnie)",
     "saveToEchoes": "Zapisz do Ech",
     "saved": "Zapisano w Echach",
     "saveError": "Nie udało się zapisać. Sprawdź połączenie lub migrację bazy (EchoEntry).",
