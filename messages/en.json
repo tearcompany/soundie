@@ -592,6 +592,7 @@
     "summary": "{minutes} min in resonance",
     "streamMinutes": "{n, plural, one {# min stayed} other {# min stayed}}",
     "centerLabel": "min",
+    "beadMinutes": "{n, plural, one {# min in resonance} other {# min in resonance}}",
     "emotionOpen": "Presence, still unnamed",
     "moodAtDoor": "Named at the threshold",
     "inTheLight": "In the light",

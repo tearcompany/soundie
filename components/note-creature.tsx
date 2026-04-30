@@ -135,7 +135,6 @@ function teardropMilestoneFromCards(
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
   const t = useTranslations('noteCreature')
-  const tMoods = useTranslations('moodIntelligence.moods')
   const tRitual = useTranslations('soundieRituals')
 
   const activeRitualId = useSoundieStore((s) => s.activeRitualId)
@@ -369,9 +368,6 @@ export function NoteCreature() {
         : []),
     ...(healingStyle ? [{ key: 'style', label: healingStyle }] : []),
   ]
-  const emotionForGraph = sessionMoodBefore
-    ? tMoods(sessionMoodBefore)
-    : (noteQuery.data?.emotionName ?? emotion?.namePl ?? '')
   const cosmicForNote = useMemo(() => getCosmicInfluenceForNoteShort(def.short), [def.short])
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<AudioContextType>({
@@ -1749,9 +1745,7 @@ export function NoteCreature() {
                 sacredClimax={sacredClimax}
                 activeNoteHex={c}
                 activeNoteShort={def.short}
-                emotionLabel={emotionForGraph}
                 inTheLightLine={def.synestheticLinePl}
-                moodFromCheckIn={sessionMoodBefore != null}
                 locale={locale as 'en' | 'pl'}
                 className="mb-4"
               />

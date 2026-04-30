@@ -520,6 +520,7 @@
     "summary": "{minutes} min przy dźwięku",
     "streamMinutes": "{n, plural, one {# min zostało} few {# min zostało} many {# min zostało} other {# min zostało}}",
     "centerLabel": "min",
+    "beadMinutes": "{n, plural, one {# min przy dźwięku} few {# min przy dźwięku} many {# min przy dźwięku} other {# min przy dźwięku}}",
     "emotionOpen": "Obecność bez jeszcze nazwy",
     "moodAtDoor": "Przy progu",
     "inTheLight": "W świetle",
