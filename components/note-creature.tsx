@@ -40,6 +40,11 @@ import { PostSessionModal } from '@/components/post-session-modal'
 import { NoteTimeline } from '@/components/note-timeline'
 import { PixiNoteOrb } from '@/components/pixi-note-orb'
 import { deriveAffirmation, getTimeOfDay } from '@/lib/affirmation-engine'
+import {
+  getCosmicAudioFrequencyHz,
+  getCosmicInfluenceForNoteShort,
+  getPrimaryCosmicInfluenceForNoteShort,
+} from '@/lib/cosmic-resonance'
 import type { RitualSealPayload } from '@/lib/soundie-rituals'
 import {
   buildRitualEchoMeta,
@@ -65,6 +70,8 @@ interface AudioContextType {
   ritualOscA: OscillatorNode | null
   ritualPreF: GainNode | null
   ritualPreA: GainNode | null
+  cosmicOsc: OscillatorNode | null
+  cosmicPre: GainNode | null
 }
 
 type DealerTeardropCard = {
@@ -365,6 +372,7 @@ export function NoteCreature() {
   const emotionForGraph = sessionMoodBefore
     ? tMoods(sessionMoodBefore)
     : (noteQuery.data?.emotionName ?? emotion?.namePl ?? '')
+  const cosmicForNote = useMemo(() => getCosmicInfluenceForNoteShort(def.short), [def.short])
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<AudioContextType>({
     ctx: null,
@@ -375,6 +383,8 @@ export function NoteCreature() {
     ritualOscA: null,
     ritualPreF: null,
     ritualPreA: null,
+    cosmicOsc: null,
+    cosmicPre: null,
   })
   const animationRef = useRef<number | null>(null)
   const sessionIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -768,6 +778,8 @@ export function NoteCreature() {
         ritualOscA: null,
         ritualPreF: null,
         ritualPreA: null,
+        cosmicOsc: null,
+        cosmicPre: null,
       }
     }
 
@@ -874,6 +886,25 @@ export function NoteCreature() {
     osc.connect(audioRef.current.convolver!)
     osc.start()
 
+    if (cosmicForNote.length > 0) {
+      const primary = getPrimaryCosmicInfluenceForNoteShort(def.short)
+      const cosmicHz = primary ? getCosmicAudioFrequencyHz(primary.orbitalDays) : def.frequency
+      const cosmicPre = ctx.createGain()
+      cosmicPre.gain.value = 0
+      cosmicPre.connect(audioRef.current.convolver!)
+      const cosmicOsc = ctx.createOscillator()
+      cosmicOsc.type = 'sine'
+      cosmicOsc.frequency.value = cosmicHz
+      cosmicOsc.connect(cosmicPre)
+      const now = ctx.currentTime
+      // Planet layer is subtle and supportive, never overpowering the core note.
+      cosmicPre.gain.setValueAtTime(0, now)
+      cosmicPre.gain.linearRampToValueAtTime(0.032, now + 0.65)
+      cosmicOsc.start()
+      audioRef.current.cosmicOsc = cosmicOsc
+      audioRef.current.cosmicPre = cosmicPre
+    }
+
     audioRef.current.oscillator = osc
     setIsPlaying(true)
 
@@ -902,6 +933,8 @@ export function NoteCreature() {
     const osc = audioRef.current.oscillator
     const rF = audioRef.current.ritualOscF
     const rA = audioRef.current.ritualOscA
+    const cOsc = audioRef.current.cosmicOsc
+    const cPre = audioRef.current.cosmicPre
 
     if (rF && rA && ctx) {
       const gain = audioRef.current.gain!
@@ -929,6 +962,17 @@ export function NoteCreature() {
         osc.stop()
         audioRef.current.oscillator = null
       }, 300)
+    }
+    if (cOsc && ctx) {
+      if (cPre) cPre.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.25)
+      setTimeout(() => {
+        try {
+          cOsc.stop()
+        } catch {
+        }
+        audioRef.current.cosmicOsc = null
+        audioRef.current.cosmicPre = null
+      }, 260)
     }
 
     setIsPlaying(false)
@@ -1172,11 +1216,16 @@ export function NoteCreature() {
 
   useEffect(() => {
     if (audioRef.current.ritualOscF || audioRef.current.ritualOscA) return
-    const { ctx, oscillator: osc } = audioRef.current
+    const { ctx, oscillator: osc, cosmicOsc: cOsc } = audioRef.current
     if (osc && ctx) {
       osc.frequency.setValueAtTime(def.frequency, ctx.currentTime)
     }
-  }, [def.frequency])
+    if (cOsc && ctx) {
+      const primary = getPrimaryCosmicInfluenceForNoteShort(def.short)
+      const cosmicHz = primary ? getCosmicAudioFrequencyHz(primary.orbitalDays) : def.frequency
+      cOsc.frequency.setValueAtTime(cosmicHz, ctx.currentTime)
+    }
+  }, [def.frequency, def.short])
 
   // Breathing animation
   useEffect(() => {
@@ -1331,6 +1380,16 @@ export function NoteCreature() {
                   sacredClimax={sacredClimax}
                   arrivalTransition={arrivalTransition}
                 />
+                {cosmicForNote.length > 0 && (
+                  <span
+                    className="pointer-events-none absolute inset-[-6px] rounded-full border animate-pulse"
+                    style={{
+                      borderColor: hexToRgba(c, 0.2),
+                      boxShadow: `0 0 0 1px ${hexToRgba(c, 0.18)}, 0 0 24px ${hexToRgba(c, 0.18)}`,
+                    }}
+                    aria-hidden
+                  />
+                )}
                 {dailyGiftForNoteId === activeNoteId && dailyGiftGlow && (
                   <span
                     className={cn('pointer-events-none absolute inset-0 rounded-full', `daily-glow--${dailyGiftGlow}`)}
