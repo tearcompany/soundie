@@ -296,12 +296,22 @@ export const soundieRouter = router({
           },
         })
 
+        const teardropCountBefore = await tx.teardropCardUnlock.count({
+          where: { playerId: input.playerId, noteId: input.noteId },
+        })
+
         await applyTeardropUnlocksAfterSession(
           tx,
           input.playerId,
           input.noteId,
           Math.min(5, newLoreLevel)
         )
+
+        const firstTeardropJustEarned = teardropCountBefore === 0 &&
+          (await tx.teardropCardUnlock.count({
+            where: { playerId: input.playerId, noteId: input.noteId },
+          })) > 0
+
         if (newlyCompletedCycles > 0) {
           const cycleXp = newlyCompletedCycles * SESSION_CYCLE_XP_AWARD
           await tx.teardropProgress.upsert({
@@ -336,36 +346,34 @@ export const soundieRouter = router({
         })
 
         let unlockedNextNote: { id: string; name: string; order: number } | null = null
-        const nextNote = await tx.note.findFirst({
-          where: { sortOrder: current.note.sortOrder + 1 },
-        })
-        if (nextNote) {
-          const nextOrder = nextNote.sortOrder + 1
-          const requiredMinutes = NOTE_UNLOCK_REQUIREMENTS[nextOrder] ?? 120
-          const existingNext = await tx.soundie.findUnique({
-            where: {
-              playerId_noteId: {
-                playerId: input.playerId,
-                noteId: nextNote.id,
-              },
-            },
+        if (firstTeardropJustEarned) {
+          const nextNote = await tx.note.findFirst({
+            where: { sortOrder: current.note.sortOrder + 1 },
           })
-          const crossedThreshold =
-            prevTotalMinutes < requiredMinutes && newTotalMinutes >= requiredMinutes
-          if (crossedThreshold && !existingNext) {
-            await tx.soundie.create({
-              data: {
-                playerId: input.playerId,
-                noteId: nextNote.id,
-                level: 1,
-                loreUnlocked: 0,
-                totalListenTime: 0,
+          if (nextNote) {
+            const existingNext = await tx.soundie.findUnique({
+              where: {
+                playerId_noteId: {
+                  playerId: input.playerId,
+                  noteId: nextNote.id,
+                },
               },
             })
+            if (!existingNext) {
+              await tx.soundie.create({
+                data: {
+                  playerId: input.playerId,
+                  noteId: nextNote.id,
+                  level: 1,
+                  loreUnlocked: 0,
+                  totalListenTime: 0,
+                },
+              })
+            }
             unlockedNextNote = {
               id: nextNote.id,
               name: nextNote.name,
-              order: nextOrder,
+              order: nextNote.sortOrder + 1,
             }
           }
         }

@@ -2,8 +2,11 @@ import { TRPCError, publicProcedure, router } from '../init'
 import {
   sanctuaryDiagramInput,
   sanctuaryDiagramOutput,
+  sanctuarySetFavoriteInput,
 } from '@/lib/validators/sanctuary'
-import { getNoteById, NOTE_LIST } from '@/lib/notes'
+import { getNoteById, isValidNoteId, NOTE_LIST } from '@/lib/notes'
+import { gardenPhaseForSoundie } from '@/lib/soundie-garden-phase'
+import { z } from 'zod'
 
 function pickLocaleForTexts(
   texts: Array<{ locale: string; field: string; content: string }>,
@@ -22,7 +25,10 @@ export const sanctuaryRouter = router({
     .output(sanctuaryDiagramOutput)
     .query(async ({ ctx, input }) => {
       const locale = input.locale ?? 'en'
-      const player = await ctx.db.player.findUnique({ where: { id: input.playerId } })
+      const player = await ctx.db.player.findUnique({
+        where: { id: input.playerId },
+        select: { id: true, favoriteNoteId: true },
+      })
       if (!player) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Player not found' })
       }
@@ -43,7 +49,17 @@ export const sanctuaryRouter = router({
         }
       }
       const teardropFocusDelegate = dbWithOptionalTeardropFocus.teardropFocusSession
-      const [sessions, heatmapSessions, moodRows, soundies, latestClaim, teardropFocusRows, teardropClaimRows] = await Promise.all([
+      const [
+        sessions,
+        heatmapSessions,
+        moodRows,
+        soundies,
+        latestClaim,
+        teardropFocusRows,
+        teardropClaimRows,
+        recentListenSessions,
+        favoriteNoteRow,
+      ] = await Promise.all([
         ctx.db.listenSession.findMany({
           where: { playerId: input.playerId, completedAt: { gte: since } },
           select: {
@@ -85,6 +101,22 @@ export const sanctuaryRouter = router({
           where: { playerId: input.playerId, createdAt: { gte: since } },
           select: { teardropCard: { select: { emotionId: true } } },
         }),
+        ctx.db.listenSession.findMany({
+          where: { playerId: input.playerId },
+          orderBy: { completedAt: 'desc' },
+          take: 24,
+          select: {
+            completedAt: true,
+            duration: true,
+            soundie: { select: { note: { select: { id: true, name: true } } } },
+          },
+        }),
+        player.favoriteNoteId
+          ? ctx.db.note.findUnique({
+              where: { id: player.favoriteNoteId },
+              select: { id: true, name: true },
+            })
+          : Promise.resolve(null),
       ])
 
       const listenByEmotion = new Map<string, number>()
@@ -133,8 +165,26 @@ export const sanctuaryRouter = router({
           level: s.level,
           totalListenTime: s.totalListenTime,
           loreUnlocked: s.loreUnlocked,
+          gardenPhase: gardenPhaseForSoundie({
+            totalListenTime: s.totalListenTime,
+            loreUnlocked: s.loreUnlocked,
+          }),
         }
       })
+
+      const topEmotion = releaseByEmotion.find((e) => e.seconds > 0)
+      const dominantNoteEntry = topEmotion
+        ? NOTE_LIST.find((n) => n.emotionId === topEmotion.emotionId)
+        : undefined
+      const dominantNoteId = dominantNoteEntry?.id ?? null
+      const dominantNoteName = dominantNoteEntry?.name ?? null
+
+      const recentSessions = recentListenSessions.map((row) => ({
+        completedAtIso: row.completedAt.toISOString(),
+        minutes: Math.max(0, Math.floor(row.duration / 60)),
+        noteId: row.soundie.note.id,
+        noteName: row.soundie.note.name,
+      }))
 
       const heatmapBuckets = new Map<string, number>()
       for (const s of heatmapSessions) {
@@ -204,6 +254,29 @@ export const sanctuaryRouter = router({
         soundieProgress,
         noteHeatmap: { cells: heatmapCells, notes: heatmapNotes },
         todayClaim,
+        favoriteNoteId: player.favoriteNoteId,
+        favoriteNoteName: favoriteNoteRow?.name ?? null,
+        dominantNoteId,
+        dominantNoteName,
+        recentSessions,
       }
+    }),
+
+  setFavoriteNote: publicProcedure
+    .input(sanctuarySetFavoriteInput)
+    .output(z.object({ ok: z.literal(true) }))
+    .mutation(async ({ ctx, input }) => {
+      const player = await ctx.db.player.findUnique({ where: { id: input.playerId } })
+      if (!player) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Player not found' })
+      }
+      if (input.noteId !== null && !isValidNoteId(input.noteId)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid note id' })
+      }
+      await ctx.db.player.update({
+        where: { id: input.playerId },
+        data: { favoriteNoteId: input.noteId },
+      })
+      return { ok: true as const }
     }),
 })

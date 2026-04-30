@@ -3,6 +3,22 @@
 
 ---
 
+## Repository alignment (read this first)
+
+This file is a **north-star UX brief**, not a checklist of shipped features. As of the current codebase:
+
+| Area | Spec in this doc | What exists today |
+|------|------------------|-------------------|
+| **Today / guidance** | §2 “Today State Card” | **Split surfaces:** Echo/Sanctuary shows a **“Today’s rhythm”** block (minutes today, dominant note from pulse, returning note, link to **`/today`**). Full four-slot recommender lives on **`/today`** (`today-page.tsx` + `today-engine`). Both are intentional; copy should keep them complementary, not competing. |
+| **Aggregates** | Journey overview, emotional patterns | **`sanctuary.getDiagramData`** + **`sanctuary-dashboard`**: pulse, release-by-emotion, heatmap, per-note cards, Teardrop path, etc. |
+| **Favorite note, Sacred Archive** | §3 favorite; §7 session archive | **Implemented:** `Player.favoriteNoteId` + **`sanctuary.setFavoriteNote`** (star on each note card); **Sacred archive** = recent `ListenSession` rows (time, note, duration). **Post-session “notes felt”** text is still not stored — optional future field. |
+| **Collection Garden** | §4 five states | **Mapped** in code: `lib/soundie-garden-phase.ts` derives **sleeping → discovered → bonded → awakened → mastered** from `totalListenTime` + `loreUnlocked` on each Soundie; shown on **`NoteProgressCard`**. |
+| **AI Guidance Card** | §6 | **Not implemented** as a dedicated panel block. |
+
+**Naming:** examples below may cite older archetype names; canonical note names live in `lib/notes.ts` (e.g. **The Heart**, **The Storm**, not “Beacon” / “Dreamer”).
+
+---
+
 # Core Principle
 
 The user panel is not an admin dashboard.
@@ -87,7 +103,7 @@ Shows:
 
 Example:
 
-Today you’ve spent 9 minutes with The Beacon.  
+Today you’ve spent 9 minutes with The Heart.  
 Suggested now: The Keeper.
 
 ---
@@ -145,7 +161,7 @@ Your mind may be processing change.
 Examples:
 
 Try 5 minutes with The River before work.  
-The Dreamer may help tonight.  
+The Storm may help tonight.  
 You’ve avoided rest lately. Sit with C.
 
 ---
@@ -154,7 +170,7 @@ You’ve avoided rest lately. Sit with C.
 
 History of sessions:
 
-Apr 26 — The Beacon — 5 min  
+Apr 26 — The Heart — 5 min  
 Apr 25 — The Foundation — 8 min
 
 Include notes felt after session.

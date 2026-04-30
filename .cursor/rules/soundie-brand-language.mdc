@@ -1,0 +1,24 @@
+---
+description: Soundie product language — poetic premium copy, no SaaS/gym tone
+alwaysApply: true
+---
+
+# Soundie — agent context
+
+You work on **Soundie**: a meditative **emotional companion** built on **living musical notes**. It is not a productivity app, fitness tracker, or generic wellness SaaS.
+
+## Non-negotiables
+
+- Copy must feel **warm, sparse, sacred-minimal, emotionally intelligent** — never corporate, never hustle, never Duolingo-like gamification wording.
+- **Streak** in user-facing text does not mean “login chain”. It means **nights of return** / **return rhythm** — ritual of coming back to oneself and to Soundie.
+- Prefer **resonance, return, unfolding, reveal, journey, sanctuary, pulse** over stats, grind, points, rewards, levels as hype.
+
+## Before writing or editing UI strings
+
+Read **`docs/brand-language-soundie.md`** and align with **`docs/SOUNDIE_COPY_GLOSSARY.json`**.
+
+If a label is literally correct but **flat**, reinterpret through the Soundie world: shorter, warmer, more bodily or ritual — not more technical.
+
+## Polish / English
+
+Same ontology in both locales: do not ship Polish that sounds like a ticket system if English is poetic (and vice versa).

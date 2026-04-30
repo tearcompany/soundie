@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { HREFLANG_SANCTUARY, localizedPath } from '@/lib/localized-path'
 import { getSiteUrl } from '@/lib/site-url'
 
 export async function generateMetadata({
@@ -10,13 +9,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
-  const title = t('sanctuaryTitle')
-  const description = t('sanctuaryDescription')
+  const title = t('mineTitle')
+  const description = t('mineDescription')
   const keywords = t('keywords')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  const canonicalPath = localizedPath(locale, 'sanctuary')
+  const canonicalPath = locale === 'pl' ? '/pl/moje' : '/moje'
   const pageUrl = new URL(canonicalPath, getSiteUrl()).toString()
   return {
     title,
@@ -25,7 +24,11 @@ export async function generateMetadata({
     keywords,
     alternates: {
       canonical: canonicalPath,
-      languages: { ...HREFLANG_SANCTUARY },
+      languages: {
+        'x-default': '/moje',
+        en: '/moje',
+        pl: '/pl/moje',
+      },
     },
     openGraph: {
       type: 'website',
@@ -47,6 +50,6 @@ export async function generateMetadata({
   }
 }
 
-export default function SanctuaryLayout({ children }: { children: React.ReactNode }) {
+export default function MojeLayout({ children }: { children: React.ReactNode }) {
   return children
 }

@@ -2,7 +2,7 @@ import { TRPCError, publicProcedure, router } from '../init'
 import { isValidYyyyMmDd, previousCalendarDay } from '@/lib/calendar-day'
 import { djb2U32 } from '@/lib/deterministic-pick'
 import type { ReturnStory } from '@/lib/validators/returnEngine'
-import { logVisitInput, logVisitOutput } from '@/lib/validators/returnEngine'
+import { logVisitInput, logVisitOutput, RETURN_MILESTONES } from '@/lib/validators/returnEngine'
 import { revealDailyClaimInput, revealDailyClaimOutput } from '@/lib/validators/daily-claim'
 
 const GLOW = ['dawn', 'dusk', 'nocturne'] as const
@@ -131,12 +131,18 @@ export const returnEngineRouter = router({
         if (n) noteShort = n.short
       }
 
+      const milestone =
+        newRowForToday && RETURN_MILESTONES.includes(streakNights as (typeof RETURN_MILESTONES)[number])
+          ? streakNights
+          : 0
+
       return {
         streakNights,
         shouldShowWelcomeBack,
         returnStory,
         isFirstVisitEver: Boolean(newRowForToday && wasFirstVisitEver),
         noteShort,
+        milestone,
       }
     }),
 

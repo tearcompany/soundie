@@ -45,7 +45,9 @@ type Props = {
   returnStory?: ReturnStory
   whisperNoteShort?: string | null
   streakNights?: number
+  milestone?: number
 }
+
 
 export function DailyGiftDialog({
   open,
@@ -55,6 +57,7 @@ export function DailyGiftDialog({
   returnStory = 'none',
   whisperNoteShort,
   streakNights = 0,
+  milestone = 0,
 }: Props) {
   const t = useTranslations('returnEngine.dailyGift')
   const tRe = useTranslations('returnEngine')
@@ -108,6 +111,14 @@ export function DailyGiftDialog({
             ))}
           </div>
           <DialogHeader className="relative z-10 space-y-4">
+            {milestone > 0 && (
+              <p
+                className="border-b border-pearl-border/60 pb-4 text-center font-mono text-xs uppercase tracking-widest"
+                style={{ color: c }}
+              >
+                {t('milestoneLabel', { n: milestone })}
+              </p>
+            )}
             {returnStory === 'second_day' && (
               <div className="space-y-2 border-b border-pearl-border/60 pb-4 text-center">
                 <p className="text-lora text-lg font-normal leading-snug text-ink">{tRe('welcomeBack')}</p>

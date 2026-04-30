@@ -12,6 +12,8 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { EchoMomentFly } from '@/components/echo-moment-fly'
 import { useEchoMomentTrigger } from '@/hooks/use-echo-moment-trigger'
 import { NoteHeatmap } from '@/components/sanctuary/note-heatmap'
+import { SanctuaryTodaySequence } from '@/components/sanctuary/sanctuary-today-sequence'
+import { SanctuaryPulse } from '@/components/sanctuary/sanctuary-pulse'
 
 export function SanctuaryDashboard() {
   const t = useTranslations('sanctuary')
@@ -19,7 +21,6 @@ export function SanctuaryDashboard() {
   const locale = useLocale() as 'en' | 'pl'
   const playerId = useSoundieStore((s) => s.playerId)
   const { shouldShow: showEchoMoment, acknowledge: dismissEchoMoment } = useEchoMomentTrigger()
-  const activeNoteId = useSoundieStore((s) => s.activeNoteId)
   const hasHydrated = useSoundieStore((s) => s.hasHydrated)
   const searchParams = useSearchParams()
   const highlightTeardropSlug = searchParams.get('teardrop')
@@ -47,28 +48,6 @@ export function SanctuaryDashboard() {
     },
     {
       enabled: hasHydrated && Boolean(playerId) && Boolean(bounds),
-    },
-  )
-  const noteIdForTeardrop = q.data?.todayClaim?.noteId ?? activeNoteId
-  const teardropMappedForNoteQuery = trpc.teardrop.getMappedForNote.useQuery(
-    {
-      playerId: playerId!,
-      noteId: noteIdForTeardrop,
-      locale,
-    },
-    {
-      enabled: hasHydrated && Boolean(playerId),
-      staleTime: 15_000,
-    },
-  )
-  const teardropProgressQuery = trpc.teardrop.getProgress.useQuery(
-    {
-      playerId: playerId!,
-      noteId: noteIdForTeardrop,
-    },
-    {
-      enabled: hasHydrated && Boolean(playerId),
-      staleTime: 15_000,
     },
   )
   const mindfulStatsQuery = trpc.mindfulMoment.getStats.useQuery(
@@ -160,6 +139,45 @@ export function SanctuaryDashboard() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-16 text-ink">
       <p className="text-lora text-2xl font-light leading-tight text-ink">{t('greeting')}</p>
+      {playerId && q.data && (
+        <SanctuaryPulse
+          className="mt-4"
+          emotions={q.data.releaseByEmotion}
+          soundieProgress={q.data.soundieProgress}
+          locale={locale}
+          todayTeardropName={q.data.todayClaim?.teardrop?.name ?? null}
+          todayNoteId={q.data.todayClaim?.noteId ?? null}
+        />
+      )}
+      {playerId && q.data && (
+        <div className="lore-card mt-4 border-0 space-y-3">
+          <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
+            {t('todayStateTitle')}
+          </p>
+          <p className="text-lora text-sm leading-relaxed text-ink/85">{t('todayStateHint')}</p>
+          {q.data.minutesToday != null && (
+            <p className="text-lora text-sm text-ink/90">
+              {t('todayStateMinutes', { m: q.data.minutesToday })}
+            </p>
+          )}
+          {q.data.dominantNoteName && (
+            <p className="text-lora text-sm text-ink/90">
+              {t('todayStateDominant', { note: q.data.dominantNoteName })}
+            </p>
+          )}
+          {q.data.favoriteNoteName && (
+            <p className="text-lora text-sm text-ink/90">
+              {t('todayStateFavorite', { note: q.data.favoriteNoteName })}
+            </p>
+          )}
+          <Link
+            href="/today"
+            className="inline-block font-mono text-[0.62rem] uppercase tracking-widest text-coral underline decoration-coral/35 underline-offset-4 hover:opacity-90"
+          >
+            {t('todayStateCta')}
+          </Link>
+        </div>
+      )}
       {q.data?.todayClaim?.teardrop ? (
         <div className="lore-card mt-3 border-0">
           <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
@@ -234,7 +252,7 @@ export function SanctuaryDashboard() {
       {!playerId && hasHydrated && (
         <p className="text-lora mt-8 text-sm text-ink/80">
           {t('noPlayer')}{' '}
-          <Link className="underline decoration-ink/25 underline-offset-2" href="/play">
+          <Link className="underline decoration-ink/25 underline-offset-2" href="/teraz">
             {t('goPlay')}
           </Link>
         </p>
@@ -242,6 +260,12 @@ export function SanctuaryDashboard() {
 
       {playerId && (q.isLoading || !q.data) && (
         <p className="font-mono text-xs text-ink-muted mt-8">{t('loading')}</p>
+      )}
+
+      {playerId && hasHydrated && (
+        <div className="mt-10">
+          <SanctuaryTodaySequence />
+        </div>
       )}
 
       {q.data && (
@@ -282,130 +306,32 @@ export function SanctuaryDashboard() {
             )}
           </div>
 
-          {bounds && (
+          {q.data.recentSessions.length > 0 && (
             <div className="lore-card border-0">
-              <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">{t('todayCard')}</p>
-              <p className="text-lora mt-2 text-lg text-ink">
-                {q.data.minutesToday != null
-                  ? t('todayMinutes', { m: q.data.minutesToday })
-                  : t('todayMinutesUnknown')}
+              <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
+                {t('sacredArchiveTitle')}
               </p>
+              <p className="text-lora mt-1 text-sm text-ink/80">{t('sacredArchiveHint')}</p>
+              <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto text-lora text-sm text-ink/90">
+                {q.data.recentSessions.map((row) => (
+                  <li key={`${row.completedAtIso}-${row.noteId}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-pearl-border/50 pb-2 last:border-0">
+                    <span>
+                      {new Date(row.completedAtIso).toLocaleString(locale === 'pl' ? 'pl-PL' : 'en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}{' '}
+                      · {row.noteName}
+                    </span>
+                    <span className="font-mono text-[0.65rem] text-ink-muted">
+                      {t('archiveMinutes', { m: row.minutes })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-
-          {teardropProgressQuery.data && teardropMappedForNoteQuery.data && (() => {
-            const mappedData = teardropMappedForNoteQuery.data
-            const phaseTitleBySlug = Object.fromEntries(
-              mappedData.phases.map((p) => [p.slug, locale === 'pl' ? p.titlePl : p.titleEn])
-            )
-            const phaseOrder = mappedData.phases.map((p) => p.slug)
-            const groupsMap = new Map<string, typeof mappedData.cards>()
-            for (const card of mappedData.cards) {
-              const slug = card.phase ?? 'archetypes'
-              if (!groupsMap.has(slug)) groupsMap.set(slug, [])
-              groupsMap.get(slug)!.push(card)
-            }
-            const groups = [...groupsMap.entries()]
-              .sort(([a], [b]) => {
-                const ai = phaseOrder.indexOf(a)
-                const bi = phaseOrder.indexOf(b)
-                return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
-              })
-              .map(([slug, cards]) => ({
-                slug,
-                title: phaseTitleBySlug[slug] ?? slug,
-                cards,
-              }))
-            const shadowGroups = groups
-              .map((group) => ({
-                ...group,
-                cards: group.cards
-                  .map((card) => ({
-                    id: card.id,
-                    name: card.name,
-                    shadow:
-                      card.texts.find((x) => x.field === 'meaningShadow')?.content?.trim() ?? '',
-                  }))
-                  .filter((card) => card.shadow.length > 0),
-              }))
-              .filter((group) => group.cards.length > 0)
-            return (
-              <div className="lore-card border-0">
-                <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
-                  {t('teardropProgressTitle')}
-                </p>
-                <div className="mt-1 flex items-center justify-between">
-                  <p className="font-mono text-[0.68rem] uppercase tracking-wide text-ink-muted">
-                    {t('teardropProgressUnlocked', {
-                      n: mappedData.cards.length,
-                      total: mappedData.totalCards,
-                    })}
-                  </p>
-                  <p className="font-mono text-[0.68rem] text-ink-muted">
-                    {t('teardropProgressXp', { xp: teardropProgressQuery.data.xp })}
-                  </p>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-pearl-border/70">
-                  <div
-                    className="h-full transition-all duration-500"
-                    style={{
-                      width: `${Math.max(0, Math.min(100, mappedData.totalCards > 0 ? (mappedData.cards.length / mappedData.totalCards) * 100 : 0))}%`,
-                      backgroundColor: '#FF6B4A',
-                    }}
-                  />
-                </div>
-                {groups.length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    {groups.map((group) => (
-                      <div key={group.slug}>
-                        <p className="font-mono text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-ink">
-                          {group.title}
-                        </p>
-                        <div className="mt-1.5 flex flex-wrap gap-1.5">
-                          {group.cards.map((card) => (
-                            <span
-                              key={card.id}
-                              className="rounded-md border border-pearl-border bg-white/60 px-2 py-1 font-mono text-[0.6rem] lowercase text-ink/80"
-                            >
-                              {card.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {shadowGroups.length > 0 && (
-                  <div className="mt-5 border-t border-pearl-border pt-4">
-                    <p className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-ink-muted">
-                      {t('teardropShadowByPhaseTitle')}
-                    </p>
-                    <div className="mt-3 space-y-4">
-                      {shadowGroups.map((group) => (
-                        <div key={`${group.slug}-shadow`}>
-                          <p className="font-mono text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-ink">
-                            {group.title}
-                          </p>
-                          <div className="mt-1.5 space-y-2">
-                            {group.cards.map((card) => (
-                              <div key={`${card.id}-shadow`} className="rounded-md border border-pearl-border/70 bg-white/55 px-2.5 py-2">
-                                <p className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-ink-muted">
-                                  {card.name}
-                                </p>
-                                <p className="mt-1 whitespace-pre-line font-mono text-[0.62rem] leading-relaxed text-ink/70">
-                                  {card.shadow}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })()}
 
           {q.data.noteHeatmap.notes.length > 0 && (
             <div>
@@ -429,9 +355,16 @@ export function SanctuaryDashboard() {
                 {t('notesTitle')}
               </h2>
               <p className="text-lora mt-1 text-sm text-ink/85">{t('notesHint')}</p>
+              <p className="text-lora mt-1 text-xs text-ink/65">{t('notesHintGarden')}</p>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {q.data.soundieProgress.map((note) => (
-                  <NoteProgressCard key={note.noteId} note={note} playerId={playerId ?? undefined} locale={locale} />
+                  <NoteProgressCard
+                    key={note.noteId}
+                    note={note}
+                    playerId={playerId ?? undefined}
+                    locale={locale}
+                    isFavorite={q.data.favoriteNoteId === note.noteId}
+                  />
                 ))}
               </div>
             </div>

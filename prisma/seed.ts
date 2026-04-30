@@ -11,8 +11,34 @@ import {
   assertTeardropEmotionMapMatchesDeck,
   TEARDROP_EMOTION_ID_BY_SLUG,
 } from '../lib/teardrop-card-emotion'
+import noteHealingProfilesEn from '../data/note-healing-profiles.json'
+import noteHealingProfilesPl from '../data/note-healing-profiles-pl.json'
+import { noteHealingProfileListSchema } from '../lib/validators/note-healing-profile'
+import { seedRituals } from './seed-rituals'
 
 const prisma = new PrismaClient()
+
+const HEALING_PROFILES_EN = noteHealingProfileListSchema.parse(noteHealingProfilesEn)
+const HEALING_PROFILES_PL = noteHealingProfileListSchema.parse(noteHealingProfilesPl)
+
+{
+  const want = NOTE_LIST.map((n) => n.id)
+  const gotEn = HEALING_PROFILES_EN.map((p) => p.noteId)
+  const gotPl = HEALING_PROFILES_PL.map((p) => p.noteId)
+  if (gotEn.length !== want.length || gotPl.length !== want.length) {
+    throw new Error('[seed] healing profiles: expected 12 entries per locale')
+  }
+  for (let i = 0; i < want.length; i++) {
+    if (gotEn[i] !== want[i] || gotPl[i] !== want[i]) {
+      throw new Error(
+        `[seed] healing profiles order mismatch at ${i}: want ${want[i]}, en ${gotEn[i]}, pl ${gotPl[i]}`,
+      )
+    }
+  }
+}
+
+const healingEnByNoteId = new Map(HEALING_PROFILES_EN.map((p) => [p.noteId, p]))
+const healingPlByNoteId = new Map(HEALING_PROFILES_PL.map((p) => [p.noteId, p]))
 
 type MessagesShape = {
   noteCreature: {
@@ -277,6 +303,11 @@ async function main() {
 
   let order = 0
   for (const n of NOTE_LIST) {
+    const profileEn = healingEnByNoteId.get(n.id)
+    const profilePl = healingPlByNoteId.get(n.id)
+    if (!profileEn || !profilePl) {
+      throw new Error(`[seed] missing healing profile for note ${n.id}`)
+    }
     const noteCreateData: Prisma.NoteUncheckedCreateInput = {
       id: n.id,
       short: n.short,
@@ -292,6 +323,8 @@ async function main() {
       sortOrder: order,
       emotionId: n.emotionId,
       healingStyle: n.healingStyle,
+      healingProfileEn: profileEn as unknown as Prisma.InputJsonValue,
+      healingProfilePl: profilePl as unknown as Prisma.InputJsonValue,
     }
     const noteUpdateData: Prisma.NoteUncheckedUpdateInput = {
       short: n.short,
@@ -307,6 +340,8 @@ async function main() {
       sortOrder: order,
       emotionId: n.emotionId,
       healingStyle: n.healingStyle,
+      healingProfileEn: profileEn as unknown as Prisma.InputJsonValue,
+      healingProfilePl: profilePl as unknown as Prisma.InputJsonValue,
     }
     await prisma.note.upsert({
       where: { id: n.id },
@@ -356,6 +391,8 @@ async function main() {
       linked++
     }
   }
+
+  await seedRituals(prisma)
 
   console.log(`[seed] done — ${TEARDROP_CARDS.length} cards, ${linked} note-card links`)
 }

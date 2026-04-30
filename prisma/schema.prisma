@@ -55,16 +55,19 @@ model VerificationToken {
 }
 
 model Player {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  streakNights Int      @default(0)
-  userId       String?  @unique
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  streakNights   Int      @default(0)
+  userId         String?  @unique
+  favoriteNoteId String?
 
   user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  favoriteNote    Note?            @relation("PlayerFavoriteNote", fields: [favoriteNoteId], references: [id], onDelete: SetNull)
   soundies        Soundie[]
   sessions        ListenSession[]
   dailyVisits     DailyVisit[]
   dailyClaims     DailyClaim[]
+  dailyMissions   DailyMission[]
   moodEntries     MoodEntry[]
   analyticsEvents AnalyticsEvent[]
   teardropFocusSessions TeardropFocusSession[]
@@ -72,6 +75,34 @@ model Player {
   teardropProgress TeardropProgress?
   teardropXpEvents TeardropXpEvent[]
   mindfulMoments MindfulMomentLog[]
+  echoEntries    EchoEntry[]
+}
+
+model Ritual {
+  id           String        @id
+  name         String
+  description  String
+  durationSec  Int
+  dominantNote String
+  energyTone   String
+  notes        String[]
+  createdAt    DateTime      @default(now())
+
+  phases       RitualPhase[]
+
+  @@index([createdAt])
+}
+
+model RitualPhase {
+  id        String   @id @default(cuid())
+  ritualId  String
+  name      String
+  noteIds   String[]
+  untilSec  Int
+
+  ritual    Ritual   @relation(fields: [ritualId], references: [id], onDelete: Cascade)
+
+  @@index([ritualId, untilSec])
 }
 
 model Soundie {
@@ -351,6 +382,8 @@ model Note {
   sortOrder          Int
   emotionId          String?
   healingStyle       String?
+  healingProfileEn   Json?
+  healingProfilePl   Json?
   emotion            Emotion?       @relation(fields: [emotionId], references: [id])
   fragments          LoreFragment[]
   captions           NoteCaption[]
@@ -360,7 +393,9 @@ model Note {
   teardropUnlocks    TeardropCardUnlock[]
   teardropXpEvents   TeardropXpEvent[]
   dailyClaims        DailyClaim[]
+  dailyMissionItems  DailyMissionItem[]
   moodEntries        MoodEntry[]
+  favoritePlayers    Player[] @relation("PlayerFavoriteNote")
 
   @@index([sortOrder])
 }
@@ -404,6 +439,23 @@ model MindfulMomentLog {
   @@index([playerId, type])
 }
 
+model EchoEntry {
+  id          String   @id @default(cuid())
+  playerId    String
+  noteId      String
+  phrase      String
+  mood        String?
+  timeOfDay   String
+  streak      Int      @default(0)
+  savedAt     DateTime @default(now())
+  ritualMeta  Json?
+
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, savedAt])
+  @@index([playerId, noteId])
+}
+
 model LoreFragment {
   id         String @id @default(cuid())
   noteId     String
@@ -414,4 +466,35 @@ model LoreFragment {
 
   @@unique([noteId, orderIndex, locale])
   @@index([noteId, locale])
+}
+
+model DailyMission {
+  id          String   @id @default(cuid())
+  playerId    String
+  missionDate String
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  player Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  items  DailyMissionItem[]
+
+  @@unique([playerId, missionDate])
+  @@index([playerId])
+  @@index([missionDate])
+}
+
+model DailyMissionItem {
+  id              String    @id @default(cuid())
+  missionId       String
+  orderIndex      Int
+  noteId          String
+  targetLoreIndex Int
+  kind            String    @default("light")
+  completedAt     DateTime?
+
+  mission DailyMission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  note    Note         @relation(fields: [noteId], references: [id], onDelete: Restrict)
+
+  @@unique([missionId, orderIndex])
+  @@index([missionId])
 }

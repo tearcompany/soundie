@@ -1,8 +1,8 @@
 const PROTECTED = [
-  /^\/play($|\/)/,
-  /^\/sanctuary($|\/)/,
-  /^\/pl\/play($|\/)/,
-  /^\/pl\/sanctuary($|\/)/,
+  /^\/teraz($|\/)/,
+  /^\/echo($|\/)/,
+  /^\/pl\/teraz($|\/)/,
+  /^\/pl\/echo($|\/)/,
 ]
 
 const LOGIN = [/^\/login$/, /^\/pl\/login$/]
@@ -28,7 +28,7 @@ export function loginPathForLocale(pathname: string): string {
 
 export function defaultAuthedPathForLocale(pathname: string): string {
   const prefix = localePrefixFromPathname(pathname)
-  return prefix ? `${prefix}/play` : '/play'
+  return prefix ? `${prefix}/teraz` : '/teraz'
 }
 
 export function safePathRedirect(raw: string | null, fallback: string): string {

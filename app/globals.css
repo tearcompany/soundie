@@ -167,6 +167,11 @@
   90% { transform: scale(1.035); opacity: 0.94; }
 }
 
+@keyframes resonance-line-breath {
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.52; }
+}
+
 @layer utilities {
   .lore-card {
     position: relative;
@@ -241,6 +246,10 @@
     transform-origin: center;
   }
 
+  .resonance-trace-line {
+    animation: resonance-line-breath 4.5s ease-in-out infinite;
+  }
+
   @keyframes lore-dust-drift {
     0% { transform: translate(0, 0) scale(0.8); opacity: 0.45; }
     50% { transform: translate(3px, -8px) scale(1.05); opacity: 0.85; }
@@ -249,6 +258,16 @@
 
   .daily-gift-orb {
     border-radius: 9999px;
+  }
+
+  @keyframes sanctuaryPulseOrb {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.035); opacity: 0.92; }
+  }
+
+  .sanctuary-pulse-orb {
+    animation: sanctuaryPulseOrb 6s ease-in-out infinite;
+    transform-origin: center;
   }
 
   .daily-glow--dawn {
@@ -271,6 +290,7 @@
       0 0 26px color-mix(in srgb, var(--glow, #4a6a8a) 35%, transparent),
       0 0 50px color-mix(in srgb, #5c7c9a 30%, transparent);
   }
+
 }
 
 @layer base {

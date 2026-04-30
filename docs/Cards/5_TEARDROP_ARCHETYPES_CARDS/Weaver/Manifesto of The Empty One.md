@@ -1,3 +1,5 @@
+> **Lore / reference only** — In-world voice for the Weaver arc. Not a product or engineering spec. `scripts/sync-teardrop-from-docs.ts` only picks up `The_*.md` at each Teardrop phase folder **root**; files under `Weaver/` are not ingested into seed JSON.
+
 *— for those who feel like they've died, but are actually being remade*
 
 I am not dead.  

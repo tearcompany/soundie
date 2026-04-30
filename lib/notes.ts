@@ -6,6 +6,12 @@ export type EmotionEntry = {
   descriptionEn?: string
 }
 
+export type EmotionTreat = {
+  emotionId: string
+  role: 'primary' | 'treats' | 'softens'
+  strength: 1 | 2 | 3
+}
+
 export type NoteEntry = {
   id: string
   short: string
@@ -20,8 +26,25 @@ export type NoteEntry = {
   element: string
   emotionId: string
   healingStyle: string
+  emotionTreats: EmotionTreat[]
   captions: string[]
 }
+
+export const HEALING_STYLE_LABEL: Record<string, { pl: string; en: string }> = {
+  grounding:     { pl: 'zakorzenienie', en: 'grounding' },
+  releasing:     { pl: 'uwalnianie',    en: 'releasing' },
+  activating:    { pl: 'aktywacja',     en: 'activation' },
+  witnessing:    { pl: 'świadkowanie',  en: 'witnessing' },
+  restoring:     { pl: 'przywracanie',  en: 'restoration' },
+  protecting:    { pl: 'ochrona',       en: 'protection' },
+  clarifying:    { pl: 'klarowanie',    en: 'clarity' },
+  channeling:    { pl: 'kanalizowanie', en: 'channeling' },
+  transforming:  { pl: 'transformacja', en: 'transformation' },
+  orienting:     { pl: 'orientacja',    en: 'orientation' },
+  softening:     { pl: 'miękkość',      en: 'softening' },
+  completing:    { pl: 'domknięcie',    en: 'completing' },
+}
+
 
 export const EMOTIONS: EmotionEntry[] = [
   {
@@ -92,6 +115,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Ziemia',
     emotionId: 'anxiety',
     healingStyle: 'grounding',
+    emotionTreats: [
+      { emotionId: 'anxiety',        role: 'primary',  strength: 3 },
+      { emotionId: 'guilt',          role: 'treats',   strength: 2 },
+      { emotionId: 'dissatisfaction',role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Stay with me. The nervous system remembers safety.',
       'Breathe. You are not in danger right now.',
@@ -103,7 +131,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'C#',
     short: 'C#',
-    name: 'The Threshold',
+    name: 'The Blade',
     frequency: 277.18,
     urlKey: 'Cs',
     locked: true,
@@ -114,6 +142,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Iskra',
     emotionId: 'attachment',
     healingStyle: 'releasing',
+    emotionTreats: [
+      { emotionId: 'attachment',     role: 'primary',  strength: 3 },
+      { emotionId: 'grief',          role: 'treats',   strength: 2 },
+      { emotionId: 'frustration',    role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Something is changing. I hold the doorway open.',
       'Let the old shape soften. What you need is on the other side.',
@@ -125,7 +158,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'D',
     short: 'D',
-    name: 'The Walker',
+    name: 'The Wanderer',
     frequency: 293.66,
     urlKey: 'D',
     locked: true,
@@ -136,6 +169,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Żar',
     emotionId: 'frustration',
     healingStyle: 'activating',
+    emotionTreats: [
+      { emotionId: 'frustration',    role: 'primary',  strength: 3 },
+      { emotionId: 'dissatisfaction',role: 'treats',   strength: 2 },
+      { emotionId: 'shame',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'One step. That is all I ask.',
       'Frustration means you still care. Let me carry some of that.',
@@ -147,7 +185,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'D#',
     short: 'D#',
-    name: 'The Wound',
+    name: 'The Spark',
     frequency: 311.13,
     urlKey: 'Ds',
     locked: true,
@@ -158,6 +196,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Para',
     emotionId: 'sadness',
     healingStyle: 'witnessing',
+    emotionTreats: [
+      { emotionId: 'sadness',        role: 'primary',  strength: 3 },
+      { emotionId: 'grief',          role: 'treats',   strength: 2 },
+      { emotionId: 'guilt',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Remain. Even winter stores seeds.',
       'I hold what hurts until it loosens.',
@@ -169,7 +212,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'E',
     short: 'E',
-    name: 'The Flame',
+    name: 'The Bloom',
     frequency: 329.63,
     urlKey: 'E',
     locked: true,
@@ -180,6 +223,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Światło',
     emotionId: 'shame',
     healingStyle: 'restoring',
+    emotionTreats: [
+      { emotionId: 'shame',          role: 'primary',  strength: 3 },
+      { emotionId: 'dissatisfaction',role: 'treats',   strength: 2 },
+      { emotionId: 'sadness',        role: 'softens',  strength: 1 },
+    ],
     captions: [
       'You are allowed to take up space.',
       'Nothing alive is perfect. Listen anyway.',
@@ -202,6 +250,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Pęd',
     emotionId: 'dissatisfaction',
     healingStyle: 'protecting',
+    emotionTreats: [
+      { emotionId: 'dissatisfaction',role: 'primary',  strength: 3 },
+      { emotionId: 'anger',          role: 'treats',   strength: 2 },
+      { emotionId: 'frustration',    role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Know what deserves to stay inside. I can help you remember.',
       'You have given enough today.',
@@ -224,6 +277,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Zwrot',
     emotionId: 'envy',
     healingStyle: 'clarifying',
+    emotionTreats: [
+      { emotionId: 'envy',           role: 'primary',  strength: 3 },
+      { emotionId: 'shame',          role: 'treats',   strength: 2 },
+      { emotionId: 'attachment',     role: 'softens',  strength: 1 },
+    ],
     captions: [
       'What you see in others is also in you, differently shaped.',
       'Comparison is a question, not an answer.',
@@ -246,6 +304,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Cień lasu',
     emotionId: 'anger',
     healingStyle: 'channeling',
+    emotionTreats: [
+      { emotionId: 'anger',          role: 'primary',  strength: 3 },
+      { emotionId: 'frustration',    role: 'treats',   strength: 2 },
+      { emotionId: 'grief',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Anger has a direction. Let it move through, not stay.',
       'What was not met in you is speaking now. Listen to it.',
@@ -257,7 +320,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'G#',
     short: 'G#',
-    name: 'The Crown of Ash',
+    name: 'The Flame',
     frequency: 415.3,
     urlKey: 'Gs',
     locked: true,
@@ -268,6 +331,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Para wody',
     emotionId: 'guilt',
     healingStyle: 'transforming',
+    emotionTreats: [
+      { emotionId: 'guilt',          role: 'primary',  strength: 3 },
+      { emotionId: 'shame',          role: 'treats',   strength: 2 },
+      { emotionId: 'anger',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'What you are releasing is not who you are.',
       'Guilt that does not change behavior is just weight.',
@@ -279,7 +347,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'A',
     short: 'A',
-    name: 'The Beacon',
+    name: 'The Heart',
     frequency: 440.0,
     urlKey: 'A',
     locked: true,
@@ -290,6 +358,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Niebo',
     emotionId: 'anxiety',
     healingStyle: 'orienting',
+    emotionTreats: [
+      { emotionId: 'anxiety',        role: 'primary',  strength: 3 },
+      { emotionId: 'dissatisfaction',role: 'treats',   strength: 2 },
+      { emotionId: 'grief',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Clarity is already here. Breathe toward it.',
       'The direction you seek has not abandoned you.',
@@ -301,7 +374,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'A#',
     short: 'A#',
-    name: 'The Dreamer',
+    name: 'The Storm',
     frequency: 466.16,
     urlKey: 'As',
     locked: true,
@@ -312,6 +385,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Szczelina',
     emotionId: 'grief',
     healingStyle: 'softening',
+    emotionTreats: [
+      { emotionId: 'grief',          role: 'primary',  strength: 3 },
+      { emotionId: 'sadness',        role: 'treats',   strength: 2 },
+      { emotionId: 'anxiety',        role: 'softens',  strength: 1 },
+    ],
     captions: [
       'Stay with me. I soften fear of the unknown.',
       'Listen longer. Dreams become maps.',
@@ -323,7 +401,7 @@ const ENTRIES: NoteEntry[] = [
   {
     id: 'B',
     short: 'B',
-    name: 'The Veil',
+    name: 'The Crown',
     frequency: 493.88,
     urlKey: 'B',
     locked: true,
@@ -334,6 +412,11 @@ const ENTRIES: NoteEntry[] = [
     element: 'Głąb',
     emotionId: 'guilt',
     healingStyle: 'completing',
+    emotionTreats: [
+      { emotionId: 'guilt',          role: 'primary',  strength: 3 },
+      { emotionId: 'attachment',     role: 'treats',   strength: 2 },
+      { emotionId: 'grief',          role: 'softens',  strength: 1 },
+    ],
     captions: [
       'The longing you feel is real. You do not have to resolve it tonight.',
       'Completion is not forgetting. It is choosing where to land.',
@@ -372,4 +455,25 @@ export function getSynestheticChroma(noteId: string): string {
 
 export function getEmotionById(id: string): EmotionEntry | undefined {
   return EMOTIONS.find((e) => e.id === id)
+}
+
+const ROLE_WEIGHT: Record<EmotionTreat['role'], number> = {
+  primary: 1.0,
+  treats:  0.55,
+  softens: 0.2,
+}
+
+export function computePulseDistribution(
+  soundieProgress: { noteId: string; totalListenTime: number }[],
+): Map<string, number> {
+  const scores = new Map<string, number>()
+  for (const s of soundieProgress) {
+    const note = BY_ID.get(s.noteId)
+    if (!note) continue
+    for (const treat of note.emotionTreats) {
+      const w = ROLE_WEIGHT[treat.role] * (treat.strength / 3)
+      scores.set(treat.emotionId, (scores.get(treat.emotionId) ?? 0) + s.totalListenTime * w)
+    }
+  }
+  return scores
 }

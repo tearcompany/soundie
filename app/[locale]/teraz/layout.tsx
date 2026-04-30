@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { HREFLANG_PLAY, localizedPath } from '@/lib/localized-path'
+import { HREFLANG_TERAZ, localizedPath } from '@/lib/localized-path'
 import { getSiteUrl } from '@/lib/site-url'
 
 export async function generateMetadata({
@@ -10,13 +10,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
-  const title = t('playTitle')
-  const description = t('playDescription')
+  const title = t('terazTitle')
+  const description = t('terazDescription')
   const keywords = t('keywords')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  const canonicalPath = localizedPath(locale, 'play')
+  const canonicalPath = localizedPath(locale, 'teraz')
   const pageUrl = new URL(canonicalPath, getSiteUrl()).toString()
   return {
     title,
@@ -25,7 +25,7 @@ export async function generateMetadata({
     keywords,
     alternates: {
       canonical: canonicalPath,
-      languages: { ...HREFLANG_PLAY },
+      languages: { ...HREFLANG_TERAZ },
     },
     openGraph: {
       type: 'website',
@@ -47,7 +47,7 @@ export async function generateMetadata({
   }
 }
 
-export default function PlayLayout({
+export default function TerazLayout({
   children,
 }: {
   children: React.ReactNode

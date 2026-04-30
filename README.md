@@ -29,7 +29,7 @@ It is not a music theory app. It is not a meditation app. It is something new: a
 
 12 notes. Each one a living entity with:
 
-- A **name** (e.g. "The Foundation", "The Dreamer", "The Wound")
+- A **name** (e.g. "The Foundation", "The Storm", "The Bloom")
 - A **frequency** (rooted in just intonation and Solfeggio traditions)
 - **5 lore fragments** — unlocked progressively through listening
 - **Healing properties** — grounded in real ethnomusicology and sound therapy research
@@ -280,15 +280,15 @@ Feels like safety.
 
 ⸻
 
-C# — The Threshold
+C# — The Blade
 
-Transition, unease, becoming, doorway states.
+Precision, release, cutting through what no longer fits.
 
 Used in rites of passage.
 
 ⸻
 
-D — The Walker
+D — The Wanderer
 
 Motion, progress, pilgrimage, momentum.
 
@@ -296,17 +296,17 @@ Marches, roads, journeys.
 
 ⸻
 
-D# — The Wound
+D# — The Spark
 
-Tension, grief, longing, unresolved beauty.
+First light in heaviness, grief met with recognition.
 
 Common in laments.
 
 ⸻
 
-E — The Flame
+E — The Bloom
 
-Vitality, courage, awakening, confidence.
+Vitality, unfolding, courage, visible life.
 
 Battle hymns and sunrise songs.
 
@@ -336,33 +336,33 @@ Storytelling tones.
 
 ⸻
 
-G# — The Crown of Ash
+G# — The Flame
 
-Ambition, cost, sacrifice, transformation.
+Refining fire, proportion, transformation, release of weight.
 
 Royal and tragic scales.
 
 ⸻
 
-A — The Beacon
+A — The Heart
 
-Clarity, alignment, calling, direction.
+Clarity through feeling, alignment, calling, direction.
 
 Tuning standard. Universal anchor.
 
 ⸻
 
-A# — The Dreamer
+A# — The Storm
 
-Vision, sleep states, imagination, symbols.
+Intensity that moves what is stuck, weather not enemy.
 
 Night chants.
 
 ⸻
 
-B — The Veil
+B — The Crown
 
-Completion, transcendence, dissolution, mystery.
+Completion, sovereignty, dissolution with dignity.
 
 Last step before return to C.
 

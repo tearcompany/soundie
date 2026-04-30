@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { DEFAULT_NOTE_ID, NOTE_LIST, urlKeyForNoteId } from '@/lib/notes'
+import { DEFAULT_NOTE_ID, NOTE_LIST, type NoteEntry, urlKeyForNoteId } from '@/lib/notes'
 import { trpc } from '@/lib/trpc/react'
 
 type LandingNote = {
@@ -13,9 +13,25 @@ type LandingNote = {
   name: string
 }
 
-const DIATONIC = new Set(['C', 'D', 'E', 'F', 'G', 'A', 'B'])
-
 const PREVIEW_SECONDS = 4
+
+type LandingNoteNameKey =
+  | 'noteNames.C'
+  | 'noteNames.C#'
+  | 'noteNames.D'
+  | 'noteNames.D#'
+  | 'noteNames.E'
+  | 'noteNames.F'
+  | 'noteNames.F#'
+  | 'noteNames.G'
+  | 'noteNames.G#'
+  | 'noteNames.A'
+  | 'noteNames.A#'
+  | 'noteNames.B'
+
+function landingNoteNameKey(id: NoteEntry['id']): LandingNoteNameKey {
+  return `noteNames.${id}` as LandingNoteNameKey
+}
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -184,22 +200,9 @@ export function SoundieLanding() {
         id: e.id,
         freq: e.frequency,
         hex: e.chromaHex,
-        name: DIATONIC.has(e.id)
-          ? t(
-              `noteNames.${e.id}` as
-                | 'noteNames.C'
-                | 'noteNames.D'
-                | 'noteNames.E'
-                | 'noteNames.F'
-                | 'noteNames.G'
-                | 'noteNames.A'
-                | 'noteNames.B',
-            )
-          : locale === 'pl'
-            ? e.synestheticTitlePl
-            : e.name,
+        name: t(landingNoteNameKey(e.id)),
       })),
-    [t, locale],
+    [t],
   )
   const reducedMotion = usePrefersReducedMotion()
   const { play, stop, playingId } = useNotePreview()
@@ -208,8 +211,12 @@ export function SoundieLanding() {
   const focusedNote = notes.find((n) => n.id === (playingId ?? hovered)) ?? null
   const { line, fade } = useCycledLine(lines, 3800, reducedMotion)
   const selectedOrFallback = selectedNoteId ?? focusedNote?.id ?? DEFAULT_NOTE_ID
+  const foundationHref = useMemo(
+    () => `/teraz?note=${encodeURIComponent(urlKeyForNoteId(DEFAULT_NOTE_ID))}`,
+    [],
+  )
   const playHref = useMemo(
-    () => `/play?note=${encodeURIComponent(urlKeyForNoteId(selectedOrFallback))}`,
+    () => `/teraz?note=${encodeURIComponent(urlKeyForNoteId(selectedOrFallback))}`,
     [selectedOrFallback],
   )
   const inviteCardQuery = trpc.teardrop.getMappedForNote.useQuery(
@@ -283,6 +290,21 @@ export function SoundieLanding() {
           {t('subhead')}
         </p>
 
+        <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href={foundationHref}
+            className="inline-flex items-center justify-center rounded-full border border-coral/40 bg-coral px-5 py-2.5 font-mono text-[0.68rem] uppercase tracking-wide text-pearl transition-colors hover:bg-coral/90"
+          >
+            {t('primaryCta')}
+          </Link>
+          <a
+            href="#notes-grid"
+            className="inline-flex items-center justify-center rounded-full border border-pearl-border/80 px-5 py-2.5 font-mono text-[0.68rem] uppercase tracking-wide text-ink-muted transition-colors hover:bg-pearl/80"
+          >
+            {t('secondaryCta')}
+          </a>
+        </div>
+
         <div className="mx-auto mt-5 flex max-w-md flex-wrap items-center justify-center gap-2">
           <span className="rounded-full border border-pearl-border/70 bg-pearl/70 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-muted">
             {t('relief1')}
@@ -300,6 +322,7 @@ export function SoundieLanding() {
         </p>
 
         <div
+          id="notes-grid"
           className="mt-6 grid w-full max-w-4xl grid-cols-2 justify-items-stretch gap-3 sm:grid-cols-3 md:grid-cols-6"
           role="group"
           aria-label={t('ariaNoteGroup')}

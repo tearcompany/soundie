@@ -8,15 +8,31 @@ import {
   urlKeyInput,
 } from '@/lib/validators/note'
 
+const listInput = z.object({ playerId: z.string().optional() }).optional()
 const listOutput = z.array(noteListItemSchema)
 const byIdInput = z.object({ id: noteIdInput, locale: localeInput })
 const byUrlKeyInput = z.object({ urlKey: urlKeyInput })
 
 export const noteRouter = router({
-  list: publicProcedure.output(listOutput).query(async ({ ctx }) => {
-    const rows = await ctx.db.note.findMany({ orderBy: { sortOrder: 'asc' } })
-    return rows
-  }),
+  list: publicProcedure
+    .input(listInput)
+    .output(listOutput)
+    .query(async ({ ctx, input }) => {
+      const rows = await ctx.db.note.findMany({ orderBy: { sortOrder: 'asc' } })
+      const playerId = input?.playerId
+      if (!playerId) return rows
+      const unlocks = await ctx.db.teardropCardUnlock.findMany({
+        where: { playerId },
+        select: { noteId: true },
+        distinct: ['noteId'],
+      })
+      const unlockedNoteIds = new Set(unlocks.map((u) => u.noteId))
+      return rows.map((note, i) => {
+        if (i === 0) return { ...note, locked: false }
+        const prev = rows[i - 1]
+        return { ...note, locked: !unlockedNoteIds.has(prev.id) }
+      })
+    }),
 
   getById: publicProcedure
     .input(byIdInput)

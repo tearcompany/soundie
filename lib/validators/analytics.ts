@@ -14,6 +14,9 @@ const analyticsName = z.enum([
   'daily_gift_revealed',
   'daily_gift_listen_click',
   'mood_check_in',
+  'daily_mission_complete',
+  'daily_mission_focus',
+  'ritual_completed',
 ])
 
 export const recordEventInput = z.object({

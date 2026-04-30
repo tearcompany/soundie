@@ -11,6 +11,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      { source: '/sanctuary', destination: '/echo', permanent: true },
+      { source: '/pl/sanctuary', destination: '/pl/echo', permanent: true },
+      { source: '/play', destination: '/teraz', permanent: true },
+      { source: '/pl/play', destination: '/pl/teraz', permanent: true },
+    ]
+  },
 }
 
 export default withNextIntl(nextConfig)

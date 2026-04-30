@@ -2,6 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { z } from 'zod'
 import { DEFAULT_NOTE_ID, isValidNoteId } from '@/lib/notes'
+import type {
+  RitualAttributionSegment,
+  RitualSealPayload,
+} from '@/lib/soundie-rituals'
 import {
   levelFromTotalListenSeconds,
   loreUnlockedFromTotalListenSeconds,
@@ -23,6 +27,17 @@ const SessionSchema = z.object({
 
 const DailyGiftGlowSchema = z.enum(['dawn', 'dusk', 'nocturne'])
 
+const RitualSealSchema = z.object({
+  ritualKey: z.enum(['warmth', 'clarity', 'grounding', 'energy', 'release']),
+  ritualId: z.string(),
+  dominantNoteId: z.string(),
+  entryNoteId: z.string(),
+  notesInvolved: z.array(z.string()),
+  phrase: z.string(),
+  elapsedSeconds: z.number().nonnegative(),
+  sealedAt: z.string().datetime(),
+})
+
 const SoundieStateSchema = z.object({
   activeNoteId: z.string(),
   playerId: z.string().cuid().nullable(),
@@ -33,6 +48,8 @@ const SoundieStateSchema = z.object({
   dailyGiftForNoteId: z.string().nullable(),
   dailyGiftCaption: z.string().nullable(),
   pendingListenFromDailyGift: z.boolean(),
+  activeRitualId: z.string().nullable(),
+  ritualSeal: RitualSealSchema.nullable(),
 })
 
 export type Progress = z.infer<typeof ProgressSchema>
@@ -40,11 +57,12 @@ export type Session = z.infer<typeof SessionSchema>
 export type SoundieState = z.infer<typeof SoundieStateSchema>
 type PersistedSoundieState = Pick<
   SoundieState,
-  'activeNoteId' | 'playerId' | 'progressByNoteId' | 'currentSession' | 'teardropShelfOpen'
+  'activeNoteId' | 'playerId' | 'progressByNoteId' | 'currentSession' | 'teardropShelfOpen' | 'activeRitualId'
 >
 
 interface SoundieStore extends SoundieState {
   hasHydrated: boolean
+  pendingLoreFocusIndex: number | null
   startSession: (durationSeconds?: number) => void
   stopSession: () => void
   updateSessionElapsed: (elapsed: number) => void
@@ -54,6 +72,8 @@ interface SoundieStore extends SoundieState {
   setActiveNote: (id: string) => void
   setPlayerId: (id: string | null) => void
   setTeardropShelfOpen: (open: boolean) => void
+  setPendingLoreFocusIndex: (idx: number | null) => void
+  focusNoteFragment: (noteId: string, loreIndexZeroBased: number, openShelf?: boolean) => void
   applyDailyClaim: (
     payload: { noteId: string; glowKey: 'dawn' | 'dusk' | 'nocturne'; rareCaption: string } | null,
     activeNoteId: string
@@ -69,6 +89,11 @@ interface SoundieStore extends SoundieState {
     noteId: string
   ) => void
   reset: () => void
+  setActiveRitualId: (id: string | null) => void
+  completeRitualListen: (
+    segments: RitualAttributionSegment[],
+    seal?: RitualSealPayload | null
+  ) => void
 }
 
 export const EMPTY_NOTE_PROGRESS: Progress = Object.freeze({
@@ -93,6 +118,8 @@ const INITIAL_STATE: SoundieState = {
   dailyGiftForNoteId: null,
   dailyGiftCaption: null,
   pendingListenFromDailyGift: false,
+  activeRitualId: null,
+  ritualSeal: null,
 }
 
 type V1StateSlice = {
@@ -111,9 +138,39 @@ export const useSoundieStore = create<SoundieStore>()(
     (set, get) => ({
       ...INITIAL_STATE,
       hasHydrated: false,
+      pendingLoreFocusIndex: null,
+
+      setPendingLoreFocusIndex: (idx: number | null) => {
+        set({ pendingLoreFocusIndex: idx })
+      },
+
+      focusNoteFragment: (noteId: string, loreIndexZeroBased: number, openShelf = true) => {
+        if (!isValidNoteId(noteId)) return
+        const clamped = Math.max(0, Math.min(4, Math.floor(loreIndexZeroBased)))
+        set((s) => ({
+          activeNoteId: noteId,
+          pendingLoreFocusIndex: clamped,
+          teardropShelfOpen: openShelf ? true : s.teardropShelfOpen,
+          dailyGiftGlow:
+            s.dailyGiftForNoteId && noteId !== s.dailyGiftForNoteId ? null : s.dailyGiftGlow,
+          dailyGiftForNoteId:
+            s.dailyGiftForNoteId && noteId !== s.dailyGiftForNoteId ? null : s.dailyGiftForNoteId,
+          dailyGiftCaption:
+            s.dailyGiftForNoteId && noteId !== s.dailyGiftForNoteId ? null : s.dailyGiftCaption,
+          sessionMoodReaction: noteId !== s.activeNoteId ? null : s.sessionMoodReaction,
+        }))
+      },
+
+      setActiveRitualId: (id: string | null) => {
+        set((s) => ({
+          activeRitualId: id,
+          ritualSeal: id !== null ? null : s.ritualSeal,
+        }))
+      },
 
       setActiveNote: (id: string) => {
         if (!isValidNoteId(id)) return
+        if (get().activeRitualId && get().currentSession.active) return
         set((s) => {
           const next: {
             activeNoteId: string
@@ -306,6 +363,45 @@ export const useSoundieStore = create<SoundieStore>()(
         }))
       },
 
+      completeRitualListen: (segments, seal) => {
+        set((state) => {
+          const nextProg = { ...state.progressByNoteId }
+          for (const seg of segments) {
+            const prev = nextProg[seg.noteId] ?? EMPTY_NOTE_PROGRESS
+            const nt = prev.totalListenTime + seg.seconds
+            nextProg[seg.noteId] = {
+              ...prev,
+              totalListenTime: nt,
+              level: levelFromTotalListenSeconds(nt),
+              loreUnlocked: loreUnlockedFromTotalListenSeconds(nt),
+              lastSeen: new Date().toISOString(),
+            }
+          }
+          const sealedAt = new Date().toISOString()
+          return {
+            progressByNoteId: nextProg,
+            currentSession: {
+              ...state.currentSession,
+              active: false,
+              elapsed: 0,
+            },
+            activeRitualId: null,
+            ritualSeal: seal
+              ? {
+                  ritualKey: seal.ritualKey,
+                  ritualId: seal.ritualId,
+                  dominantNoteId: seal.dominantNoteId,
+                  entryNoteId: seal.entryNoteId,
+                  notesInvolved: [...seal.notesInvolved],
+                  phrase: seal.phrase,
+                  elapsedSeconds: seal.elapsedSeconds,
+                  sealedAt,
+                }
+              : state.ritualSeal,
+          }
+        })
+      },
+
       reset: () => {
         const pid = get().playerId
         set({
@@ -314,18 +410,20 @@ export const useSoundieStore = create<SoundieStore>()(
           hasHydrated: get().hasHydrated,
           moodEntranceCleared: true,
           sessionMoodReaction: null,
+          activeRitualId: null,
         })
       },
     }),
     {
       name: 'soundie-storage',
-      version: 6,
+      version: 9,
       partialize: (state): PersistedSoundieState => ({
         activeNoteId: state.activeNoteId,
         playerId: state.playerId,
         progressByNoteId: state.progressByNoteId,
         currentSession: state.currentSession,
         teardropShelfOpen: state.teardropShelfOpen,
+        activeRitualId: state.activeRitualId,
       }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated()
@@ -387,6 +485,18 @@ export const useSoundieStore = create<SoundieStore>()(
           }
           const { progress: _drop, ...rest } = cur as SoundieState & { progress?: Progress }
           p = { ...rest, progressByNoteId: next }
+        }
+        if (version < 7) {
+          const cur = p as SoundieState & { activeRitualId?: string | null }
+          p = { ...cur, activeRitualId: cur.activeRitualId ?? null }
+        }
+        if (version < 8) {
+          const cur = p as SoundieState & { ritualSeal?: SoundieState['ritualSeal'] }
+          p = { ...cur, ritualSeal: cur.ritualSeal ?? null }
+        }
+        if (version < 9) {
+          const cur = p as SoundieState & { activeRitualId?: string | null }
+          p = { ...cur, activeRitualId: cur.activeRitualId ?? null }
         }
         return p as SoundieState
       },

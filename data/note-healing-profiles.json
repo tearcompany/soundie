@@ -1,0 +1,423 @@
+[
+  {
+    "noteId": "C",
+    "noteName": "The Foundation",
+    "emotionCore": "Safety at the root — the body remembering it can land",
+    "archetype": "The Root / Ground",
+    "treats": [
+      "anxiety",
+      "overwhelm",
+      "dissociation",
+      "spiraling thoughts",
+      "hypervigilance",
+      "emotional flooding"
+    ],
+    "heals": [
+      "felt safety",
+      "steadiness",
+      "trust in the body",
+      "slowness",
+      "grounded presence"
+    ],
+    "supports": [
+      "winding down",
+      "stressful days",
+      "grounding before sleep",
+      "morning stillness",
+      "breathwork"
+    ],
+    "transforms": [
+      "fear into steadiness",
+      "rush into presence",
+      "noise into a single breath"
+    ],
+    "bodyFocus": ["feet and legs", "breath settling low in the torso"],
+    "energyTone": "grounding",
+    "shortMeaning": "A deep return to the sense that you are held by something steady.",
+    "todayUse": "When the mind races ahead of the body, stay until the floor feels real again."
+  },
+  {
+    "noteId": "C#",
+    "noteName": "The Blade",
+    "emotionCore": "Honest edge — what must be cut away so truth can breathe",
+    "archetype": "The Blade",
+    "treats": [
+      "stuck attachment",
+      "fear of letting go",
+      "identity rigidity",
+      "transition anxiety",
+      "unfinished goodbyes"
+    ],
+    "heals": [
+      "permission to change",
+      "clean grief",
+      "honest release",
+      "courage at the edge"
+    ],
+    "supports": [
+      "life transitions",
+      "endings and new chapters",
+      "closing circles",
+      "difficult conversations",
+      "reflective evenings"
+    ],
+    "transforms": [
+      "clinging into openness",
+      "stale loyalty into truth",
+      "stuckness into a chosen step"
+    ],
+    "bodyFocus": ["jaw and hands unclenching", "shoulders dropping away from ears"],
+    "energyTone": "opening",
+    "shortMeaning": "A clean edge at the crossing — not cruelty, precision.",
+    "todayUse": "When you are between two versions of yourself, listen until you know what no longer belongs."
+  },
+  {
+    "noteId": "D",
+    "noteName": "The Wanderer",
+    "emotionCore": "Motion without shame — one step as enough",
+    "archetype": "The Wanderer",
+    "treats": [
+      "frustration",
+      "inertia",
+      "shame about pace",
+      "emotional fatigue",
+      "feeling behind"
+    ],
+    "heals": [
+      "patience",
+      "small courage",
+      "realistic momentum",
+      "self-compassion for pace"
+    ],
+    "supports": [
+      "starting again",
+      "long projects",
+      "morning focus",
+      "transitions",
+      "walking meditation"
+    ],
+    "transforms": [
+      "stuckness into one honest step",
+      "pressure into rhythm",
+      "doubt into showing up anyway"
+    ],
+    "bodyFocus": ["hips and stride", "weight shifting evenly"],
+    "energyTone": "uplifting",
+    "shortMeaning": "Amber patience — forward is allowed to be quiet.",
+    "todayUse": "When everything feels blocked, ask only for the next small motion."
+  },
+  {
+    "noteId": "D#",
+    "noteName": "The Spark",
+    "emotionCore": "A small light in heaviness — recognition before repair",
+    "archetype": "The Spark",
+    "treats": [
+      "unexpressed grief",
+      "emotional numbness",
+      "sadness without outlet",
+      "heaviness",
+      "loneliness in pain"
+    ],
+    "heals": [
+      "tenderness toward pain",
+      "emotional honesty",
+      "soft witnessing",
+      "permission to feel"
+    ],
+    "supports": [
+      "quiet evenings",
+      "memorial moments",
+      "gentle crying",
+      "reflective journaling",
+      "emotional reset"
+    ],
+    "transforms": [
+      "isolation into held feeling",
+      "sadness into tenderness",
+      "silence into truth spoken softly"
+    ],
+    "bodyFocus": ["chest and throat", "unhurried exhale"],
+    "energyTone": "warming",
+    "shortMeaning": "Copper dawn — not the whole sun yet, but enough to see by.",
+    "todayUse": "When sadness has no words yet, stay until something small and true flickers back."
+  },
+  {
+    "noteId": "E",
+    "noteName": "The Bloom",
+    "emotionCore": "Worthiness — life unfolding without having to earn it first",
+    "archetype": "The Bloom",
+    "treats": [
+      "shame",
+      "self-erasure",
+      "feeling invisible",
+      "harsh inner criticism",
+      "emotional shutdown"
+    ],
+    "heals": [
+      "warmth toward self",
+      "permission to matter",
+      "dignity",
+      "soft pride"
+    ],
+    "supports": [
+      "speaking up",
+      "creative risk",
+      "relationships",
+      "forgiveness of self",
+      "morning intention"
+    ],
+    "transforms": [
+      "shame into humanity",
+      "hiding into presence",
+      "coldness into visible, gentle life"
+    ],
+    "bodyFocus": ["solar plexus area", "relaxed shoulders"],
+    "energyTone": "warming",
+    "shortMeaning": "Gold that does not ask you to be finished before you open.",
+    "todayUse": "When you want to shrink, let sound remind you that growth can include you."
+  },
+  {
+    "noteId": "F",
+    "noteName": "The Keeper",
+    "emotionCore": "Boundaries as care — the hearth that chooses who warms it",
+    "archetype": "The Hearth Guardian",
+    "treats": [
+      "perfectionism",
+      "burnout from over-giving",
+      "resentment",
+      "never-enough loops",
+      "scattered focus"
+    ],
+    "heals": [
+      "self-regard",
+      "rest as sacred",
+      "selective generosity",
+      "inner clarity about limits"
+    ],
+    "supports": [
+      "saying no",
+      "recovery days",
+      "protecting focus",
+      "deep work",
+      "difficult conversations"
+    ],
+    "transforms": [
+      "over-extension into sustainable care",
+      "resentment into honest limits",
+      "chaos into a defended center"
+    ],
+    "bodyFocus": ["arms resting inward", "feet planted before answering"],
+    "energyTone": "grounding",
+    "shortMeaning": "Lime vigilance — love includes guarding what is yours.",
+    "todayUse": "When everyone wants a piece of you, listen until you remember what is non-negotiable."
+  },
+  {
+    "noteId": "F#",
+    "noteName": "The Mirror",
+    "emotionCore": "Clear seeing — comparison softened into truth",
+    "archetype": "The Reflector",
+    "treats": [
+      "comparison",
+      "envy fog",
+      "self-doubt",
+      "emotional confusion",
+      "distorted self-image"
+    ],
+    "heals": [
+      "honest clarity",
+      "intuition",
+      "proportion",
+      "self-honesty without cruelty"
+    ],
+    "supports": [
+      "journaling",
+      "evening reflection",
+      "transitions",
+      "honest friendship",
+      "breathwork"
+    ],
+    "transforms": [
+      "illusion into insight",
+      "comparison into self-knowledge",
+      "fog into one true sentence"
+    ],
+    "bodyFocus": ["soft eyes", "long neck, unforced"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Teal inquiry — what you see in others is information, not a verdict.",
+    "todayUse": "When the story about yourself wobbles, listen until the reflection steadies."
+  },
+  {
+    "noteId": "G",
+    "noteName": "The River",
+    "emotionCore": "Anger as energy that can move without destroying",
+    "archetype": "The Channel",
+    "treats": [
+      "bottled anger",
+      "irritation",
+      "inner tension",
+      "feeling unheard",
+      "emotional pressure"
+    ],
+    "heals": [
+      "directed vitality",
+      "honest expression",
+      "release with care",
+      "emotional clarity"
+    ],
+    "supports": [
+      "hard conversations",
+      "physical movement",
+      "clearing the air",
+      "emotional reset",
+      "transitions"
+    ],
+    "transforms": [
+      "heat into direction",
+      "pressure into flow",
+      "anger into boundaries spoken cleanly"
+    ],
+    "bodyFocus": ["spine lengthening", "whole-body movement"],
+    "energyTone": "cooling",
+    "shortMeaning": "Forest water — force can bend around what is true.",
+    "todayUse": "When heat rises, stay until it knows where to go besides inward."
+  },
+  {
+    "noteId": "G#",
+    "noteName": "The Flame",
+    "emotionCore": "Refining fire — guilt that can lighten into accountable care",
+    "archetype": "The Flame",
+    "treats": [
+      "false guilt",
+      "over-responsibility",
+      "shame-heavy rumination",
+      "indecision",
+      "emotional fatigue"
+    ],
+    "heals": [
+      "proportion",
+      "accountable softness",
+      "ethical clarity",
+      "self-forgiveness practice"
+    ],
+    "supports": [
+      "amends without self-destruction",
+      "reflective evenings",
+      "letting old stories complete",
+      "journaling"
+    ],
+    "transforms": [
+      "guilt into honest repair",
+      "weight into learning",
+      "rumination into one next right action"
+    ],
+    "bodyFocus": ["long exhale", "unclenching belly"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Aquamarine fire — what burns away was never the whole of you.",
+    "todayUse": "When everything feels like your fault, listen until heat becomes clarity, not shame."
+  },
+  {
+    "noteId": "A",
+    "noteName": "The Heart",
+    "emotionCore": "Orientation through feeling — a brief sense of what matters",
+    "archetype": "The Heart",
+    "treats": [
+      "directionless anxiety",
+      "scattered priorities",
+      "feeling unmoored",
+      "overwhelm of choices",
+      "mental noise"
+    ],
+    "heals": [
+      "brief clarity",
+      "sense of place",
+      "trustworthy next step",
+      "calm focus"
+    ],
+    "supports": [
+      "planning gently",
+      "crossroads",
+      "morning focus",
+      "refinding purpose",
+      "transitions"
+    ],
+    "transforms": [
+      "confusion into simplicity",
+      "noise into one true direction",
+      "fear into a small true north"
+    ],
+    "bodyFocus": ["open posture", "eyes soft on horizon"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Sky-blue pulse — not all of the map, just the next inch that feels true.",
+    "todayUse": "When you cannot see the whole path, listen until one step feels honest in the chest."
+  },
+  {
+    "noteId": "A#",
+    "noteName": "The Storm",
+    "emotionCore": "Weather that moves what was stuck — intensity without collapse",
+    "archetype": "The Storm",
+    "treats": [
+      "fear of the unknown",
+      "grief tension",
+      "spiritual restlessness",
+      "forcing answers",
+      "scattered focus"
+    ],
+    "heals": [
+      "tolerance of not-knowing",
+      "imaginal wisdom",
+      "soft faith",
+      "patience with process"
+    ],
+    "supports": [
+      "liminal seasons",
+      "night rituals",
+      "creative incubation",
+      "sleep rituals",
+      "reflective evenings"
+    ],
+    "transforms": [
+      "dread into curiosity",
+      "forcing into waiting",
+      "chaos into slow pattern"
+    ],
+    "bodyFocus": ["unhurried breath", "hands resting open"],
+    "energyTone": "opening",
+    "shortMeaning": "Indigo weather — the sky clears by moving, not by forcing blue.",
+    "todayUse": "When the mind demands certainty tonight, stay until the pressure finds a direction."
+  },
+  {
+    "noteId": "B",
+    "noteName": "The Crown",
+    "emotionCore": "Sovereign completion — longing without grasping",
+    "archetype": "The Crown",
+    "treats": [
+      "unresolved longing",
+      "guilt about moving on",
+      "fear of finality",
+      "emotional fatigue",
+      "inner tension"
+    ],
+    "heals": [
+      "completion without cruelty",
+      "honored grief",
+      "clean closure",
+      "gentle decisiveness"
+    ],
+    "supports": [
+      "goodbyes",
+      "project finales",
+      "relationship shifts",
+      "seasonal endings",
+      "reflective evenings"
+    ],
+    "transforms": [
+      "grasping into release",
+      "longing into blessing",
+      "confusion into a quiet full stop"
+    ],
+    "bodyFocus": ["slow exhale", "heavy places allowed to rest"],
+    "energyTone": "cooling",
+    "shortMeaning": "Deep violet crown — an ending can still leave you whole.",
+    "todayUse": "When something is over but your hands won't open, listen until closure feels dignified."
+  }
+]

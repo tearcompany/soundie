@@ -2,11 +2,8 @@ import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
 
-function createPrismaClient() {
-  return new PrismaClient()
-}
+export const db = globalForPrisma.prisma ?? new PrismaClient()
 
-export const db =
-  process.env.NODE_ENV === 'production'
-    ? (globalForPrisma.prisma ??= createPrismaClient())
-    : createPrismaClient()
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = db
+}

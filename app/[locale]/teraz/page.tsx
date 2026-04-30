@@ -7,16 +7,16 @@ import { SoundiePlayerBridge } from '@/components/soundie-player-bridge'
 import { ReturnEngineBridge } from '@/components/return-engine-bridge'
 import { MoodCheckInBridge } from '@/components/mood-check-in-bridge'
 
-export default function PlayPage() {
+export default function TerazPage() {
   return (
     <main className="relative flex min-h-0 flex-1 flex-col overflow-x-hidden bg-pearl">
       <div className="flex min-h-0 w-full flex-1 flex-col">
         <NoteCreature />
       </div>
+      <SoundiePlayerBridge />
+      <MoodCheckInBridge />
+      <ReturnEngineBridge />
       <Suspense fallback={null}>
-        <MoodCheckInBridge />
-        <ReturnEngineBridge />
-        <SoundiePlayerBridge />
         <SoundieQueryBridge />
       </Suspense>
     </main>

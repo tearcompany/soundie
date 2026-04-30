@@ -7,6 +7,7 @@ import { urlKeyForNoteId } from '@/lib/notes'
 import { Link } from '@/i18n/navigation'
 import { MAX_LORE_FRAGMENTS } from '@/lib/progress'
 import { trpc } from '@/lib/trpc/react'
+import type { GardenPhase } from '@/lib/soundie-garden-phase'
 
 export type NoteProgressRow = {
   noteId: string
@@ -15,16 +16,22 @@ export type NoteProgressRow = {
   level: number
   totalListenTime: number
   loreUnlocked: number
+  gardenPhase: GardenPhase
 }
 
 type Props = {
   note: NoteProgressRow
   playerId?: string
   locale?: 'en' | 'pl'
+  isFavorite?: boolean
 }
 
-export function NoteProgressCard({ note, playerId, locale = 'en' }: Props) {
+export function NoteProgressCard({ note, playerId, locale = 'en', isFavorite = false }: Props) {
   const t = useTranslations('sanctuary')
+  const utils = trpc.useUtils()
+  const setFavorite = trpc.sanctuary.setFavoriteNote.useMutation({
+    onSuccess: () => utils.sanctuary.getDiagramData.invalidate(),
+  })
   const messages = useMessages() as {
     noteCreature?: { lore?: Record<string, string[]> }
   }
@@ -97,7 +104,37 @@ export function NoteProgressCard({ note, playerId, locale = 'en' }: Props) {
           <p className="font-mono text-[0.6rem] text-ink-muted">
             {t('noteLevel', { lv: note.level })}
           </p>
+          <p className="mt-0.5 font-mono text-[0.58rem] text-ink-muted/90">
+            {note.gardenPhase === 'sleeping'
+              ? t('gardenPhase.sleeping')
+              : note.gardenPhase === 'discovered'
+                ? t('gardenPhase.discovered')
+                : note.gardenPhase === 'bonded'
+                  ? t('gardenPhase.bonded')
+                  : note.gardenPhase === 'awakened'
+                    ? t('gardenPhase.awakened')
+                    : t('gardenPhase.mastered')}
+          </p>
         </div>
+        {playerId && (
+          <button
+            type="button"
+            disabled={setFavorite.isPending}
+            onClick={() =>
+              setFavorite.mutate({
+                playerId,
+                noteId: isFavorite ? null : note.noteId,
+              })
+            }
+            className="shrink-0 rounded-full p-1.5 text-ink-muted transition-colors hover:bg-pearl-border/40 hover:text-ink"
+            aria-label={isFavorite ? t('favoriteRemove') : t('favoriteAdd')}
+            aria-pressed={isFavorite}
+          >
+            <span className="text-base leading-none" aria-hidden>
+              {isFavorite ? '★' : '☆'}
+            </span>
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5" aria-label={t('noteFragmentsAria', { n: note.loreUnlocked, max: MAX_LORE_FRAGMENTS })}>
@@ -167,7 +204,7 @@ export function NoteProgressCard({ note, playerId, locale = 'en' }: Props) {
       )}
       <div>
         <Link
-          href={`/play?note=${encodeURIComponent(urlKeyForNoteId(note.noteId))}`}
+          href={`/teraz?note=${encodeURIComponent(urlKeyForNoteId(note.noteId))}`}
           className="font-mono text-[0.62rem] uppercase tracking-widest text-ink-muted underline decoration-ink/30 underline-offset-4 hover:text-ink"
         >
           {t('listenNote')}

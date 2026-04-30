@@ -1,0 +1,423 @@
+[
+  {
+    "noteId": "C",
+    "noteName": "The Foundation",
+    "emotionCore": "Bezpieczeństwo u korzenia — ciało, które znów pamięta, że może oprzeć się o ziemię",
+    "archetype": "Korzeń / Grunt",
+    "treats": [
+      "niepokój",
+      "przebodźcowanie",
+      "odsunięcie od ciała",
+      "zapętlone myśli",
+      "nadpobudliwość",
+      "emocjonalna fala"
+    ],
+    "heals": [
+      "poczucie bezpieczeństwa w ciele",
+      "stałość",
+      "zaufanie do ciała",
+      "wolniejszy rytm",
+      "obecność zakorzeniona w tu i teraz"
+    ],
+    "supports": [
+      "uspokajanie przed snem",
+      "ciężkie dni",
+      "wieczorny rytuał oddechu",
+      "poranna cisza",
+      "praca z oddechem"
+    ],
+    "transforms": [
+      "lęk w stałość",
+      "pęd w obecność",
+      "szum w jeden świadomy oddech"
+    ],
+    "bodyFocus": ["stopy i nogi", "oddech osiadający nisko w tułowiu"],
+    "energyTone": "grounding",
+    "shortMeaning": "Głęboki powrót do poczucia, że coś stabilnego cię podtrzymuje.",
+    "todayUse": "Gdy umysł wyprzedza cieło, zostań, aż podłoga znów poczuje się prawdziwa."
+  },
+  {
+    "noteId": "C#",
+    "noteName": "The Blade",
+    "emotionCore": "Uczciwa krawędź — co trzeba oddzielić, by prawda mogła oddychać",
+    "archetype": "Ostrze",
+    "treats": [
+      "utknięte przywiązanie",
+      "lęk przed puszczeniem",
+      "sztywność tożsamości",
+      "niepokój przy przejściu",
+      "niedomknięte pożegnania"
+    ],
+    "heals": [
+      "pozwolenie na zmianę",
+      "żałoba bez wymuszania",
+      "szczere puszczenie",
+      "odwaga na krawędzi"
+    ],
+    "supports": [
+      "życiowe przejścia",
+      "końce i nowe rozdziały",
+      "domykanie kręgów",
+      "trudne rozmowy",
+      "refleksyjne wieczory"
+    ],
+    "transforms": [
+      "chwyt w otwartość",
+      "przestarzała lojalność w prawdę",
+      "utknięcie w świadomy krok"
+    ],
+    "bodyFocus": ["rozluźnienie szczęki i dłoni", "barki opadające od uszu"],
+    "energyTone": "opening",
+    "shortMeaning": "Czysta krawędź na przejściu — nie okrucieństwo, precyzja.",
+    "todayUse": "Gdy jesteś między dwiema wersjami siebie, słuchaj, aż wiesz, co już do ciebie nie należy."
+  },
+  {
+    "noteId": "D",
+    "noteName": "The Wanderer",
+    "emotionCore": "Ruch bez wstydu — jeden krok jako dość",
+    "archetype": "Wędrowiec",
+    "treats": [
+      "frustracja",
+      "inercja",
+      "wstyd z powodu tempa",
+      "emocjonalne zmęczenie",
+      "poczucie, że się spóźniasz"
+    ],
+    "heals": [
+      "cierpliwość",
+      "mały odwaga",
+      "realistyczny impet",
+      "łagodność wobec własnego tempa"
+    ],
+    "supports": [
+      "zaczynanie od nowa",
+      "długie projekty",
+      "poranny fokus",
+      "przejścia",
+      "medytacja w marszu"
+    ],
+    "transforms": [
+      "utknięcie w jeden uczciwy krok",
+      "presja w rytm",
+      "wątpliwość w pojawienie się mimo wszystko"
+    ],
+    "bodyFocus": ["biodra i krok", "równomierne przenoszenie ciężaru"],
+    "energyTone": "uplifting",
+    "shortMeaning": "Bursztynowa cierpliwość — naprzód wolno iść cicho.",
+    "todayUse": "Gdy wszystko się blokuje, poproś tylko o najmniejszy następny ruch."
+  },
+  {
+    "noteId": "D#",
+    "noteName": "The Spark",
+    "emotionCore": "Małe światło w ciężarze — rozpoznanie zanim naprawa",
+    "archetype": "Iskra",
+    "treats": [
+      "niewypowiedziana żałoba",
+      "emocjonalna odrętwiałość",
+      "smutek bez ujścia",
+      "ciężar",
+      "samotność w bólu"
+    ],
+    "heals": [
+      "czułość wobec bólu",
+      "emocjonalna prawda",
+      "łagodne świadkowanie",
+      "pozwolenie na uczucie"
+    ],
+    "supports": [
+      "ciche wieczory",
+      "chwile pamięci",
+      "łagodny płacz",
+      "dziennik bez oceny",
+      "emocjonalny reset"
+    ],
+    "transforms": [
+      "izolacja w przyjęte uczucie",
+      "smutek w czułość",
+      "cisza w prawdę wypowiedzianą cicho"
+    ],
+    "bodyFocus": ["klatka i gardło", "nieśpieszny wydech"],
+    "energyTone": "warming",
+    "shortMeaning": "Miedziany świt — jeszcze nie całe słońce, ale dość, by widzieć.",
+    "todayUse": "Gdy smutek nie ma jeszcze słów, zostań, aż coś małego i prawdziwego znów się zapali."
+  },
+  {
+    "noteId": "E",
+    "noteName": "The Bloom",
+    "emotionCore": "Godność — życie, które się otwiera bez wcześniejszego zasługiwania",
+    "archetype": "Rozkwit",
+    "treats": [
+      "wstyd",
+      "wymazywanie siebie",
+      "poczucie niewidzialności",
+      "surowy wewnętrzny głos",
+      "emocjonalne zamknięcie"
+    ],
+    "heals": [
+      "ciepło wobec siebie",
+      "pozwolenie, by na sobie zależało",
+      "godność",
+      "łagodna duma"
+    ],
+    "supports": [
+      "mówienie głośno",
+      "twórcze ryzyko",
+      "relacje",
+      "wybaczenie sobie",
+      "poranna intencja"
+    ],
+    "transforms": [
+      "wstyd w ludzkość",
+      "chowanie się w obecność",
+      "chłód w widzialne, łagodne życie"
+    ],
+    "bodyFocus": ["okolice splotu słonecznego", "rozluźnione barki"],
+    "energyTone": "warming",
+    "shortMeaning": "Złoto, które nie każe być gotowym, zanim się otworzysz.",
+    "todayUse": "Gdy chcesz się zwinąć, niech dźwięk przypomni, że rozwój może cię pomieścić."
+  },
+  {
+    "noteId": "F",
+    "noteName": "The Keeper",
+    "emotionCore": "Granice jako troska — palenisko, które wybiera, kto się grzeje",
+    "archetype": "Strażnik paleniska",
+    "treats": [
+      "perfekcjonizm",
+      "wypalenie z przedawania się",
+      "uraza",
+      "pętle „nigdy dość”",
+      "rozproszona uwaga"
+    ],
+    "heals": [
+      "szacunek do siebie",
+      "odpoczynek jako świętość",
+      "wybieralna hojność",
+      "jasność wewnętrznych limitów"
+    ],
+    "supports": [
+      "mówienie nie",
+      "dni odbudowy",
+      "ochrona skupienia",
+      "głęboka praca",
+      "trudne rozmowy"
+    ],
+    "transforms": [
+      "nadmiar dawania w zrównoważoną troskę",
+      "uraza w uczciwe granice",
+      "chaos w broniony środek"
+    ],
+    "bodyFocus": ["ramiona spoczywające do środka", "stopy na ziemi przed odpowiedzią"],
+    "energyTone": "grounding",
+    "shortMeaning": "Limonkowa czujność — miłość obejmuje też strzeżenie tego, co twoje.",
+    "todayUse": "Gdy każdy chce kawałek ciebie, słuchaj, aż przypomnisz sobie, co jest nie do negocjacji."
+  },
+  {
+    "noteId": "F#",
+    "noteName": "The Mirror",
+    "emotionCore": "Jasne widzenie — porównanie zmiękczone w prawdę",
+    "archetype": "Odbicie",
+    "treats": [
+      "porównywanie się",
+      "mgła zawiści",
+      "wątpliwość wobec siebie",
+      "emocjonalny chaos",
+      "zniekształcony obraz siebie"
+    ],
+    "heals": [
+      "uczciwa jasność",
+      "intuicja",
+      "proporcja",
+      "prawda o sobie bez okrucieństwa"
+    ],
+    "supports": [
+      "dziennik",
+      "wieczorna refleksja",
+      "przejścia",
+      "uczciwa przyjaźń",
+      "praca z oddechem"
+    ],
+    "transforms": [
+      "iluzja w wgląd",
+      "porównanie w poznanie siebie",
+      "mgła w jedno prawdziwe zdanie"
+    ],
+    "bodyFocus": ["miękkie oczy", "szyja bez napinania"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Tealowe pytanie — to, co widzisz u innych, to informacja, nie wyrok.",
+    "todayUse": "Gdy opowieść o tobie się chwieje, słuchaj, aż odbicie się uspokoi."
+  },
+  {
+    "noteId": "G",
+    "noteName": "The River",
+    "emotionCore": "Złość jako energia, która może płynąć bez niszczenia",
+    "archetype": "Kanał",
+    "treats": [
+      "zatrzymana złość",
+      "irytacja",
+      "wewnętrzne napięcie",
+      "poczucie nieusłyszenia",
+      "emocjonalny parcie"
+    ],
+    "heals": [
+      "ukierunkowana żywotność",
+      "uczciwe wyrażenie",
+      "uwolnienie z troską",
+      "emocjonalna jasność"
+    ],
+    "supports": [
+      "ciężkie rozmowy",
+      "ruch ciała",
+      "oczyszczenie atmosfery",
+      "emocjonalny reset",
+      "przejścia"
+    ],
+    "transforms": [
+      "ciepło w kierunek",
+      "presja w przepływ",
+      "złość w granice wypowiedziane czysto"
+    ],
+    "bodyFocus": ["wydłużony kręgosłup", "ruch całego ciała"],
+    "energyTone": "cooling",
+    "shortMeaning": "Leśna woda — siła może omijać to, co prawdziwe.",
+    "todayUse": "Gdy rośnie gorączka, zostań, aż znajdzie drogę inną niż do środka."
+  },
+  {
+    "noteId": "G#",
+    "noteName": "The Flame",
+    "emotionCore": "Ogień oczyszczający — wina, która może zelżeć w odpowiedzialną troskę",
+    "archetype": "Płomień",
+    "treats": [
+      "fałszywa wina",
+      "nadmierna odpowiedzialność",
+      "wstydliwe rozmyślanie w kółko",
+      "niezdecydowanie",
+      "emocjonalne zmęczenie"
+    ],
+    "heals": [
+      "proporcja",
+      "odpowiedzialna łagodność",
+      "etyczna jasność",
+      "praktyka wybaczenia sobie"
+    ],
+    "supports": [
+      "naprawa bez samounicestwienia",
+      "refleksyjne wieczory",
+      "domykanie starych opowieści",
+      "dziennik"
+    ],
+    "transforms": [
+      "wina w uczciwą naprawę",
+      "ciężar w naukę",
+      "rozmyślanie w jeden następny właściwy krok"
+    ],
+    "bodyFocus": ["długi wydech", "rozluźnienie brzucha"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Akwamarynowy ogień — to, co się pali, nie było całą tobą.",
+    "todayUse": "Gdy wszystko wydaje się twoją winą, słuchaj, aż gorączka stanie się jasnością, nie wstydem."
+  },
+  {
+    "noteId": "A",
+    "noteName": "The Heart",
+    "emotionCore": "Orientacja przez uczucie — krótkie poczucie, co jest ważne",
+    "archetype": "Serce",
+    "treats": [
+      "niepokój bez kierunku",
+      "rozproszone priorytety",
+      "poczucie oderwania",
+      "przebodźcowanie wyborami",
+      "mentalny szum"
+    ],
+    "heals": [
+      "chwilowa jasność",
+      "poczucie miejsca",
+      "wiarygodny następny krok",
+      "spokojny fokus"
+    ],
+    "supports": [
+      "łagodne planowanie",
+      "rozdroża",
+      "poranny fokus",
+      "odnajdywanie sensu",
+      "przejścia"
+    ],
+    "transforms": [
+      "zamęt w prostotę",
+      "szum w jeden prawdziwy kierunek",
+      "lęk w mały prawdziwy północ"
+    ],
+    "bodyFocus": ["otwarta postawa", "oczy miękko na linii horyzontu"],
+    "energyTone": "clarifying",
+    "shortMeaning": "Niebieski puls — nie cała mapa, tylko następny skrawek, który czuje się prawdziwy.",
+    "todayUse": "Gdy nie widzisz całej ścieżki, słuchaj, aż jeden krok poczuje się uczciwy w klatce."
+  },
+  {
+    "noteId": "A#",
+    "noteName": "The Storm",
+    "emotionCore": "Pogoda, która rusza to, co było stane — intensywność bez załamania",
+    "archetype": "Burza",
+    "treats": [
+      "lęk przed nieznanym",
+      "napięcie żałoby",
+      "duchowa nerwowość",
+      "wymuszanie odpowiedzi",
+      "rozproszona uwaga"
+    ],
+    "heals": [
+      "znoszenie nie-wiedzy",
+      "mądrość wyobraźni",
+      "miękka wiara",
+      "cierpliwość wobec procesu"
+    ],
+    "supports": [
+      "czasy przejściowe",
+      "wieczorne rytuały",
+      "inkubacja twórcza",
+      "rytuały przed snem",
+      "refleksyjne wieczory"
+    ],
+    "transforms": [
+      "trwoga w ciekawość",
+      "wymuszanie w czekanie",
+      "chaos w powolny wzorzec"
+    ],
+    "bodyFocus": ["nieśpieszny oddech", "dłonie spoczywające otwarte"],
+    "energyTone": "opening",
+    "shortMeaning": "Fioletowa pogoda — niebo czyści się przez ruch, nie przez wymuszanie błękitu.",
+    "todayUse": "Gdy umysł żąda pewności dziś wieczorem, zostań, aż napięcie znajdzie kierunek."
+  },
+  {
+    "noteId": "B",
+    "noteName": "The Crown",
+    "emotionCore": "Suwerenne domknięcie — tęsknota bez chwytania",
+    "archetype": "Korona",
+    "treats": [
+      "niedomknięta tęsknota",
+      "wina, że idziesz dalej",
+      "lęk przed ostatecznością",
+      "emocjonalne zmęczenie",
+      "wewnętrzne napięcie"
+    ],
+    "heals": [
+      "domknięcie bez okrucieństwa",
+      "szanowana żałoba",
+      "czyste zamknięcie",
+      "łagodna decyzyjność"
+    ],
+    "supports": [
+      "pożegnania",
+      "finały projektów",
+      "zmiany w relacjach",
+      "końce sezonów",
+      "refleksyjne wieczory"
+    ],
+    "transforms": [
+      "chwyt w puszczenie",
+      "tęsknota w błogosławieństwo",
+      "zamęt w ciche kropkowanie"
+    ],
+    "bodyFocus": ["powolny wydech", "miejsca, którym wolno być ciężkim"],
+    "energyTone": "cooling",
+    "shortMeaning": "Głęboki fiolet korony — koniec też może zostawić cię całym.",
+    "todayUse": "Gdy coś się skończyło, a dłonie nie chcą się otworzyć, słuchaj, aż zamknięcie poczuje się godne."
+  }
+]

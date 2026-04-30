@@ -1,5 +1,13 @@
 import { z } from 'zod'
 
+export const gardenPhaseSchema = z.enum([
+  'sleeping',
+  'discovered',
+  'bonded',
+  'awakened',
+  'mastered',
+])
+
 export const sanctuaryDiagramInput = z.object({
   playerId: z.string().cuid(),
   rangeDays: z.number().int().min(3).max(90).default(14),
@@ -31,6 +39,7 @@ export const soundieProgressRowOut = z.object({
   level: z.number().int().min(1).max(5),
   totalListenTime: z.number().int().nonnegative(),
   loreUnlocked: z.number().int().min(0).max(5),
+  gardenPhase: gardenPhaseSchema,
 })
 
 const todayClaimOut = z
@@ -70,6 +79,13 @@ export const noteHeatmapOutput = z.object({
   ),
 })
 
+export const archiveSessionRowOut = z.object({
+  completedAtIso: z.string(),
+  minutes: z.number().int().nonnegative(),
+  noteId: z.string(),
+  noteName: z.string(),
+})
+
 export const sanctuaryDiagramOutput = z.object({
   releaseByEmotion: z.array(emotionRowOut),
   moodInRange: z.array(moodPointOut),
@@ -78,4 +94,14 @@ export const sanctuaryDiagramOutput = z.object({
   soundieProgress: z.array(soundieProgressRowOut),
   noteHeatmap: noteHeatmapOutput,
   todayClaim: todayClaimOut,
+  favoriteNoteId: z.string().nullable(),
+  favoriteNoteName: z.string().nullable(),
+  dominantNoteId: z.string().nullable(),
+  dominantNoteName: z.string().nullable(),
+  recentSessions: z.array(archiveSessionRowOut),
+})
+
+export const sanctuarySetFavoriteInput = z.object({
+  playerId: z.string().cuid(),
+  noteId: z.string().min(1).max(8).nullable(),
 })

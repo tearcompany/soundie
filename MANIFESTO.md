@@ -173,11 +173,13 @@ repeatable peace
 
 # Our Promise
 
-We will not manipulate attention.
+We will not manipulate attention in the sense of dark patterns, guilt mechanics, or shame-based retention.
 
 We will not weaponize shame.
 
 We will not engineer addiction through emptiness.
+
+**What we do invite:** voluntary return — a gentle rhythm (visits, “nights of return,” today’s suggestions, daily gift as presence — see `returnEngine`, `/today`). That is **invitation**, not alarmist “don’t break the streak” pressure. Copy and UX should stay in the compassionate frame in `docs/brand-language-soundie.md`.
 
 If users return, let it be because they feel better.
 
@@ -195,9 +197,9 @@ May healing feel playable.
 
 # Final Law
 
-The app does not demand attention.
+The app does not **harvest** attention through manipulation or panic.
 
-It rewards stillness.
+It **invites** return on the user’s terms and rewards stillness when they show up.
 
 ---
 

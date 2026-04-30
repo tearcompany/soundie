@@ -15,8 +15,8 @@ Ramy produktu (pętla użytkownika, minimum funkcji) — wspólny horyzont z tym
 | Tydzień 1 — wizyty / return | `DailyVisit` używa `visitDate` (string dnia), nie `dateKey`; `returnEngine.logVisit` + `ReturnEngineBridge`; brak osobnej trasy `player.checkIn` |
 | Tydzień 2 — nagroda dziennie | `DailyClaim` (nie `DailyRewardClaim`); `returnEngine.revealDailyClaim`; Teardrop + glow w Zustand / UI; analityka m.in. `daily_gift_*`; dodatkowo auto-unlock claim przy wejściu do `/sanctuary` (`SanctuaryUnlockBridge`) |
 | Tydzień 3 — mood | `MoodEntry` + `mood.saveEntry`; UI `MoodCheckInBridge`; linie reakcji: `lib/mood-reaction-texts.ts` (5×12), nie osobny `mood.submit` |
-| Tydzień 4 — share / admin | Część zdarzeń w `AnalyticsEvent` (np. `share_click`, `teardrop_open`, `sanctuary_enter`); **brak** dedykowanego `/api/share-card` i `/admin` w tym stanie — nadal na roadmapie |
-| Poza planem 30 dni | `/sanctuary` + D3, nawigacja `SiteNav`, lore w karuzeli z `LoreFragment` (en/pl) + fallback i18n, auth OTP (tRPC + SMTP/Resend fallback), copy „tonacja afirmacji / intencja korelatywna” — opis: `ZAIMPLEMENTOWANE.md` |
+| Tydzień 4 — share / admin | Część zdarzeń w `AnalyticsEvent` (`share_click`, `share_complete`, `share_copy_fallback`, `teardrop_open`, `lore_slide_view`, `sanctuary_enter`, …). **`/admin`** — podstawowy panel (`app/[locale]/admin/page.tsx`: gracze, avg session, share, przybliżony D1). **Brak** generowanej karty obrazka: `/api/share-card` nadal na roadmapie. |
+| Poza planem 30 dni | `/sanctuary` + D3, nawigacja `SiteNav`, lore w karuzeli z `LoreFragment` (en/pl) + fallback i18n, auth OTP (tRPC + SMTP/Resend fallback), copy „tonacja afirmacji / intencja korelatywna” — opis: `ZAIMPLEMENTOWANE.md`. **Dopis (2026-Q2):** **Sanctuary Pulse** — `SanctuaryPulse` + waga z `releaseByEmotion` (listen / teardrop focus / claims); dzisiejsza karta Teardrop na `/sanctuary` + share z eventami. **`/play` NoteCreature** — sekcje Lore \| Teardrop \| Session \| Journey; drawer „Otwórz znaczenie” (biały panel + scroll). **Analytics:** `lore_slide_view` (meta: noteId, loreIndex, loreUnlocked, teardropCardId), `share_complete` + `share_copy_fallback` z UI Sanktuarium. |
 
 Szczegóły techniczne (mapa kodu w tym repozytorium): [`ZAIMPLEMENTOWANE.md`](./ZAIMPLEMENTOWANE.md).
 
@@ -299,20 +299,13 @@ Share your resonance
 * teardrop_open
 * lore_slide_view
 
-Stan: `teardrop_open` i `sanctuary_enter` są już emitowane; `share_complete` i `lore_slide_view` nadal do dowiezienia.
+**Stan w repo:** `share_click` / `share_complete` / `share_copy_fallback` (Sanktuarium — share dnia), `teardrop_open` (m.in. `meta.surface: sanctuary_card` / daily gift), `lore_slide_view` (`note-creature.tsx`, meta z indeksem lore i nutą). `sanctuary_enter` — wg `ZAIMPLEMENTOWANE.md`.
 
 ---
 
 ## Day 25 — Dashboard
 
-Prosty panel admina: `/admin` (plan)
-
-Cards:
-
-* New users
-* D1 %
-* Avg session
-* Shares
+Panel: **`/admin`** (`app/[locale]/admin/page.tsx`) — karty m.in. total players, nowi 24h, przybliżony D1, avg session, share clicks / completes. **Do dopieszczenia:** ochrona trasy (auth), segmentacja „która nuta trzyma najlepiej” (Day 26).
 
 ---
 
@@ -398,14 +391,6 @@ Nie zabij go nadmiarem.
 
 ## Next 3 Shipy (z aktualnego stanu)
 
-1. **`lore_slide_view` analytics**
-   - emit event przy wejściu na konkretny slajd lore (index, noteId, loreUnlocked, source)
-   - dopiąć w `components/note-creature.tsx` do zmiany `selectedLoreIndex`
-
-2. **`share_complete` (best effort)**
-   - po `share_click` dopisać logikę wykrycia sukcesu share (Web Share API promise resolve + fallback copy link)
-   - dodać event `share_complete` i osobno `share_copy_fallback` jeśli nie ma natywnego share
-
-3. **Sanctuary: widok „dzisiejsza karta”**
-   - pokazać aktywny daily claim (teardrop name/tagline/affirmation) bez potrzeby powrotu do `/play`
-   - event `teardrop_open` rozszerzyć o `surface: 'sanctuary_card' | 'daily_gift_dialog'`
+1. **`/api/share-card` (Day 22)** — obrazek do natywnego share (nuty, aura, subtelna grafika); podpiąć przycisk po 180s / z Sanktuarium zamiast samego URL.
+2. **Ochrona `/admin` + rozszerzenie metryk (Day 25–26)** — auth, retention po nutach / emocjach (masz już dane w diagramie Sanktuarium).
+3. **Pierwsza minuta / return (Tydzień 1)** — jeśli `player.checkIn` nadal nie ma: spiąć `returnEngine` z czytelnym „welcome back” na `/play` albo uzasadnić w dokumencie, że `DailyVisit` + bridge wystarczają i zaktualizować Day 2–3 w tym pliku.

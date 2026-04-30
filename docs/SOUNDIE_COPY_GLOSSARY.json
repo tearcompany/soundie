@@ -1,0 +1,95 @@
+{
+  "streak": {
+    "meaning": "consecutive nights the person returned to Soundie — ritual of return to self, not a login chain",
+    "preferred_labels": {
+      "en": [
+        "{n} nights of return",
+        "{n} return nights",
+        "return rhythm: {n}"
+      ],
+      "pl": [
+        "{n} nocy powrotu",
+        "rytm powrotu: {n} nocy",
+        "{n} kolejnych powrotów"
+      ]
+    },
+    "avoid": [
+      "streak",
+      "chain",
+      "login streak",
+      "maintain your streak"
+    ]
+  },
+  "session": {
+    "meaning": "completed or ongoing listening episode — presence with a note",
+    "preferred_labels": {
+      "en": ["listening ritual", "time in resonance", "session"],
+      "pl": ["rytuał słuchania", "czas w rezonansie", "sesja"]
+    },
+    "avoid": ["grind block", "workout"]
+  },
+  "minutes": {
+    "meaning": "duration held in sound — not a score",
+    "preferred_labels": {
+      "en": ["minutes in resonance", "time with the note"],
+      "pl": ["minuty w rezonansie", "czas przy nucie"]
+    },
+    "avoid": ["track your minutes", "hit your goal"]
+  },
+  "progress": {
+    "meaning": "lore layers / note growth — unfolding",
+    "preferred_labels": {
+      "en": ["unfolding", "what opened", "layers awakened"],
+      "pl": ["odsłonięcie", "warstwy", "to co dojrzało"]
+    },
+    "avoid": ["progress bar mindset", "crush your goals"]
+  },
+  "unlock": {
+    "meaning": "reveal after presence — not loot",
+    "preferred_labels": {
+      "en": ["reveal", "unveil", "what surfaced"],
+      "pl": ["odsłonięcie", "ujawnienie", "to co wypłynęło"]
+    },
+    "avoid": ["unlock reward", "loot"]
+  },
+  "dashboard": {
+    "meaning": "reflection space — Echo / Sanctuary",
+    "preferred_labels": {
+      "en": ["sanctuary", "echo", "mirror of listening"],
+      "pl": ["sanktuarium", "echo", "lustro słuchania"]
+    },
+    "avoid": ["dashboard", "analytics hub"]
+  },
+  "stats": {
+    "meaning": "narrative view of presence — journey",
+    "preferred_labels": {
+      "en": ["your journey", "patterns of return"],
+      "pl": ["twoja podróż", "rys powrotów"]
+    },
+    "avoid": ["stats", "metrics dashboard"]
+  },
+  "daily_check_in": {
+    "meaning": "mood at the threshold before play",
+    "preferred_labels": {
+      "en": ["moment at the door", "how you arrived"],
+      "pl": ["chwila przy progu", "jak przyszedłeś"]
+    },
+    "avoid": ["daily check-in required"]
+  },
+  "pulse": {
+    "meaning": "aggregate emotional rhythm — sanctuary pulse / week rhythm",
+    "preferred_labels": {
+      "en": ["pulse", "rhythm of the week"],
+      "pl": ["puls", "rytm tygodnia"]
+    },
+    "avoid": ["engagement score"]
+  },
+  "today": {
+    "meaning": "daily ritual page — four invitations for the day",
+    "preferred_labels": {
+      "en": ["your frequency today", "rhythm of today"],
+      "pl": ["twój rytm dziś", "częstotliwość dnia"]
+    },
+    "avoid": ["daily dashboard"]
+  }
+}

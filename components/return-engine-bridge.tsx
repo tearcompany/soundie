@@ -32,7 +32,7 @@ function visitContextKey(playerId: string, day: string) {
   return `reCtx:${playerId}:${day}`
 }
 
-type VisitCtx = { streakNights: number; returnStory: ReturnStory; whisper: string | null }
+type VisitCtx = { streakNights: number; returnStory: ReturnStory; whisper: string | null; milestone: number }
 
 function readVisitCtx(playerId: string, day: string): VisitCtx | null {
   if (typeof window === 'undefined') return null
@@ -41,7 +41,7 @@ function readVisitCtx(playerId: string, day: string): VisitCtx | null {
     if (!raw) return null
     const p = JSON.parse(raw) as VisitCtx
     if (typeof p.streakNights !== 'number' || typeof p.returnStory !== 'string') return null
-    return p
+    return { ...p, milestone: typeof p.milestone === 'number' ? p.milestone : 0 }
   } catch {
     return null
   }
@@ -77,6 +77,7 @@ export function ReturnEngineBridge() {
   const [whisperNote, setWhisperNote] = useState<string | null>(null)
   const [streakNights, setStreakNights] = useState(0)
   const [returnStory, setReturnStory] = useState<ReturnStory>('none')
+  const [milestone, setMilestone] = useState(0)
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined' || !playerId) return
@@ -86,6 +87,7 @@ export function ReturnEngineBridge() {
         setStreakNights(prev.streakNights)
         setReturnStory(prev.returnStory)
         setWhisperNote(prev.whisper)
+        setMilestone(prev.milestone)
       }
       setVisitReady(true)
     }
@@ -164,10 +166,12 @@ export function ReturnEngineBridge() {
           setStreakNights(v.streakNights)
           setReturnStory(v.returnStory)
           setWhisperNote(whisper)
+          setMilestone(v.milestone)
           writeVisitCtx(playerId, day, {
             streakNights: v.streakNights,
             returnStory: v.returnStory,
             whisper,
+            milestone: v.milestone,
           })
           setVisitReady(true)
         },
@@ -210,6 +214,7 @@ export function ReturnEngineBridge() {
           returnStory={giftPayload.isNew ? returnStory : 'none'}
           whisperNoteShort={whisperNote}
           streakNights={streakNights}
+          milestone={giftPayload.isNew ? milestone : 0}
           gift={{
             rareCaption: giftPayload.rareCaption,
             glowKey: giftPayload.glowKey,
