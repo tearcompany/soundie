@@ -100,7 +100,7 @@ Players don't collect monsters. They **awaken Acoustic Archetypes** — living e
 
 ### 🛠️ Stack (for the technically curious)
 
-`Next.js` · `tRPC` · `Prisma + PostgreSQL` · `Zustand` · `Web Audio API` · `shadcn/ui` · `Zod` · `Fraunces + Lora + DM Mono`
+`Next.js` · `tRPC` · `Prisma + PostgreSQL` · `Zustand` · `Web Audio API` · `shadcn/ui` · `Zod` · `Fraunces + Cormorant + DM Mono`
 
 ---
 

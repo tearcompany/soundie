@@ -354,7 +354,18 @@ Spójrz tylko na:
 * push notifications
 * streak garden
 * premium waitlist
-* AI journeys
+* **AI journeys** — m.in. **AI tłumaczące / opisujące w czasie rzeczywistym przejścia (transitions, shifting) między nutami** podczas słuchania i w kontekście sekwencji rezonansu (ślad na `/teraz`). Cel: ciepły, poetycki język zamiast suchych etykiet; pamięć ruchu między tonami bez tabeli zdarzeń. Szczegóły handoffu: [`NOTE_TIMELINE_HANDOFF.md`](./NOTE_TIMELINE_HANDOFF.md#roadmap-ai-real-time-note-transitions-translation).
+
+---
+
+## Roadmap: AI real-time note transitions (translation)
+
+**Założenie produktowe:** gdy gracz przechodzi z nuty do nuty (w sesji, dual rytuale, lub jako ciąg w czasie), **model językowy** generuje w locie krótką, spójną z tonem Soundie narrację: *co się „przesuwa” między jednym rezonansem a drugim* — w wybranym języku użytkownika (PL/EN na start).
+
+- **Input (koncept):** para lub łańcuch nut (id, Hz, profil emocji, opcjonalnie mood przed sesją), timing, ewentualnie stan rytuału.
+- **Output:** zdania do UI (nie zastępują terapeuty; zgodnie z [`MANIFESTO.md`](../MANIFESTO.md) — brak obietnic medical-grade).
+- **Where:** player `/teraz`, później ewentualnie Sanktuarium / Echo przy podsumowaniach ścieżek.
+- **Status:** zapis roadmapy; implementacja po ustaleniu budżetu latency, prywatności i copy review ([`brand-language-soundie.md`](./brand-language-soundie.md)).
 
 ---
 

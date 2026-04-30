@@ -28,14 +28,14 @@ Gdy gracz słucha kilku nut blisko siebie (np. F → A → C w odstępie kilku m
 - pierścień 2 = co przyszło drugie,
 - itd.
 
-Po hover'ze pokazuje się **ścieżka rytuału jako pigułki** + **procent** wszystkich rytuałów, które ją zawierają. To pamięć, która mówi językiem ruchu, nie liczb.
+Po hover'ze pokazuje się **ścieżka rytuału jako lista nut** (bez liczników statystycznych — cel: sama geografia ruchu). To pamięć, która mówi językiem ruchu, nie liczb.
 
 ---
 
 ## Filozofia (zgodna z `Soundie Userpanel Manifesto.md`)
 
-- **Brak osi i etykiet liczbowych.** Czas jest sekwencją, nie skalą.
-- **Brak KPI.** Procent jest jedynym widocznym miernikiem — i tylko po hover.
+- **Brak osi i etykiet liczbowych na wykresie.** Czas jest sekwencją, nie skalą.
+- **Bez KPI w tooltipie** — kolory i kolejność nut wystarczają; agregaty zostają w Sanktuarium / roadmapie analitycznej.
 - **Kolory mówią.** Każdy klin to chromaHex swojej nuty.
 - **Hierarchia, nie pomiar.** "Co po czym" zamiast "ile minut".
 
@@ -75,25 +75,71 @@ Klient woła z `windowHours: 72` (3 dni — dobry kompromis między świeżości
 
 ---
 
-## Algorytm: sesje → rytuały → drzewo → sunburst
+## Algorytm: sesje → sekwencje → drzewo → sunburst
 
-1. **Filtr okna** — bierzemy sesje z ostatnich `windowHours` godzin.
-2. **Grupowanie w rytuały** — sortujemy chronologicznie i tniemy na rytuały gdy luka między sesjami przekracza `SEQUENCE_GAP_MS = 30 min`. Każdy rytuał = `noteId[]` w kolejności.
-3. **Budowa drzewa** — przeglądamy wszystkie rytuały. Dla każdego idziemy w dół drzewa po `noteId`, tworząc węzły gdy trzeba. Na ostatnim węźle (terminal sekwencji) zwiększamy `count++`. To kluczowe: **liczy się ten węzeł, w którym sekwencja się kończy**, dzięki czemu `d3.hierarchy.sum()` daje poprawną wagę każdej gałęzi.
-4. **`d3.hierarchy → .sum() → .sort()`** — agregujemy wagi w górę drzewa.
-5. **`d3.partition().size([2π, RADIUS])`** — układ radialny.
-6. **`d3.arc()`** z `padAngle: 0.005`, `padRadius: RADIUS/2`, `innerRadius: y0`, `outerRadius: y1 - 1` — generuje path każdego klina.
-7. **Render** — pomijamy korzeń (depth 0), rysujemy każdego potomka jako `<path>` z fill = `noteHex`.
+Implementacja: `collectRitualSequences` + `buildTree` w `components/note-timeline.tsx`.
+
+### 1. Filtr okna czasu
+
+Bierzemy sesje mieszczące się w `domainStart = nowMs - windowMs`, gdzie `windowMs` jest dynamiczne: zaczyna od `windowHours` (domyślnie 24h) i zawęża się do minimum **3h** proporcjonalnie do czasu aktywnej sesji (pełny zoom po ~45 min słuchania).
+
+### 2. Grupowanie w sekwencje (journey)
+
+Sortujemy sesje rosnąco po `completedAt`. Tniemy na nową sekwencję gdy luka między sesjami przekracza `RITUAL_GAP_MS = 40 min`. Każda sekwencja to `noteShort[]` w kolejności odtwarzania.
+
+**Deduplicacja sąsiadów:** jeśli ta sama nuta pojawia się kolejno (np. dwa odsłuchy tej samej nuty pod rząd), wchodzi do sekwencji **tylko raz** — liczy się zmiana, nie powtórzenie.
+
+### 3. Zliczanie sekwencji
+
+Każda sekwencja jest spłaszczana do klucza (`A>F>C`). Tworzymy `Map<klucz, count>`.
+
+### 4. Budowa drzewa
+
+Dla każdego wpisu z mapy przechodzimy po częściach klucza (`A`, `F`, `C`, …) tworząc węzły gdy brakuje. Na węźle końcowym dodajemy `value += count`. `value` jest **tylko na liściach** — to kluczowe, bo `d3.hierarchy.sum()` propaguje sumy w górę i każdy pośredni węzeł dostaje sumę swoich potomków.
+
+### 5. Layout radialny D3
+
+```
+d3.hierarchy(tree).sum(d => d.value ?? 0).sort(desc)
+→ d3.partition().size([2π, r])
+→ d3.arc()
+    .innerRadius(d => d.y0 + BASE_RADIUS)
+    .outerRadius(d => max(d.y0 + BASE_RADIUS + 1, d.y1 + BASE_RADIUS - 1))
+```
+
+`BASE_RADIUS = 18px` — promień martwej strefy centrum (minuty / Hz).
+
+### 6. Render
+
+- Pomijamy korzeń (`depth === 0`) i kliny o zerowej rozpiętości kątowej.
+- Każdy klin `<path>` dostaje `fill = chromaHex` swojej nuty, z `opacity 0.92` gdy to aktywna nuta, `0.72` w pozostałych.
+- Aktywna nuta ma `drop-shadow` glow w swoim kolorze.
+
+### 7. Neurofeedback (live RAF 60fps)
+
+Dwa pierścienie `<circle ref>` wokół sunburstu są animowane bezpośrednio przez DOM (`ring1Ref`, `ring2Ref`) bez `setState`. Centrum (`centerNumRef`, `centerLblRef`) pokazuje:
+- podczas sesji: `{Hz} · {noteShort}` z pulsem oddechowym skalowanym od `frequencyHz`,
+- w spoczynku: `{totalMinutes}` + `min`.
 
 ---
 
-## Interakcja
+- **Hover na klin** → tooltip z **samą ścieżką nut** (np. `A → F`), kolorem segmentu; bez liczników powrotów / procentów (świadoma redukcja szumu analitycznego).
+- **Środek koła** — minuty w rezonansie lub live Hz w trakcie odtwarzania (neurofeedback); nie breadcrumb z procentami.
 
-- **Hover na klin** → `setHovered(path)` gdzie `path` to lista `noteId` od korzenia do tego klina.
-- **Highlight ancestor chain** — wszystkie kliny w łańcuchu od korzenia do hover-target zostają jasne (`fillOpacity: 0.88`), reszta przyciemnia się (`0.18`). Logika: `pathKey === hoveredKey || hoveredKey.startsWith(pathKey + '|')`.
-- **Breadcrumb nad sunburstem** — pokazuje pełną ścieżkę rytuału jako pigułki w kolorach nut, połączone strzałkami.
-- **Środek koła** — gdy nic nie hover'owane: `totalSequences` + "rituals". Gdy hover: `XX.X%` + "of N rituals".
-- **`onMouseLeave` na kontenerze** → reset hovered.
+---
+
+## Roadmap: AI real-time note transitions (translation)
+
+**Założenie:** osobny warstwa narracji generowana przez **AI**, która w **czasie rzeczywistym** *tłumaczy* i *nazywa* **przejścia (transitions / shifting) między nutami**: co się zmienia w doświadczeniu, gdy słuch przechodzi z jednej częstotliwości / architype’u na drugi — w języku użytkownika, w ramie Soundie (ciepło, minimalizm, bez tonu „dashboardu”).
+
+| Aspekt | Notatka |
+|--------|--------|
+| **Kiedy** | Podczas słuchania (zmiana nuty, faza dual rytuału), ewentualnie po hoverze na gałęzi sunburstu jako uzupełnienie samej listy nut |
+| **Wejście** | Para / łańcuch nut, Hz, opcjonalnie mood przy progu, kontekst sesji |
+| **Wyjście** | Krótki blok copy (PL/EN); wymaga **review** wobec [`brand-language-soundie.md`](./brand-language-soundie.md) i [`MANIFESTO.md`](../MANIFESTO.md) |
+| **Status** | Tylko dokumentacja / roadmap — brak wdrożenia w tym commicie |
+
+Szerszy kontekst produktowy: [ROADMAP.md — *Roadmap: AI real-time note transitions (translation)*](./ROADMAP.md#roadmap-ai-real-time-note-transitions-translation).
 
 ---
 

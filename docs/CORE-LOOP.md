@@ -42,3 +42,9 @@ To jest wręcz piękne.
 ---
 
 Wykonanie w timeboxach i taski: [ROADMAP.md](./ROADMAP.md).
+
+---
+
+## Poza core (roadmapa)
+
+**AI — tłumaczenie / opis w czasie rzeczywistym** przejść (*transitions*, *shifting*) **między nutami** podczas słuchania i w kontekście śladu rezonansu. Zapis produktowy i szczegóły: [ROADMAP.md](./ROADMAP.md#roadmap-ai-real-time-note-transitions-translation) oraz [NOTE_TIMELINE_HANDOFF.md](./NOTE_TIMELINE_HANDOFF.md#roadmap-ai-real-time-note-transitions-translation).

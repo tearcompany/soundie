@@ -25,11 +25,11 @@ function TeardropPageInner() {
     <main className="relative min-h-0 flex-1 overflow-x-hidden bg-pearl">
       <section className="mx-auto w-full max-w-4xl px-4 py-8 pb-14 text-ink">
         <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">{t('kicker')}</p>
-        <h1 className="mt-2 text-lora text-3xl font-light leading-tight">{t('title')}</h1>
-        <p className="mt-2 max-w-2xl text-lora text-sm text-ink/80">{t('sub')}</p>
+        <h1 className="mt-2 font-body-serif text-3xl font-light leading-tight">{t('title')}</h1>
+        <p className="mt-2 max-w-2xl font-body-serif text-sm text-ink/80">{t('sub')}</p>
 
         {!playerId && hasHydrated && (
-          <p className="mt-6 text-lora text-sm text-ink/80">
+          <p className="mt-6 font-body-serif text-sm text-ink/80">
             {t('noPlayer')}{' '}
             <Link className="underline decoration-ink/30 underline-offset-4" href="/teraz">
               {t('goPlay')}
@@ -53,7 +53,7 @@ function TeardropPageInner() {
               <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
                 {t('victoryTitle')}
               </p>
-              <p className="mt-2 text-lora text-lg text-ink">
+              <p className="mt-2 font-body-serif text-lg text-ink">
                 {t('progress', { unlocked: q.data.unlockedCards, total: q.data.totalDeckCards })}
               </p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-pearl-border/70">
@@ -74,7 +74,7 @@ function TeardropPageInner() {
             </div>
 
             {q.data.cards.length === 0 ? (
-              <p className="text-lora text-sm text-ink/80">{t('empty')}</p>
+              <p className="font-body-serif text-sm text-ink/80">{t('empty')}</p>
             ) : (
               <TeardropCollectionGallery
                 cards={q.data.cards}

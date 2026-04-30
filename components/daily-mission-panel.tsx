@@ -54,7 +54,7 @@ function MissionRow({
 
       <div className="min-w-0 flex-1">
         <p
-          className="truncate text-lora text-[0.92rem] leading-tight"
+          className="truncate font-body-serif text-[0.92rem] leading-tight"
           style={{ color: c }}
         >
           {item.noteSynestheticTitle}
@@ -67,7 +67,7 @@ function MissionRow({
         </p>
 
         {item.teardropCardName && (
-          <p className="mt-1 truncate text-lora text-[0.72rem] italic leading-snug text-ink/70">
+          <p className="mt-1 truncate font-body-serif text-[0.72rem] italic leading-snug text-ink/70">
             <span className="opacity-60">→ </span>
             {item.teardropCardName}
             {item.teardropCardTagline ? (
@@ -169,13 +169,13 @@ function MissionSection({
           </p>
           <PresenceDots items={items} kind={kind} />
         </div>
-        <p className="text-lora mt-1.5 text-[0.72rem] italic leading-snug text-ink/70">
+        <p className="font-body-serif mt-1.5 text-[0.72rem] italic leading-snug text-ink/70">
           {whisper}
         </p>
 
         {items.length === 0 ? (
           <div className="mt-3 space-y-1">
-            <p className="text-lora text-[0.72rem] italic text-ink-muted">{empty}</p>
+            <p className="font-body-serif text-[0.72rem] italic text-ink-muted">{empty}</p>
             {kind === 'shadow' && (
               <p className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-ink-muted/70">
                 {t('silenceVerse')}
@@ -209,19 +209,19 @@ export function DailyMissionPanel({ mission, onItemFocus }: Props) {
       <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
         {t('kicker')}
       </p>
-      <p className="text-lora mt-2 text-lg font-light text-ink">
+      <p className="font-body-serif mt-2 text-lg font-light text-ink">
         {allRevealed ? t('allRevealedShort') : t('title')}
       </p>
 
       {!allRevealed && mission.items.length > 0 && (
-        <p className="text-lora mt-2 text-sm italic leading-relaxed text-ink/75">
+        <p className="font-body-serif mt-2 text-sm italic leading-relaxed text-ink/75">
           {t('subtitle')}
         </p>
       )}
 
       {mission.items.length === 0 ? (
         <div className="mt-4 space-y-2">
-          <p className="text-lora text-sm italic text-ink-muted">{t('emptyAllUnlocked')}</p>
+          <p className="font-body-serif text-sm italic text-ink-muted">{t('emptyAllUnlocked')}</p>
           <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink-muted/70">
             {t('silenceVerse')}
           </p>
@@ -234,7 +234,7 @@ export function DailyMissionPanel({ mission, onItemFocus }: Props) {
       )}
 
       {allRevealed && mission.items.length > 0 && (
-        <p className="text-lora mt-5 text-center text-sm italic text-ink/75">
+        <p className="font-body-serif mt-5 text-center text-sm italic text-ink/75">
           {t('completionWhisper')}
         </p>
       )}

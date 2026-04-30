@@ -290,7 +290,7 @@ export function SanctuaryPulse({
                 {t('pulseDominantLabel')}
               </p>
               <p
-                className="mt-0.5 text-lora text-[1.08rem] font-semibold leading-snug"
+                className="mt-0.5 font-body-serif text-[1.08rem] font-semibold leading-snug"
                 style={{ color: dominantHex }}
               >
                 {dominantName}
@@ -303,12 +303,12 @@ export function SanctuaryPulse({
                   {t('pulseHealingMode', { style: healingLabel })}
                 </p>
               )}
-              <p className="mt-2 text-lora text-[0.78rem] leading-relaxed text-ink/72">
+              <p className="mt-2 font-body-serif text-[0.78rem] leading-relaxed text-ink/72">
                 {narrative}
               </p>
             </>
           ) : (
-            <p className="text-lora text-[0.8rem] leading-relaxed text-ink/60">
+            <p className="font-body-serif text-[0.8rem] leading-relaxed text-ink/60">
               {t('pulseEmpty')}
             </p>
           )}

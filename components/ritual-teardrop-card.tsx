@@ -129,7 +129,7 @@ function RitualCard({
           </p>
         </div>
 
-        <p className="mt-2 text-lora text-[0.82rem] leading-relaxed text-ink/68">
+        <p className="mt-2 font-body-serif text-[0.82rem] leading-relaxed text-ink/68">
           {tToday(`rituals.${key}.line` as 'rituals.warmth.line')}
         </p>
 

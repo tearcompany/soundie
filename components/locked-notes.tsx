@@ -148,7 +148,7 @@ export function LockedNotes() {
                           </p>
                           <p
                             className={cn(
-                              'mt-0.5 text-lora text-[0.7rem] leading-tight transition-all duration-200',
+                              'mt-0.5 font-body-serif text-[0.7rem] leading-tight transition-all duration-200',
                               !selected && !blocked && 'opacity-60 group-hover:opacity-100',
                               blocked && 'opacity-55',
                             )}

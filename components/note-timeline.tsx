@@ -34,6 +34,12 @@ type Props = {
   sacredClimax?: boolean
   activeNoteHex?: string
   activeNoteShort?: string
+  /** Human-readable emotion: check-in mood at the door, or the note’s emotional tone */
+  emotionLabel?: string
+  /** Synesthetic / “in the light” line for this note (PL in DB; shown with translated kicker) */
+  inTheLightLine?: string
+  /** When true, emotionLabel came from mood check-in */
+  moodFromCheckIn?: boolean
   className?: string
 }
 
@@ -52,8 +58,6 @@ type TooltipState = {
   x: number
   y: number
   path: string
-  count: number
-  share: number
   color: string
 }
 
@@ -127,6 +131,9 @@ export function NoteTimeline({
   sacredClimax = false,
   activeNoteHex,
   activeNoteShort,
+  emotionLabel = '',
+  inTheLightLine = '',
+  moodFromCheckIn = false,
   className,
 }: Props) {
   const t = useTranslations('noteTimeline')
@@ -251,7 +258,7 @@ export function NoteTimeline({
     liveRef.current.centerLabelStr = centerLabelStr
   }, [totalMinutes, centerLabelStr])
 
-  const { arcs, totalRituals, radius } = useMemo(() => {
+  const { arcs, radius } = useMemo(() => {
     const baseWindowMs = windowHours * 60 * 60 * 1000
     const elapsedMs = Math.max(0, sessionElapsedSeconds) * 1000
     const zoomProgress = sessionActive ? clamp(elapsedMs / (45 * 60 * 1000), 0, 1) : 0
@@ -276,7 +283,6 @@ export function NoteTimeline({
 
     const r = Math.max(64, Math.min(width, HEIGHT) / 2 - 10)
     const partitionRoot = partition<TreeNode>().size([2 * Math.PI, r])(root)
-    const total = root.value ?? 0
 
     const arcGen = d3Arc<typeof partitionRoot>()
       .startAngle((d) => d.x0)
@@ -295,7 +301,7 @@ export function NoteTimeline({
         return { node: d, path, color, isActive }
       })
 
-    return { arcs, totalRituals: total, radius: r + BASE_RADIUS }
+    return { arcs, radius: r + BASE_RADIUS }
   }, [sessions, width, windowHours, sessionElapsedSeconds, sessionActive, nowMs, activeNoteShort])
 
   // Keep radius in liveRef in sync
@@ -318,6 +324,39 @@ export function NoteTimeline({
         </span>
       </div>
       <div className="relative overflow-visible rounded-xl border border-pearl-border/35 bg-pearl-dark/22 backdrop-blur-[2px]">
+        <div className="border-b border-pearl-border/25 px-4 pb-3 pt-3">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+            <div className="min-w-0 flex-1">
+              {moodFromCheckIn && (
+                <p className="mb-0.5 font-mono text-[0.48rem] uppercase tracking-[0.16em] text-ink-muted/45">
+                  {t('moodAtDoor')}
+                </p>
+              )}
+              <p
+                className={cn(
+                  'font-[family-name:var(--font-fraunces,serif)] text-[0.92rem] font-medium leading-snug',
+                  emotionLabel ? 'text-ink/88' : 'text-ink-muted/45 italic',
+                )}
+              >
+                {emotionLabel || t('emotionOpen')}
+              </p>
+            </div>
+            <p
+              className="shrink-0 font-mono text-[0.62rem] tabular-nums tracking-[0.12em] text-ink-muted/75"
+              style={activeNoteHex ? { color: hexToRgba(activeNoteHex, 0.88) } : undefined}
+            >
+              {Math.round(frequencyHz)} Hz
+            </p>
+          </div>
+          {inTheLightLine ? (
+            <div className="mt-2.5 space-y-1">
+              <p className="font-mono text-[0.48rem] uppercase tracking-[0.18em] text-ink-muted/45">
+                {t('inTheLight')}
+              </p>
+              <p className="font-body-serif text-[0.76rem] leading-relaxed text-ink/68">{inTheLightLine}</p>
+            </div>
+          ) : null}
+        </div>
         <svg width={width} height={HEIGHT} className="block">
           <g transform={`translate(${width / 2}, ${HEIGHT / 2})`}>
 
@@ -342,7 +381,6 @@ export function NoteTimeline({
             />
 
             {arcs.map((a, i) => {
-              const count = a.node.value ?? 0
               const pathTokens = a.node
                 .ancestors()
                 .reverse()
@@ -371,8 +409,6 @@ export function NoteTimeline({
                       x: e.clientX - rect.left + 10,
                       y: e.clientY - rect.top + 10,
                       path: ritualPath,
-                      count,
-                      share: totalRituals > 0 ? (count / totalRituals) * 100 : 0,
                       color: a.color,
                     })
                   }}
@@ -421,17 +457,11 @@ export function NoteTimeline({
             className="pointer-events-none absolute z-10 max-w-[15rem] rounded-xl border border-pearl-border/45 bg-white/96 px-3.5 py-2.5 shadow-lg backdrop-blur-md"
             style={{ left: tooltip.x, top: tooltip.y }}
           >
-            <p className="font-[family-name:var(--font-fraunces,serif)] text-[0.72rem] font-medium italic leading-snug text-ink/80">
-              {tooltip.path}
-            </p>
             <p
-              className="mt-1.5 font-mono text-[0.52rem] uppercase tracking-[0.14em]"
-              style={{ color: tooltip.color }}
+              className="font-[family-name:var(--font-fraunces,serif)] text-[0.72rem] font-medium italic leading-snug"
+              style={{ color: hexToRgba(tooltip.color, 0.92) }}
             >
-              {t('returnsLabel', { n: tooltip.count })}
-            </p>
-            <p className="mt-0.5 font-mono text-[0.48rem] uppercase tracking-[0.12em] text-ink-muted/50">
-              {t('ofPresence', { n: Math.round(tooltip.share) })}
+              {tooltip.path}
             </p>
           </div>
         )}

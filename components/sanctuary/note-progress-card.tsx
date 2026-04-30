@@ -100,7 +100,7 @@ export function NoteProgressCard({ note, playerId, locale = 'en', isFavorite = f
           {note.noteId}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lora text-sm font-medium text-ink">{note.noteName}</p>
+          <p className="truncate font-body-serif text-sm font-medium text-ink">{note.noteName}</p>
           <p className="font-mono text-[0.6rem] text-ink-muted">
             {t('noteLevel', { lv: note.level })}
           </p>
@@ -200,7 +200,7 @@ export function NoteProgressCard({ note, playerId, locale = 'en', isFavorite = f
       )}
 
       {loreQuote && (
-        <p className="text-lora text-sm italic leading-relaxed text-ink/80 line-clamp-3">{loreQuote}</p>
+        <p className="font-body-serif text-sm italic leading-relaxed text-ink/80 line-clamp-3">{loreQuote}</p>
       )}
       <div>
         <Link

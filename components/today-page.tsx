@@ -49,7 +49,7 @@ export function TodayPage() {
   if (!playerId) {
     return (
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 py-10 pb-16">
-        <p className="text-lora text-center text-sm text-ink/75">{t('needPlayer')}</p>
+        <p className="font-body-serif text-center text-sm text-ink/75">{t('needPlayer')}</p>
         <Link
           href="/teraz"
           className="mx-auto mt-6 inline-block font-mono text-xs uppercase tracking-widest text-coral underline underline-offset-4"
@@ -125,8 +125,8 @@ export function TodayPage() {
             ···
           </span>
         </div>
-        <h1 className="text-lora mt-4 text-2xl font-light tracking-tight text-ink">{t('heroTitle')}</h1>
-        <p className="mt-2 text-lora text-sm italic text-ink/60">{t('heroSubtitle')}</p>
+        <h1 className="font-body-serif mt-4 text-2xl font-light tracking-tight text-ink">{t('heroTitle')}</h1>
+        <p className="mt-2 font-body-serif text-sm italic text-ink/60">{t('heroSubtitle')}</p>
         {streakNights > 0 && (
           <p className="mt-3 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-ink-muted">
             {t('streak', { n: streakNights })}
@@ -161,9 +161,9 @@ export function TodayPage() {
                 >
                   {slot.noteShort}
                 </span>
-                <h2 className="text-lora text-lg font-normal leading-snug text-ink">{slot.noteName}</h2>
+                <h2 className="font-body-serif text-lg font-normal leading-snug text-ink">{slot.noteName}</h2>
               </div>
-              <p className="mt-3 text-lora text-[0.85rem] leading-relaxed text-ink/78 pointer-events-none">{slot.poeticLine}</p>
+              <p className="mt-3 font-body-serif text-[0.85rem] leading-relaxed text-ink/78 pointer-events-none">{slot.poeticLine}</p>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <span className="font-mono text-[0.58rem] tabular-nums text-ink-muted pointer-events-none">
                   {slot.frequency.toFixed(2)} Hz

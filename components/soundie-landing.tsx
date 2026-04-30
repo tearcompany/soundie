@@ -286,7 +286,7 @@ export function SoundieLanding() {
           {t('headlineLine2')}
         </h1>
 
-        <p className="mt-6 text-center font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink-muted">
+        <p className="mt-6 text-center font-body-serif text-base leading-relaxed text-ink-muted">
           {t('subhead')}
         </p>
 
@@ -363,7 +363,7 @@ export function SoundieLanding() {
                 >
                   {n.id}
                 </span>
-                <span className="max-w-[5rem] text-center font-[family-name:var(--font-lora,serif)] text-[0.62rem] leading-tight text-ink-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                <span className="max-w-[5rem] text-center font-body-serif text-[0.62rem] leading-tight text-ink-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
                   {n.name}
                 </span>
               </button>
@@ -382,7 +382,7 @@ export function SoundieLanding() {
             <p className="mt-1 font-mono text-[0.68rem] uppercase tracking-wide text-ink-muted">
               {inviteTagline || t('inviteFallbackTagline')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink/85">
+            <p className="mt-3 font-body-serif text-sm italic leading-relaxed text-ink/85">
               {inviteAffirmation || t('inviteFallbackAffirmation')}
             </p>
             <div className="mt-4">
@@ -404,13 +404,13 @@ export function SoundieLanding() {
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
               {t('narrativeWhatKicker')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink">
+            <p className="mt-3 font-body-serif text-base leading-relaxed text-ink">
               {t('narrativeWhatP1')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink/90">
+            <p className="mt-3 font-body-serif text-base leading-relaxed text-ink/90">
               {t('narrativeWhatP2')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-base leading-relaxed text-ink/90">
+            <p className="mt-3 font-body-serif text-base leading-relaxed text-ink/90">
               {t('narrativeWhatP3')}
             </p>
           </div>
@@ -422,10 +422,10 @@ export function SoundieLanding() {
             <div className="mt-4 rounded-xl border border-pearl-border/80 bg-pearl/60 px-4 py-3 font-mono text-[0.72rem] leading-relaxed text-ink/90">
               {t('narrativeHowFlow')}
             </div>
-            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm text-ink/85">
+            <p className="mt-4 font-body-serif text-sm text-ink/85">
               {t('narrativeHowIntro')}
             </p>
-            <ul className="mt-3 space-y-2.5 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <ul className="mt-3 space-y-2.5 font-body-serif text-sm leading-relaxed text-ink/85">
               <li className="flex gap-2">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-coral" aria-hidden />
                 <span>{t('narrativeHowBullet1')}</span>
@@ -447,7 +447,7 @@ export function SoundieLanding() {
                 <span>{t('narrativeHowBullet5')}</span>
               </li>
             </ul>
-            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm italic text-ink-muted">
+            <p className="mt-4 font-body-serif text-sm italic text-ink-muted">
               {t('narrativeHowClosing')}
             </p>
           </div>
@@ -459,10 +459,10 @@ export function SoundieLanding() {
             <div className="mt-4 rounded-xl border border-pearl-border/80 bg-pearl/60 px-4 py-3 font-mono text-[0.68rem] leading-relaxed text-ink/90">
               {t('narrativeTeardropPhases')}
             </div>
-            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-4 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeTeardropP1')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-3 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeTeardropP2')}
             </p>
           </div>
@@ -471,7 +471,7 @@ export function SoundieLanding() {
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
               {t('narrativeDifferentKicker')}
             </p>
-            <blockquote className="mt-4 border-l-4 border-coral/70 pl-4 font-[family-name:var(--font-lora,serif)] text-base italic leading-relaxed text-ink">
+            <blockquote className="mt-4 border-l-4 border-coral/70 pl-4 font-body-serif text-base italic leading-relaxed text-ink">
               {t('narrativeDifferentQuote')}
             </blockquote>
             <ul className="mt-4 space-y-2 font-mono text-[0.68rem] leading-relaxed text-ink-muted">
@@ -480,7 +480,7 @@ export function SoundieLanding() {
               <li>{t('narrativeDifferent3')}</li>
               <li>{t('narrativeDifferent4')}</li>
             </ul>
-            <p className="mt-4 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-4 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeDifferentClosing')}
             </p>
           </div>
@@ -489,20 +489,20 @@ export function SoundieLanding() {
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-coral">
               {t('narrativeWorldKicker')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-3 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeWorldP1')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-3 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeWorldP2')}
             </p>
-            <p className="mt-3 font-[family-name:var(--font-lora,serif)] text-sm leading-relaxed text-ink/85">
+            <p className="mt-3 font-body-serif text-sm leading-relaxed text-ink/85">
               {t('narrativeWorldP3')}
             </p>
           </div>
         </section>
 
         <div className="mx-auto mt-16 max-w-md space-y-4 text-center">
-          <p className="font-[family-name:var(--font-lora,serif)] text-sm italic leading-relaxed text-ink-muted">
+          <p className="font-body-serif text-sm italic leading-relaxed text-ink-muted">
             {t('closing')}
           </p>
           <p className="font-mono text-[0.6rem] leading-relaxed text-ink-muted/80">{t('narrativeStack')}</p>

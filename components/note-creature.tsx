@@ -128,6 +128,7 @@ function teardropMilestoneFromCards(
 export function NoteCreature() {
   const locale = useLocale() as 'en' | 'pl'
   const t = useTranslations('noteCreature')
+  const tMoods = useTranslations('moodIntelligence.moods')
   const tRitual = useTranslations('soundieRituals')
 
   const activeRitualId = useSoundieStore((s) => s.activeRitualId)
@@ -361,6 +362,9 @@ export function NoteCreature() {
         : []),
     ...(healingStyle ? [{ key: 'style', label: healingStyle }] : []),
   ]
+  const emotionForGraph = sessionMoodBefore
+    ? tMoods(sessionMoodBefore)
+    : (noteQuery.data?.emotionName ?? emotion?.namePl ?? '')
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<AudioContextType>({
     ctx: null,
@@ -1284,7 +1288,7 @@ export function NoteCreature() {
         )}
         {sessionMoodReaction && (
           <p
-            className="text-lora text-sm text-ink/90 mb-3 max-w-sm mx-auto text-center leading-relaxed"
+            className="font-body-serif text-sm text-ink/90 mb-3 max-w-sm mx-auto text-center leading-relaxed"
             style={{ color: hexToRgba(c, 0.88) }}
           >
             {sessionMoodReaction}
@@ -1335,10 +1339,10 @@ export function NoteCreature() {
                 )}
               </button>
 
-              <h2 className="text-lora text-2xl font-semibold tracking-tight text-ink md:text-[1.65rem]">
+              <h2 className="font-body-serif text-2xl font-semibold tracking-tight text-ink md:text-[1.65rem]">
                 {def.name}
               </h2>
-              <p className="text-lora mt-2 max-w-[18rem] text-sm italic leading-snug text-ink/70">
+              <p className="font-body-serif mt-2 max-w-[18rem] text-sm italic leading-snug text-ink/70">
                 {t(`archetypeWhisper.${listeningNoteId.replace(/^the-/, '')}`)}
               </p>
               <p className="font-mono mt-2 text-[0.62rem] uppercase tracking-[0.22em] text-ink-muted/85">
@@ -1417,7 +1421,7 @@ export function NoteCreature() {
                   }}
                   role="status"
                 >
-                  <p className="text-lora text-sm font-medium text-ink">
+                  <p className="font-body-serif text-sm font-medium text-ink">
                     {t('unlockBannerTitle')}
                   </p>
                   <p className="mt-1.5 font-mono text-[0.65rem] leading-relaxed text-ink/90">
@@ -1464,7 +1468,7 @@ export function NoteCreature() {
                                     {t('fragmentUnlocked')}
                                   </p>
                                 )}
-                                <p className="text-lora mx-auto max-w-prose text-sm italic text-ink leading-relaxed">
+                                <p className="font-body-serif mx-auto max-w-prose text-sm italic text-ink leading-relaxed">
                                   &ldquo;{text}&rdquo;
                                 </p>
                               </div>
@@ -1601,7 +1605,7 @@ export function NoteCreature() {
                       {selectedTeardropCard.name}
                     </p>
                     {teardropPreviewLine ? (
-                      <p className="text-lora mt-2 line-clamp-3 text-sm leading-relaxed text-ink/78">
+                      <p className="font-body-serif mt-2 line-clamp-3 text-sm leading-relaxed text-ink/78">
                         {teardropPreviewLine}
                       </p>
                     ) : null}
@@ -1672,7 +1676,7 @@ export function NoteCreature() {
                 </div>
               </div>
             )}
-            <p className="text-lora mb-3 text-sm italic text-ink/65">{t('remainWithNote', { note: def.short })}</p>
+            <p className="font-body-serif mb-3 text-sm italic text-ink/65">{t('remainWithNote', { note: def.short })}</p>
             {streamQuery.data && streamQuery.data.sessions.length > 0 && (
               <NoteTimeline
                 sessions={streamQuery.data.sessions}
@@ -1686,6 +1690,9 @@ export function NoteCreature() {
                 sacredClimax={sacredClimax}
                 activeNoteHex={c}
                 activeNoteShort={def.short}
+                emotionLabel={emotionForGraph}
+                inTheLightLine={def.synestheticLinePl}
+                moodFromCheckIn={sessionMoodBefore != null}
                 locale={locale as 'en' | 'pl'}
                 className="mb-4"
               />
@@ -1708,19 +1715,19 @@ export function NoteCreature() {
           {cardSection === 'journey' && (
             <div className="rounded-xl border border-pearl-border/55 bg-pearl-dark/25 px-4 py-4 text-left">
               <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-ink-muted">{t('journeyTitle')}</p>
-              <p className="text-lora mt-3 text-sm text-ink/88">
+              <p className="font-body-serif mt-3 text-sm text-ink/88">
                 {sessionsQuery.data
                   ? t('journeyReturns', { count: sessionsQuery.data.totalCount })
                   : '—'}
               </p>
-              <p className="text-lora mt-1.5 text-sm text-ink/88">
+              <p className="font-body-serif mt-1.5 text-sm text-ink/88">
                 {sessionsQuery.data
                   ? t('journeyResonance', {
                       minutes: Math.floor(sessionsQuery.data.totalSeconds / 60),
                     })
                   : '—'}
               </p>
-              <p className="text-lora mt-1.5 text-sm text-ink/75">
+              <p className="font-body-serif mt-1.5 text-sm text-ink/75">
                 {sessionsQuery.data?.sessions[0]?.completedAt
                   ? t('journeyLastVisit', {
                       when: new Date(sessionsQuery.data.sessions[0].completedAt).toLocaleString(
@@ -1764,7 +1771,7 @@ export function NoteCreature() {
               className="flex max-h-[88vh] flex-col gap-0 overflow-hidden rounded-t-2xl border-pearl-border bg-white p-0 sm:mx-auto sm:max-w-lg"
             >
               <SheetHeader className="sticky top-0 z-10 shrink-0 border-b border-pearl-border/50 bg-white px-4 pb-3 pt-3 pr-14 text-left">
-                <SheetTitle className="text-lora text-lg font-normal text-ink">
+                <SheetTitle className="font-body-serif text-lg font-normal text-ink">
                   {selectedTeardropCard?.name ?? t('tabTeardrop')}
                 </SheetTitle>
               </SheetHeader>
@@ -1780,7 +1787,7 @@ export function NoteCreature() {
                           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
                             {t('shelfReadingTagline')}
                           </p>
-                          <p className="mt-1 text-lora text-sm italic leading-relaxed text-ink/95">
+                          <p className="mt-1 font-body-serif text-sm italic leading-relaxed text-ink/95">
                             {selectedTeardropTexts.tagline}
                           </p>
                         </div>
@@ -1870,7 +1877,7 @@ export function NoteCreature() {
                           <p className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-ink-muted">
                             {t('shelfReadingAffirmation')}
                           </p>
-                          <p className="mt-1.5 text-lora text-sm italic leading-relaxed text-ink">
+                          <p className="mt-1.5 font-body-serif text-sm italic leading-relaxed text-ink">
                             &ldquo;{selectedTeardropTexts.affirmation}&rdquo;
                           </p>
                         </div>

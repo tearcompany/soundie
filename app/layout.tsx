@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Fraunces, Lora, DM_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Fraunces, Cormorant, DM_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { headers } from 'next/headers'
 import './globals.css'
@@ -9,7 +9,11 @@ import { getSiteUrl } from '@/lib/site-url'
 const _geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 const _geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
 const _fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces' })
-const _lora = Lora({ subsets: ['latin'], variable: '--font-lora' })
+const _cormorant = Cormorant({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-cormorant',
+})
 const _dmMono = DM_Mono({
   subsets: ['latin'],
   weight: '400',
@@ -102,7 +106,7 @@ export default async function RootLayout({
       style={
         {
           '--font-fraunces': _fraunces.style.fontFamily,
-          '--font-lora': _lora.style.fontFamily,
+          '--font-cormorant': _cormorant.style.fontFamily,
           '--font-dm-mono': _dmMono.style.fontFamily,
         } as React.CSSProperties
       }

@@ -101,7 +101,7 @@ export function LoginForm() {
         {step === 'email' ? (
           <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
             <div>
-              <p className="text-lora text-lg font-light text-ink mb-1">{t('emailLabel')}</p>
+              <p className="font-body-serif text-lg font-light text-ink mb-1">{t('emailLabel')}</p>
               <p className="font-mono text-[0.65rem] text-ink-muted">{t('emailHint')}</p>
             </div>
             <Input
@@ -124,7 +124,7 @@ export function LoginForm() {
         ) : (
           <form onSubmit={handleCodeSubmit} className="flex flex-col gap-4">
             <div>
-              <p className="text-lora text-lg font-light text-ink mb-1">{t('checkInbox')}</p>
+              <p className="font-body-serif text-lg font-light text-ink mb-1">{t('checkInbox')}</p>
               <p className="font-mono text-[0.65rem] text-ink-muted">
                 {t('sentTo', { email })}
               </p>

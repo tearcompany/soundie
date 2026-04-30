@@ -63,7 +63,7 @@ export function MoodChips({ data }: { data: Point[] }) {
         )
       })}
       {rows.every((r) => r.count === 0) && (
-        <p className="text-lora text-sm text-ink/80">{t('emptyMood')}</p>
+        <p className="font-body-serif text-sm text-ink/80">{t('emptyMood')}</p>
       )}
     </div>
   )

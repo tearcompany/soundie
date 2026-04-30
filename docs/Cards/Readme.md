@@ -44,7 +44,7 @@
 ## ✳️ TYPOGRAFIA
 
 - **Nagłówki**: Cinzel / Playfair Display / EB Garamond
-- **Treść**: Garamond / Lora / Cardo
+- **Treść**: Garamond / Cormorant / Cardo
 - **Hasła i cytaty**: kursywa, złoto / jasny gradient, lekka aureola
 
 ---

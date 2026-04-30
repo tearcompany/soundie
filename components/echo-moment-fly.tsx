@@ -86,10 +86,10 @@ export function EchoMomentFly({ onDismiss }: Props) {
             <p className="font-mono text-[0.58rem] uppercase tracking-widest text-ink-muted">
               {t('kicker')}
             </p>
-            <p className="mt-3 text-lora text-xl leading-snug text-ink">
+            <p className="mt-3 font-body-serif text-xl leading-snug text-ink">
               {t('invite')}
             </p>
-            <p className="mt-2 text-lora text-sm leading-relaxed text-ink/65">
+            <p className="mt-2 font-body-serif text-sm leading-relaxed text-ink/65">
               {t('inviteSub')}
             </p>
             <div className="mt-7 flex flex-col gap-2">
@@ -151,7 +151,7 @@ export function EchoMomentFly({ onDismiss }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.6 }}
-                className="mt-2 text-center text-lora text-sm italic leading-relaxed text-ink/70"
+                className="mt-2 text-center font-body-serif text-sm italic leading-relaxed text-ink/70"
               >
                 {texts[textIndex]}
               </motion.p>
@@ -206,7 +206,7 @@ export function EchoMomentFly({ onDismiss }: Props) {
               ))}
             </motion.div>
 
-            <p className="text-lora text-lg leading-snug text-ink">
+            <p className="font-body-serif text-lg leading-snug text-ink">
               {t('doneTitle')}
             </p>
             <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">

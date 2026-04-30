@@ -54,7 +54,7 @@ export function MinePage() {
   if (!playerId) {
     return (
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 py-10 pb-16">
-        <p className="text-lora text-center text-sm text-ink/75">{t('needPlayer')}</p>
+        <p className="font-body-serif text-center text-sm text-ink/75">{t('needPlayer')}</p>
         <Link
           href="/teraz"
           className="mx-auto mt-6 inline-block font-mono text-xs uppercase tracking-widest text-coral underline underline-offset-4"
@@ -82,7 +82,7 @@ export function MinePage() {
         <h1 className="mt-2 font-[family-name:var(--font-fraunces,serif)] text-2xl font-semibold tracking-tight text-ink">
           {t('ritualsTitle')}
         </h1>
-        <p className="mt-2 text-lora text-sm text-ink/72">{t('ritualsHint')}</p>
+        <p className="mt-2 font-body-serif text-sm text-ink/72">{t('ritualsHint')}</p>
       </header>
 
       <div className="relative mt-8 w-full">

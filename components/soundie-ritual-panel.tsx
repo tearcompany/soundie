@@ -118,7 +118,7 @@ export function SoundieRitualPanel({
           </p>
         )}
         <p className="mt-6 font-mono text-[0.55rem] leading-relaxed text-ink-muted/60">{t('roadmapLine')}</p>
-        <p className="mt-4 whitespace-pre-line font-[family-name:var(--font-lora,serif)] text-xs italic leading-relaxed text-ink-muted/75">
+        <p className="mt-4 whitespace-pre-line font-body-serif text-xs italic leading-relaxed text-ink-muted/75">
           {t('miriamQuote')}
         </p>
       </div>

@@ -118,7 +118,7 @@ export function TeardropCollectionGallery({ cards, phases, locale, focusSlug }: 
         )}
       >
         <div>
-          <p className="text-lora text-xl text-ink">{card.name}</p>
+          <p className="font-body-serif text-xl text-ink">{card.name}</p>
           {tagline && (
             <p className="mt-0.5 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted">
               {tagline}
@@ -127,11 +127,11 @@ export function TeardropCollectionGallery({ cards, phases, locale, focusSlug }: 
         </div>
 
         {description && (
-          <p className="text-lora text-sm leading-relaxed text-ink/80 line-clamp-6">{description}</p>
+          <p className="font-body-serif text-sm leading-relaxed text-ink/80 line-clamp-6">{description}</p>
         )}
 
         {affirmation && (
-          <p className="text-lora text-sm italic leading-relaxed text-ink/70 border-l-2 border-ink/15 pl-3 line-clamp-4">
+          <p className="font-body-serif text-sm italic leading-relaxed text-ink/70 border-l-2 border-ink/15 pl-3 line-clamp-4">
             {affirmation}
           </p>
         )}
@@ -165,7 +165,7 @@ export function TeardropCollectionGallery({ cards, phases, locale, focusSlug }: 
   }
 
   if (filteredSorted.length === 0) {
-    return <p className="text-lora text-sm text-ink/80">{t('emptyFiltered')}</p>
+    return <p className="font-body-serif text-sm text-ink/80">{t('emptyFiltered')}</p>
   }
 
   return (

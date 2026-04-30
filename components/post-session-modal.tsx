@@ -175,7 +175,7 @@ export function PostSessionModal({
                   {t('kicker')}
                 </p>
                 <p
-                  className="font-[family-name:var(--font-lora,serif)] text-xl font-normal italic leading-relaxed text-ink"
+                  className="font-body-serif text-xl font-normal italic leading-relaxed text-ink"
                   style={{ animation: 'echoLineReveal 0.9s ease-out 1.1s both' }}
                 >
                   {phrase}

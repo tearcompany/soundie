@@ -122,7 +122,7 @@ export function MoodCheckInBridge() {
         {step === 1 && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-lora text-center text-lg font-normal text-ink">
+              <DialogTitle className="font-body-serif text-center text-lg font-normal text-ink">
                 {t('ask')}
               </DialogTitle>
               <DialogDescription className="sr-only">{t('ask')}</DialogDescription>
@@ -149,11 +149,11 @@ export function MoodCheckInBridge() {
         {step === 2 && picked && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-lora text-center text-base font-normal text-ink">
+              <DialogTitle className="font-body-serif text-center text-base font-normal text-ink">
                 {t('reactionLabel')}
               </DialogTitle>
             </DialogHeader>
-            <p className="text-lora text-center text-sm italic leading-relaxed text-ink/90">
+            <p className="font-body-serif text-center text-sm italic leading-relaxed text-ink/90">
               {reactionLine(activeNoteId, picked, locale)}
             </p>
             <div

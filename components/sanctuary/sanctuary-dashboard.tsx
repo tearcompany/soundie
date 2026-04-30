@@ -138,7 +138,7 @@ export function SanctuaryDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-16 text-ink">
-      <p className="text-lora text-2xl font-light leading-tight text-ink">{t('greeting')}</p>
+      <p className="font-body-serif text-2xl font-light leading-tight text-ink">{t('greeting')}</p>
       {playerId && q.data && (
         <SanctuaryPulse
           className="mt-4"
@@ -154,19 +154,19 @@ export function SanctuaryDashboard() {
           <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
             {t('todayStateTitle')}
           </p>
-          <p className="text-lora text-sm leading-relaxed text-ink/85">{t('todayStateHint')}</p>
+          <p className="font-body-serif text-sm leading-relaxed text-ink/85">{t('todayStateHint')}</p>
           {q.data.minutesToday != null && (
-            <p className="text-lora text-sm text-ink/90">
+            <p className="font-body-serif text-sm text-ink/90">
               {t('todayStateMinutes', { m: q.data.minutesToday })}
             </p>
           )}
           {q.data.dominantNoteName && (
-            <p className="text-lora text-sm text-ink/90">
+            <p className="font-body-serif text-sm text-ink/90">
               {t('todayStateDominant', { note: q.data.dominantNoteName })}
             </p>
           )}
           {q.data.favoriteNoteName && (
-            <p className="text-lora text-sm text-ink/90">
+            <p className="font-body-serif text-sm text-ink/90">
               {t('todayStateFavorite', { note: q.data.favoriteNoteName })}
             </p>
           )}
@@ -188,12 +188,12 @@ export function SanctuaryDashboard() {
               {todayTeardropHref ? (
                 <Link
                   href={todayTeardropHref}
-                  className="mt-2 inline-block text-lora text-lg text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink/55"
+                  className="mt-2 inline-block font-body-serif text-lg text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink/55"
                 >
                   {q.data.todayClaim.teardrop.name}
                 </Link>
               ) : (
-                <p className="mt-2 text-lora text-lg text-ink underline decoration-ink/20 underline-offset-4">
+                <p className="mt-2 font-body-serif text-lg text-ink underline decoration-ink/20 underline-offset-4">
                   {q.data.todayClaim.teardrop.name}
                 </p>
               )}
@@ -208,7 +208,7 @@ export function SanctuaryDashboard() {
                 </p>
               )}
               {q.data.todayClaim.teardrop.affirmation && (
-                <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink/90">
+                <p className="mt-2 font-body-serif text-sm italic leading-relaxed text-ink/90">
                   {q.data.todayClaim.teardrop.affirmation}
                 </p>
               )}
@@ -240,17 +240,17 @@ export function SanctuaryDashboard() {
             </p>
           )}
           {q.data.todayClaim.teardrop.affirmation && (
-            <p className="mt-2 text-lora text-sm italic leading-relaxed text-ink/85">
+            <p className="mt-2 font-body-serif text-sm italic leading-relaxed text-ink/85">
               {q.data.todayClaim.teardrop.affirmation}
             </p>
           )}
         </div>
       ) : (
-        <p className="text-lora mt-2 text-sm text-ink/80">{t('sub')}</p>
+        <p className="font-body-serif mt-2 text-sm text-ink/80">{t('sub')}</p>
       )}
 
       {!playerId && hasHydrated && (
-        <p className="text-lora mt-8 text-sm text-ink/80">
+        <p className="font-body-serif mt-8 text-sm text-ink/80">
           {t('noPlayer')}{' '}
           <Link className="underline decoration-ink/25 underline-offset-2" href="/teraz">
             {t('goPlay')}
@@ -281,7 +281,7 @@ export function SanctuaryDashboard() {
                 {t('shareCta')}
               </button>
               {shareFeedback !== 'idle' && (
-                <p className="text-lora text-xs text-ink/70">
+                <p className="font-body-serif text-xs text-ink/70">
                   {shareFeedback === 'done'
                     ? t('shareDone')
                     : shareFeedback === 'copied'
@@ -293,7 +293,7 @@ export function SanctuaryDashboard() {
             <h2 className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
               {t('releaseTitle')}
             </h2>
-            <p className="text-lora mt-1 text-sm text-ink/85">{t('releaseHint')}</p>
+            <p className="font-body-serif mt-1 text-sm text-ink/85">{t('releaseHint')}</p>
             {hasAnyTime ? (
               <div className="mt-4">
                 <EmotionBubblePack
@@ -302,7 +302,7 @@ export function SanctuaryDashboard() {
                 />
               </div>
             ) : (
-              <p className="text-lora mt-4 text-sm text-ink/80">{t('emptyRelease')}</p>
+              <p className="font-body-serif mt-4 text-sm text-ink/80">{t('emptyRelease')}</p>
             )}
           </div>
 
@@ -311,8 +311,8 @@ export function SanctuaryDashboard() {
               <p className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
                 {t('sacredArchiveTitle')}
               </p>
-              <p className="text-lora mt-1 text-sm text-ink/80">{t('sacredArchiveHint')}</p>
-              <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto text-lora text-sm text-ink/90">
+              <p className="font-body-serif mt-1 text-sm text-ink/80">{t('sacredArchiveHint')}</p>
+              <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto font-body-serif text-sm text-ink/90">
                 {q.data.recentSessions.map((row) => (
                   <li key={`${row.completedAtIso}-${row.noteId}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-pearl-border/50 pb-2 last:border-0">
                     <span>
@@ -354,8 +354,8 @@ export function SanctuaryDashboard() {
               <h2 className="font-mono text-[0.65rem] uppercase tracking-widest text-ink-muted">
                 {t('notesTitle')}
               </h2>
-              <p className="text-lora mt-1 text-sm text-ink/85">{t('notesHint')}</p>
-              <p className="text-lora mt-1 text-xs text-ink/65">{t('notesHintGarden')}</p>
+              <p className="font-body-serif mt-1 text-sm text-ink/85">{t('notesHint')}</p>
+              <p className="font-body-serif mt-1 text-xs text-ink/65">{t('notesHintGarden')}</p>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {q.data.soundieProgress.map((note) => (
                   <NoteProgressCard
@@ -376,20 +376,20 @@ export function SanctuaryDashboard() {
                 {te('momentsTitle')}
               </h2>
               {mindfulStatsQuery.data.count === 0 ? (
-                <p className="text-lora mt-2 text-sm text-ink/60">{te('momentsNone')}</p>
+                <p className="font-body-serif mt-2 text-sm text-ink/60">{te('momentsNone')}</p>
               ) : (
                 <div className="mt-2 grid grid-cols-3 gap-4">
                   <div>
                     <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
                       {te('momentsWitnessed')}
                     </p>
-                    <p className="mt-0.5 text-lora text-2xl text-ink">{mindfulStatsQuery.data.count}</p>
+                    <p className="mt-0.5 font-body-serif text-2xl text-ink">{mindfulStatsQuery.data.count}</p>
                   </div>
                   <div>
                     <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
                       {te('momentsLastVisitor')}
                     </p>
-                    <p className="mt-0.5 text-lora text-sm text-ink/80">
+                    <p className="mt-0.5 font-body-serif text-sm text-ink/80">
                       {mindfulStatsQuery.data.lastType === 'fly' ? te('momentsFly') : (mindfulStatsQuery.data.lastType ?? '—')}
                     </p>
                   </div>
@@ -397,7 +397,7 @@ export function SanctuaryDashboard() {
                     <p className="font-mono text-[0.58rem] uppercase tracking-[0.12em] text-ink-muted">
                       {te('momentsStillness')}
                     </p>
-                    <p className="mt-0.5 text-lora text-sm text-ink/80">
+                    <p className="mt-0.5 font-body-serif text-sm text-ink/80">
                       {te('momentsStillnessValue', { n: mindfulStatsQuery.data.totalMinutes })}
                     </p>
                   </div>

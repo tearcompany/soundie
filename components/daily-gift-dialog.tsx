@@ -121,9 +121,9 @@ export function DailyGiftDialog({
             )}
             {returnStory === 'second_day' && (
               <div className="space-y-2 border-b border-pearl-border/60 pb-4 text-center">
-                <p className="text-lora text-lg font-normal leading-snug text-ink">{tRe('welcomeBack')}</p>
+                <p className="font-body-serif text-lg font-normal leading-snug text-ink">{tRe('welcomeBack')}</p>
                 {whisperNoteShort && (
-                  <p className="text-lora text-base leading-relaxed text-ink/90">
+                  <p className="font-body-serif text-base leading-relaxed text-ink/90">
                     {tRe('dailyWhisper', { note: whisperNoteShort })}
                   </p>
                 )}
@@ -140,15 +140,15 @@ export function DailyGiftDialog({
               </p>
             )}
             {returnStory === 'first_day' && (
-              <p className="border-b border-pearl-border/60 pb-4 text-center text-lora text-sm italic text-ink/85">
+              <p className="border-b border-pearl-border/60 pb-4 text-center font-body-serif text-sm italic text-ink/85">
                 {t('firstEvening')}
               </p>
             )}
-            <DialogTitle className="text-lora text-center text-base font-normal leading-snug text-ink">
+            <DialogTitle className="font-body-serif text-center text-base font-normal leading-snug text-ink">
               {title}
             </DialogTitle>
             <DialogDescription
-              className="text-lora text-center text-sm leading-relaxed text-ink/80"
+              className="font-body-serif text-center text-sm leading-relaxed text-ink/80"
               id="daily-gift-body"
               asChild
             >
@@ -181,13 +181,13 @@ export function DailyGiftDialog({
                   {t('teardrop')}: {gift.teardrop.name}
                 </p>
                 {teardropQuote && (
-                  <p className="text-lora mt-2 text-sm italic leading-relaxed text-ink">
+                  <p className="font-body-serif mt-2 text-sm italic leading-relaxed text-ink">
                     &ldquo;{teardropQuote}&rdquo;
                   </p>
                 )}
               </div>
             )}
-            <blockquote className="w-full text-center text-lora text-sm italic leading-relaxed text-ink/95">
+            <blockquote className="w-full text-center font-body-serif text-sm italic leading-relaxed text-ink/95">
               &ldquo;{gift.rareCaption}&rdquo;
             </blockquote>
           </div>

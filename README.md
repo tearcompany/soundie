@@ -59,7 +59,7 @@ Notes are not unlocked by paying. They are unlocked by listening.
 
 **Name:** Soundie
 **Palette:** Pearl (`#F5F0EB`) + Coral (`#FF6B4A`) + warm ink (`#1A1410`)
-**Typography:** Fraunces (display) · Lora (lore text) · DM Mono (frequencies/UI)
+**Typography:** Fraunces (display) · Cormorant (prose / lore) · DM Mono (frequencies/UI)
 **Aesthetic:** Oscilloscope meets fandom wiki. Organic, warm, slightly ancient.
 **Feel:** Calm. Alive. Slightly magical. Like holding something fragile and beautiful.
 
@@ -133,7 +133,7 @@ You are continuing development of **Soundie** — a meditative sound-healing Tam
 
 **What exists so far:**
 - Full concept and vision (this document)
-- Design system (Pearl + Coral palette, Fraunces/Lora/DM Mono typography)
+- Design system (Pearl + Coral palette, Fraunces/Cormorant/DM Mono typography)
 - Database schema (User, Soundie, ListenSession, Note models)
 - tRPC router structure (soundie.getAll, soundie.completeSession, soundie.unlockNote)
 - Folder structure defined

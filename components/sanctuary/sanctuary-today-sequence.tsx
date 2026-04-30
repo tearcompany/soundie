@@ -95,7 +95,7 @@ export function SanctuaryTodaySequence() {
         <>
           <DailyMissionPanel mission={mission} onItemFocus={handleItemFocus} />
           {mission.items.length > 0 && (
-            <p className="text-lora mt-4 text-[0.7rem] leading-relaxed text-ink-muted/90">
+            <p className="font-body-serif mt-4 text-[0.7rem] leading-relaxed text-ink-muted/90">
               {t('sanctuaryHint')}
             </p>
           )}
