@@ -140,7 +140,7 @@
     }
   },
   "resonanceTrace": {
-    "title": "Co zostało",
+    "title": "Rezonans",
     "shadowLabel": "Cień",
     "healLabel": "To trzymało",
     "affirmationLabel": "Afirmacja",
@@ -516,14 +516,12 @@
     }
   },
   "noteTimeline": {
-    "title": "Co zostało",
+    "title": "Rezonans",
     "summary": "{minutes} min · {n, plural, one {# moment} few {# momenty} many {# momentów} other {# momentów}}",
-    "action": {
-      "low": "byłeś blisko.",
-      "medium": "zostałeś.",
-      "deep": "zostałeś niesiony."
-    },
-    "clustered": "+{n} powrotów blisko w czasie"
+    "hoverPath": "Najedź na ścieżkę, by odczytać rytuał",
+    "rituals": "rytuałów",
+    "ofRituals": "z {n, plural, one {# rytuału} few {# rytuałów} many {# rytuałów} other {# rytuałów}}",
+    "empty": "Potrzeba przynajmniej jednego rytuału, by narysować koło"
   },
   "ritualCard": {
     "title": "Pary nut",

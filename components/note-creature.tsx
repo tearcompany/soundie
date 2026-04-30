@@ -242,7 +242,11 @@ export function NoteCreature() {
 
   const sessionsQuery = trpc.soundie.getSessions.useQuery(
     { playerId: playerId!, noteId: listeningNoteId },
-    { enabled: !!playerId, staleTime: 10_000, retry: false },
+    { enabled: !!playerId, staleTime: 10_000, retry: false, refetchInterval: 45_000 },
+  )
+  const streamQuery = trpc.soundie.getRecentAcrossNotes.useQuery(
+    { playerId: playerId!, windowHours: 72 },
+    { enabled: !!playerId, staleTime: 10_000, retry: false, refetchInterval: 45_000 },
   )
   const teardropPlaylistQuery = trpc.teardrop.getMappedForNote.useQuery(
     { noteId: listeningNoteId, locale, playerId: playerId ?? undefined },
@@ -1712,13 +1716,11 @@ export function NoteCreature() {
               </div>
             )}
             <p className="text-lora mb-3 text-sm italic text-ink/65">{t('remainWithNote', { note: def.short })}</p>
-            {sessionsQuery.data && sessionsQuery.data.sessions.length > 0 && (
+            {streamQuery.data && streamQuery.data.sessions.length > 0 && (
               <NoteTimeline
-                sessions={sessionsQuery.data.sessions}
-                totalSeconds={sessionsQuery.data.totalSeconds}
-                noteId={activeNoteId}
-                noteShort={def.short}
-                noteHex={c}
+                sessions={streamQuery.data.sessions}
+                totalSeconds={streamQuery.data.totalSeconds}
+                windowHours={streamQuery.data.windowHours}
                 locale={locale as 'en' | 'pl'}
                 className="mb-4"
               />

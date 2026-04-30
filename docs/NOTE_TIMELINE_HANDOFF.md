@@ -6,122 +6,94 @@
 
 To **nie jest feature** — to **kręgosłup pamięci Soundie**.
 
-Komponent na stronie `/{locale}/teraz` (pod kartą gracza) przechowuje to, co zostało po sesjach z aktywną nutą. Nie pokazuje wykresu, KPI ani osi. Pokazuje **ślady, które coś zmieniły**.
+Komponent na stronie `/{locale}/teraz` (pod linią "Zostań pod {nuta}") rysuje **sequences sunburst** wzorowany na pracy Kerry Roddena: każda klin koła to fragment **rytuału** — sekwencji nut, które gracz odsłuchał blisko siebie w czasie.
 
-W UI nazywa się to: **"What stayed" / "Co zostało"**. W kodzie zostawiamy nazwę `NoteTimeline` ze względów technicznych.
+W UI nazywa się **"Rezonans" / "Resonance"**. W kodzie zostawiamy nazwę pliku `note-timeline.tsx` (historyczny ślad).
+
+---
+
+## Dlaczego sunburst (a nie wykres czasowy)
+
+Wcześniejsze warianty pokazywały:
+- punkty per sesja → zbyt dyskretnie,
+- streamgraph (wiggle) → ładnie, ale nie pokazuje **kierunku przepływu** między nutami.
+
+Sunburst Kerry Roddena pokazuje to, czego nie pokazują wykresy temporalne:
+
+> *"Co nastąpiło po czym."*
+
+Gdy gracz słucha kilku nut blisko siebie (np. F → A → C w odstępie kilku minut), to jeden **rytuał**. Sunburst zlicza wszystkie takie ścieżki i rysuje je jako koncentryczne kliny:
+- środek = wspólny początek wszystkich rytuałów,
+- pierścień 1 = pierwsza nuta każdego rytuału,
+- pierścień 2 = co przyszło drugie,
+- itd.
+
+Po hover'ze pokazuje się **ścieżka rytuału jako pigułki** + **procent** wszystkich rytuałów, które ją zawierają. To pamięć, która mówi językiem ruchu, nie liczb.
+
+---
 
 ## Filozofia (zgodna z `Soundie Userpanel Manifesto.md`)
 
-- **Punkt ≠ sesja.** Punkt = moment, który coś zmienił.
-- **Brak osi czasu jako etykiet.** Czas istnieje przestrzennie, nie liczbowo.
-- **Brak KPI.** Brak streaków. Brak "performance". Total minut jest ciszą u góry, nie nagłówkiem.
-- **Tooltip mówi emocjami, nie technicznymi danymi.** Bez "3 min, Apr 26". Z: archetyp + akcja intensywności + cicha afirmacja.
-- **Mini-echo clustering.** 2–3 sesje blisko czasowo ⇒ jeden punkt z pełniejszym blaskiem (tak jak echa zlewają się w ciało).
+- **Brak osi i etykiet liczbowych.** Czas jest sekwencją, nie skalą.
+- **Brak KPI.** Procent jest jedynym widocznym miernikiem — i tylko po hover.
+- **Kolory mówią.** Każdy klin to chromaHex swojej nuty.
+- **Hierarchia, nie pomiar.** "Co po czym" zamiast "ile minut".
 
 ---
 
 ## Gdzie to jest
 
-- UI komponent: `components/note-timeline.tsx`
-- Osadzenie: `components/note-creature.tsx` (pod główną kartą, nad `PostSessionModal`)
-- Dane sesji: `trpc.soundie.getSessions` w `server/trpc/routers/soundie.ts`
-- Profil emocjonalny nuty: `lib/note-healing-profiles.ts` (z `data/note-healing-profiles*.json`)
-- i18n:
-  - `messages/en.json` → `noteTimeline.*`
-  - `messages/pl.json` → `noteTimeline.*`
-- Animacja pulse: `app/globals.css` (`note-timeline-pulse-kf`, `.note-timeline-pulse`)
+| Warstwa | Ścieżka |
+|---------|---------|
+| Komponent UI | `components/note-timeline.tsx` |
+| Osadzenie | `components/note-creature.tsx` (sekcja `session`, pod `remainWithNote`) |
+| Endpoint danych | `trpc.soundie.getRecentAcrossNotes` (`server/trpc/routers/soundie.ts`) |
+| i18n | `messages/{en,pl}.json` → `noteTimeline.*` |
+
+Brak pliku CSS — komponent używa tailwindowych klas projektu i kolorów nut z DB.
 
 ---
 
-## Model punktu
-
-Każdy widoczny punkt to **klaster** sesji ze swoim wymiarem emocjonalnym:
+## Endpoint `soundie.getRecentAcrossNotes`
 
 ```ts
-type ClusteredPoint = {
-  id: string
-  duration: number          // suma sekund w klastrze
-  completedAt: Date         // newest sesja jako kotwica
-  count: number             // ile sesji złożyło się na ten punkt
-  intensity: 'low' | 'medium' | 'deep'
+input: {
+  playerId: cuid
+  windowHours: int 1..72 (default 24, używane: 72)
+}
+output: {
+  sessions: {
+    id, durationSeconds, completedAt,
+    noteId, noteShort, noteName, noteHex
+  }[]   // do 500, rosnąco
+  totalSeconds: int
+  windowHours: int
 }
 ```
 
-### Reguła `intensity`
-
-```ts
-if (duration < 120)  → 'low'    // dotknąłeś
-if (duration < 300)  → 'medium' // zostałeś
-else                 → 'deep'   // zostałeś niesiony
-```
-
-### Reguła clustering (`CLUSTER_WINDOW_MS = 10 min`)
-
-Sesje w odstępie ≤ 10 min są spinane w jeden punkt. `duration` się sumuje, więc klaster może awansować do wyższej intensity. Dzięki temu seria krótkich powrotów świeci jak jeden głęboki moment.
+Klient woła z `windowHours: 72` (3 dni — dobry kompromis między świeżością a bogactwem sekwencji) i `refetchInterval: 45_000`.
 
 ---
 
-## Mapowanie na warstwę wizualną
+## Algorytm: sesje → rytuały → drzewo → sunburst
 
-| Intensity | Promień (px) | Glow                    |
-|-----------|--------------|-------------------------|
-| `low`     | 3.5          | brak (chyba że newest)  |
-| `medium`  | 6            | brak (chyba że newest)  |
-| `deep`    | 9.5          | tak (subtelna aureola)  |
-
-- **Najnowszy punkt** zawsze pulsuje (`note-timeline-pulse`).
-- Starsze punkty są lekko wyblakłe (linear fade po opacity).
-- Linia łącząca punkty: `curveMonotoneX`, `strokeDasharray="4 4"`, prawie niewidoczna.
-- Pionowy tick "teraz" — bardzo subtelny.
+1. **Filtr okna** — bierzemy sesje z ostatnich `windowHours` godzin.
+2. **Grupowanie w rytuały** — sortujemy chronologicznie i tniemy na rytuały gdy luka między sesjami przekracza `SEQUENCE_GAP_MS = 30 min`. Każdy rytuał = `noteId[]` w kolejności.
+3. **Budowa drzewa** — przeglądamy wszystkie rytuały. Dla każdego idziemy w dół drzewa po `noteId`, tworząc węzły gdy trzeba. Na ostatnim węźle (terminal sekwencji) zwiększamy `count++`. To kluczowe: **liczy się ten węzeł, w którym sekwencja się kończy**, dzięki czemu `d3.hierarchy.sum()` daje poprawną wagę każdej gałęzi.
+4. **`d3.hierarchy → .sum() → .sort()`** — agregujemy wagi w górę drzewa.
+5. **`d3.partition().size([2π, RADIUS])`** — układ radialny.
+6. **`d3.arc()`** z `padAngle: 0.005`, `padRadius: RADIUS/2`, `innerRadius: y0`, `outerRadius: y1 - 1` — generuje path każdego klina.
+7. **Render** — pomijamy korzeń (depth 0), rysujemy każdego potomka jako `<path>` z fill = `noteHex`.
 
 ---
 
-## Tooltip — ton
+## Interakcja
 
-Bez czasu. Bez minut. Bez liczb.
-
-Format:
-
-```
-F — The Keeper       (font-mono, kolor nuty)
-you stayed.          (font-lora, główna linia emocjonalna)
-"You were held."     (font-lora italic, cicha afirmacja)
-+2 returns close…    (tylko gdy klaster > 1)
-```
-
-Źródła:
-- **archetype**: `getNoteHealingProfile(noteId, locale).archetype`
-- **action**: `t('noteTimeline.action.{intensity}')`
-- **affirmation**: `getNoteHealingProfile(noteId, locale).shortMeaning`
-- **clustered hint**: `t('noteTimeline.clustered', { n })`
-
----
-
-## API / propsy
-
-```ts
-<NoteTimeline
-  sessions={...}        // z trpc.soundie.getSessions
-  totalSeconds={...}
-  noteId={activeNoteId}
-  noteShort={def.short}
-  noteHex={chromaHex}
-  locale={'en' | 'pl'}
-  className="..."
-/>
-```
-
-`getSessions` zwraca:
-
-```ts
-{
-  sessions: { id, duration, completedAt }[],   // do 50, malejąco
-  totalCount: number,
-  totalSeconds: number
-}
-```
-
-Komponent przed renderem sortuje rosnąco i klastruje.
+- **Hover na klin** → `setHovered(path)` gdzie `path` to lista `noteId` od korzenia do tego klina.
+- **Highlight ancestor chain** — wszystkie kliny w łańcuchu od korzenia do hover-target zostają jasne (`fillOpacity: 0.88`), reszta przyciemnia się (`0.18`). Logika: `pathKey === hoveredKey || hoveredKey.startsWith(pathKey + '|')`.
+- **Breadcrumb nad sunburstem** — pokazuje pełną ścieżkę rytuału jako pigułki w kolorach nut, połączone strzałkami.
+- **Środek koła** — gdy nic nie hover'owane: `totalSequences` + "rituals". Gdy hover: `XX.X%` + "of N rituals".
+- **`onMouseLeave` na kontenerze** → reset hovered.
 
 ---
 
@@ -129,53 +101,56 @@ Komponent przed renderem sortuje rosnąco i klastruje.
 
 ```jsonc
 "noteTimeline": {
-  "title": "What stayed",
+  "title": "Resonance",                   // PL: "Rezonans"
   "summary": "{minutes} min · {n, plural, ...}",
-  "action": {
-    "low":    "you came close.",
-    "medium": "you stayed.",
-    "deep":   "you were held."
-  },
-  "clustered": "+{n} returns close in time"
+  "hoverPath": "Hover a path to read the ritual",
+  "rituals": "rituals",                   // PL: "rytuałów"
+  "ofRituals": "of {n, plural, ...}",     // PL: "z {n, plural, ...}"
+  "empty": "Need at least one ritual to draw the wheel"
 }
 ```
 
-Tłumaczenia PL podążają tym samym tonem (np. `"deep": "zostałeś niesiony."`).
+---
 
-> **Ton kopii**: pasywne, miękkie, świadkujące. Bez ego użytkownika, bez "achievements".
+## Edge cases
+
+- **`sessions.length === 0`** → komponent się nie renderuje (jak wcześniej).
+- **0 rytuałów (po filtrze)** → fallback z komunikatem `t('empty')` w pustym kontenerze.
+- **1 rytuał z 1 sesją** → sunburst pokazuje pojedynczy okrąg (cały klin = jedna nuta). Wciąż czytelny.
+- **Bardzo długi rytuał (np. 8 nut po kolei)** → sunburst będzie miał 8 pierścieni, pierścień zewnętrzny będzie cienki ale nadal czytelny.
 
 ---
 
 ## Powiązana poprawka wydajności
 
-W `hooks/use-soundie-query.ts` usunięto round-trip `trpc.note.getByUrlKey` przy `?note=...`. Mapowanie `urlKey → noteId` idzie lokalnie przez `noteIdFromUrlKey`, więc wejście w kartę z timeline'em jest natychmiastowe.
+W `hooks/use-soundie-query.ts` usunięto round-trip `trpc.note.getByUrlKey` przy `?note=...`. Mapowanie `urlKey → noteId` idzie lokalnie. Wejście na `/teraz?note=…` jest natychmiastowe.
 
 ---
 
 ## Co monitorować
 
-- **Wąskie ekrany**: punkty `deep` mogą się dotykać przy gęstej historii — clustering to mityguje, ale przy 50+ sesjach warto będzie wprowadzić wtórny downsampling.
-- **Brak danych**: komponent się nie renderuje (`sessions.length === 0`) — to celowe, by nie pokazywać pustki, gdy historia jest pusta.
-- **Pierwsza sesja**: pokażemy 1 punkt z pełnym pulse — to jest w porządku, bo "ślad istnieje".
-- **`shortMeaning` w polskich profilach**: literówka "cieło" w jednym z profili (`C`) — do poprawy w `data/note-healing-profiles-pl.json`.
+- **Maksymalna głębokość rytuału** — w teorii rytuał może być 10+ sesji długi. SVG nadal renderuje, ale pierścienie zewnętrzne robią się cienkie. Jeśli stanie się problemem, wprowadzimy max depth z agregacją "+N more" w ostatnim pierścieniu.
+- **Rosnąca liczba węzłów** — przy bardzo aktywnych graczach drzewo rośnie. Limit 500 sesji na endpoint chroni nas, ale warto monitorować perf przy dużych zbiorach.
+- **`SEQUENCE_GAP_MS`** = 30 min jest heurystyką. Można pomyśleć o adaptacyjnym progu (np. mediana międzyczasów gracza).
 
 ---
 
 ## Propozycje kolejnych iteracji
 
-1. **Echo bridge**: jeśli użytkownik ma `EchoEntry` zapisaną blisko sesji, wstaw `phrase` jako 4. linię w tooltip ("twoje słowo: …").
-2. **Ślad między nutami**: cienka linia łącząca timeline'y różnych nut (na sanktuarium), gdy użytkownik wraca do tej samej nuty po dłuższej przerwie.
-3. **Wstęga miesiąca**: monthly reflection letter — generujemy z `clusters` per nuta + szept profilowy.
-4. **Body resonance hint**: opcjonalna mała ikona ciała (z `bodyFocus`) jako micro-element przy `deep`.
+1. **Animowane wejście klinów** — fade-in po depth, nadaje rytmiczny "rozwój" otwarcia.
+2. **Klik = focus** (jak w klasycznym Roddenie): klin staje się nowym korzeniem, pierścień zewnętrzny pokazuje co dalej.
+3. **Filtr "tylko deep rytuały"** — sekwencje trwające ≥10 min łącznie.
+4. **Echo overlay** — kropka na klinach gdzie zapisany jest `EchoEntry`.
+5. **Wide multi-window**: 24h / 7d / 30d toggle nad kołem.
 
 ---
 
 ## Final note
 
-> Inne dashboardy mierzą output.  
-> Ten timeline odbija wewnętrzną pogodę.  
+> Inne dashboardy mierzą output.
+> To koło pokazuje formy, w jakich do siebie wracasz.
 >
-> Brak osi to nie pominięcie.  
-> Brak osi to deklaracja.
+> Każdy rytuał to ślad ruchu duszy między nutami.
+> Sunburst zbiera te ślady w jedno koło.
 
 — Miriam

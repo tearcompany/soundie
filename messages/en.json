@@ -588,14 +588,12 @@
     }
   },
   "noteTimeline": {
-    "title": "What stayed",
+    "title": "Resonance",
     "summary": "{minutes} min · {n, plural, one {# moment} other {# moments}}",
-    "action": {
-      "low": "you came close.",
-      "medium": "you stayed.",
-      "deep": "you were held."
-    },
-    "clustered": "+{n} returns close in time"
+    "hoverPath": "Hover a path to read the ritual",
+    "rituals": "rituals",
+    "ofRituals": "of {n, plural, one {# ritual} other {# rituals}}",
+    "empty": "Need at least one ritual to draw the wheel"
   },
   "ritualCard": {
     "title": "Note pairs",

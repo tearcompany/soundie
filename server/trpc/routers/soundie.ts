@@ -52,6 +52,22 @@ const sessionsOutputSchema = z.object({
   totalSeconds: z.number().int(),
 })
 
+const streamSessionSchema = z.object({
+  id: z.string(),
+  durationSeconds: z.number().int().nonnegative(),
+  completedAt: z.coerce.date(),
+  noteId: z.string(),
+  noteShort: z.string(),
+  noteName: z.string(),
+  noteHex: z.string(),
+})
+
+const streamOutputSchema = z.object({
+  sessions: z.array(streamSessionSchema),
+  totalSeconds: z.number().int().nonnegative(),
+  windowHours: z.number().int().positive(),
+})
+
 const getOneOutputSchema = soundieRowSchema.extend({
   totalMinutes: z.number().int().nonnegative(),
   progressToNextFragment: z.object({
@@ -154,6 +170,46 @@ export const soundieRouter = router({
         totalCount: totals._count._all,
         totalSeconds: totals._sum.duration ?? 0,
       }
+    }),
+
+  getRecentAcrossNotes: publicProcedure
+    .input(
+      z.object({
+        playerId: z.string().cuid(),
+        windowHours: z.number().int().min(1).max(72).default(24),
+      }),
+    )
+    .output(streamOutputSchema)
+    .query(async ({ ctx, input }) => {
+      const since = new Date(Date.now() - input.windowHours * 60 * 60 * 1000)
+      const rows = await ctx.db.listenSession.findMany({
+        where: { playerId: input.playerId, completedAt: { gte: since } },
+        orderBy: { completedAt: 'asc' },
+        take: 500,
+        select: {
+          id: true,
+          duration: true,
+          completedAt: true,
+          soundie: {
+            select: {
+              note: {
+                select: { id: true, short: true, name: true, chromaHex: true },
+              },
+            },
+          },
+        },
+      })
+      const sessions = rows.map((r) => ({
+        id: r.id,
+        durationSeconds: r.duration,
+        completedAt: r.completedAt,
+        noteId: r.soundie.note.id,
+        noteShort: r.soundie.note.short,
+        noteName: r.soundie.note.name,
+        noteHex: r.soundie.note.chromaHex,
+      }))
+      const totalSeconds = sessions.reduce((acc, s) => acc + s.durationSeconds, 0)
+      return { sessions, totalSeconds, windowHours: input.windowHours }
     }),
 
   getOne: publicProcedure

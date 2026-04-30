@@ -1,161 +1,192 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { scaleTime, line as d3Line, curveMonotoneX } from 'd3'
+import { hierarchy, partition, arc as d3Arc, type HierarchyRectangularNode } from 'd3'
 import { cn } from '@/lib/utils'
-import { getNoteHealingProfile } from '@/lib/note-healing-profiles'
+import { hexToRgba } from '@/lib/hex-rgba'
 
-const TIMELINE_HEIGHT = 88
-const INSET_X = 18
-const CENTER_Y = 50
+const SIZE = 320
+const RADIUS = SIZE / 2
+const SEQUENCE_GAP_MS = 30 * 60 * 1000 // ≤30 min between sessions = same ritual
 
-type Intensity = 'low' | 'medium' | 'deep'
-
-const INTENSITY_RADIUS: Record<Intensity, number> = {
-  low: 3.5,
-  medium: 6,
-  deep: 9.5,
-}
-
-const CLUSTER_WINDOW_MS = 10 * 60 * 1000
-
-type SessionInput = {
+type StreamSession = {
   id: string
-  duration: number
+  durationSeconds: number
   completedAt: Date | string
-}
-
-type ClusteredPoint = {
-  id: string
-  duration: number
-  completedAt: Date
-  count: number
-  intensity: Intensity
-}
-
-type TooltipState = {
-  x: number
-  y: number
-  archetype: string
-  action: string
-  affirmation: string
-  count: number
+  noteId: string
+  noteShort: string
+  noteName: string
+  noteHex: string
 }
 
 type Props = {
-  sessions: SessionInput[]
+  sessions: StreamSession[]
   totalSeconds: number
-  noteId: string
-  noteShort: string
-  noteHex: string
   locale: 'en' | 'pl'
+  windowHours?: number
   className?: string
 }
 
-// `locale` is consumed by useTranslations indirectly via next-intl context,
-// but we keep it in props to read the right healing profile.
-
-function intensityFromDuration(seconds: number): Intensity {
-  if (seconds < 120) return 'low'
-  if (seconds < 300) return 'medium'
-  return 'deep'
+type TreeNode = {
+  name: string
+  noteId?: string
+  noteShort?: string
+  noteName?: string
+  noteHex?: string
+  count: number
+  children: TreeNode[]
 }
 
-function clusterSessions(sortedAsc: { id: string; duration: number; completedAt: Date }[]): ClusteredPoint[] {
-  const out: ClusteredPoint[] = []
-  for (const s of sortedAsc) {
-    const last = out[out.length - 1]
-    if (last && s.completedAt.getTime() - last.completedAt.getTime() <= CLUSTER_WINDOW_MS) {
-      last.duration += s.duration
-      last.count += 1
-      last.completedAt = s.completedAt
-      last.intensity = intensityFromDuration(last.duration)
-    } else {
-      out.push({
-        id: s.id,
-        duration: s.duration,
-        completedAt: s.completedAt,
-        count: 1,
-        intensity: intensityFromDuration(s.duration),
-      })
+type ArcDatum = HierarchyRectangularNode<TreeNode>
+
+function buildSequences(sessions: StreamSession[]): StreamSession[][] {
+  const sorted = [...sessions]
+    .map((s) => ({ ...s, completedAt: new Date(s.completedAt) }))
+    .sort((a, b) => a.completedAt.getTime() - b.completedAt.getTime())
+  const seqs: StreamSession[][] = []
+  let cur: StreamSession[] = []
+  let lastT = -Infinity
+  for (const s of sorted) {
+    const t = s.completedAt.getTime()
+    if (t - lastT > SEQUENCE_GAP_MS) {
+      if (cur.length) seqs.push(cur)
+      cur = []
     }
+    cur.push(s)
+    lastT = t
   }
-  return out
+  if (cur.length) seqs.push(cur)
+  return seqs
 }
 
-export function NoteTimeline({
-  sessions,
-  totalSeconds,
-  noteId,
-  noteShort,
-  noteHex,
-  locale,
-  className,
-}: Props) {
+function buildTree(seqs: StreamSession[][]): TreeNode {
+  const root: TreeNode = { name: 'root', count: 0, children: [] }
+  for (const seq of seqs) {
+    let cur = root
+    for (const sess of seq) {
+      let child = cur.children.find((c) => c.noteId === sess.noteId)
+      if (!child) {
+        child = {
+          name: sess.noteShort,
+          noteId: sess.noteId,
+          noteShort: sess.noteShort,
+          noteName: sess.noteName,
+          noteHex: sess.noteHex,
+          count: 0,
+          children: [],
+        }
+        cur.children.push(child)
+      }
+      cur = child
+    }
+    cur.count++
+  }
+  return root
+}
+
+function pathOf(d: ArcDatum): string[] {
+  const ancestors = d.ancestors().reverse()
+  const ids: string[] = []
+  for (const a of ancestors) {
+    if (a.depth === 0) continue
+    if (a.data.noteId) ids.push(a.data.noteId)
+  }
+  return ids
+}
+
+export function NoteTimeline({ sessions, totalSeconds, locale, windowHours = 72, className }: Props) {
+  void locale
   const t = useTranslations('noteTimeline')
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState(300)
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const [hovered, setHovered] = useState<string[] | null>(null)
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => {
-      if (entry) setWidth(entry.contentRect.width)
-    })
-    ro.observe(el)
-    setWidth(el.getBoundingClientRect().width)
-    return () => ro.disconnect()
-  }, [])
+  const inWindow = useMemo(() => {
+    const since = Date.now() - windowHours * 60 * 60 * 1000
+    return sessions.filter((s) => new Date(s.completedAt).getTime() >= since)
+  }, [sessions, windowHours])
 
-  const profile = useMemo(() => getNoteHealingProfile(noteId, locale), [noteId, locale])
-  const archetype = profile?.archetype ?? profile?.noteName ?? ''
-  const affirmationLine = profile?.shortMeaning ?? ''
+  const sequences = useMemo(() => buildSequences(inWindow), [inWindow])
+  const totalSequences = sequences.length
 
-  const clusters = useMemo(() => {
-    const normalized = sessions
-      .map((s) => ({
-        id: s.id,
-        duration: s.duration,
-        completedAt: new Date(s.completedAt),
-      }))
-      .sort((a, b) => a.completedAt.getTime() - b.completedAt.getTime())
-    return clusterSessions(normalized)
-  }, [sessions])
+  const layout = useMemo(() => {
+    if (sequences.length === 0) return null
+    const tree = buildTree(sequences)
+    if (tree.children.length === 0) return null
+    const root = hierarchy<TreeNode>(tree, (d) => d.children)
+      .sum((d) => d.count)
+      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
+    const part = partition<TreeNode>().size([2 * Math.PI, RADIUS])
+    return part(root)
+  }, [sequences])
 
-  const { xScale, pathD, points } = useMemo(() => {
-    if (clusters.length === 0) return { xScale: null, pathD: null, points: [] as (ClusteredPoint & { x: number })[] }
-
-    const now = Date.now()
-    const first = clusters[0]!.completedAt.getTime()
-    const span = Math.max(now - first, 1)
-    const padLeft = Math.max(span * 0.06, 3_600_000)
-    const padRight = Math.max(span * 0.03, 900_000)
-
-    const x = scaleTime()
-      .domain([new Date(first - padLeft), new Date(now + padRight)])
-      .range([
-        INSET_X + INTENSITY_RADIUS.deep,
-        Math.max(INSET_X + INTENSITY_RADIUS.deep + 1, width - INSET_X - INTENSITY_RADIUS.deep),
-      ])
-
-    const positioned = clusters.map((c) => ({ ...c, x: x(c.completedAt) }))
-
-    const lineGen = d3Line<(typeof positioned)[number]>()
-      .x((d) => d.x)
-      .y(() => CENTER_Y)
-      .curve(curveMonotoneX)
-
-    return { xScale: x, pathD: lineGen(positioned), points: positioned }
-  }, [clusters, width])
+  const arcGen = useMemo(
+    () =>
+      d3Arc<ArcDatum>()
+        .startAngle((d) => d.x0)
+        .endAngle((d) => d.x1)
+        .padAngle(0.005)
+        .padRadius(RADIUS / 2)
+        .innerRadius((d) => d.y0)
+        .outerRadius((d) => Math.max(d.y0, d.y1 - 1)),
+    [],
+  )
 
   const totalMinutes = Math.floor(totalSeconds / 60)
 
   if (sessions.length === 0) return null
 
+  if (!layout || totalSequences === 0) {
+    return (
+      <div className={cn('w-full select-none', className)}>
+        <div className="mb-2.5 flex items-baseline gap-2 px-1">
+          <h3 className="font-[family-name:var(--font-fraunces,serif)] text-[1.05rem] font-medium tracking-tight text-ink/90">
+            {t('title')}
+          </h3>
+        </div>
+        <div className="rounded-xl border border-pearl-border/35 bg-pearl-dark/22 p-4 text-center">
+          <p className="font-mono text-[0.55rem] uppercase tracking-[0.2em] text-ink-muted/55">
+            {t('empty')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Resolve hovered path → node + breadcrumb
+  let hoveredCount = 0
+  let hoveredPath: { noteShort: string; noteName: string; noteHex: string }[] = []
+  if (hovered && hovered.length > 0) {
+    let cur: ArcDatum | undefined = layout
+    for (const id of hovered) {
+      const next = cur?.children?.find((c) => c.data.noteId === id)
+      if (!next) {
+        cur = undefined
+        break
+      }
+      cur = next
+    }
+    if (cur) {
+      hoveredCount = cur.value ?? 0
+      const ancestors = cur.ancestors().reverse()
+      hoveredPath = ancestors
+        .filter((a) => a.depth > 0)
+        .map((a) => ({
+          noteShort: a.data.noteShort ?? '',
+          noteName: a.data.noteName ?? '',
+          noteHex: a.data.noteHex ?? '#888',
+        }))
+    }
+  }
+
+  const percent =
+    hovered && hoveredCount > 0 && totalSequences > 0
+      ? ((hoveredCount / totalSequences) * 100).toFixed(1)
+      : null
+
+  const hoveredKey = hovered ? hovered.join('|') : null
+
   return (
-    <div ref={containerRef} className={cn('w-full select-none', className)}>
+    <div className={cn('w-full select-none', className)}>
       <div className="mb-2.5 flex items-baseline gap-2 px-1">
         <h3 className="font-[family-name:var(--font-fraunces,serif)] text-[1.05rem] font-medium tracking-tight text-ink/90">
           {t('title')}
@@ -165,122 +196,98 @@ export function NoteTimeline({
         </span>
       </div>
 
-      <div className="relative overflow-visible rounded-xl border border-pearl-border/35 bg-pearl-dark/22">
-        <svg width={width} height={TIMELINE_HEIGHT} className="block" aria-hidden>
-          {pathD && (
-            <path
-              d={pathD}
-              fill="none"
-              stroke={noteHex}
-              strokeWidth={1.5}
-              strokeOpacity={0.14}
-              strokeDasharray="4 4"
-            />
-          )}
-
-          {points.map((pt, i) => {
-            const isNewest = i === points.length - 1
-            const fade = 0.42 + (i / Math.max(points.length - 1, 1)) * 0.5
-            const r = INTENSITY_RADIUS[pt.intensity]
-            const showGlow = pt.intensity === 'deep' || isNewest
-            return (
-              <g key={pt.id}>
-                {showGlow && (
-                  <circle
-                    cx={pt.x}
-                    cy={CENTER_Y}
-                    r={r + (pt.intensity === 'deep' ? 8 : 5)}
-                    fill={noteHex}
-                    fillOpacity={pt.intensity === 'deep' ? 0.16 : 0.1}
-                    className={isNewest ? 'note-timeline-pulse' : undefined}
-                  />
-                )}
-                <circle
-                  cx={pt.x}
-                  cy={CENTER_Y}
-                  r={r}
-                  fill={noteHex}
-                  fillOpacity={isNewest ? 0.92 : fade}
-                  stroke={noteHex}
-                  strokeWidth={1}
-                  strokeOpacity={0.32}
-                  style={{ cursor: 'pointer' }}
-                  onMouseEnter={() =>
-                    setTooltip({
-                      x: pt.x,
-                      y: CENTER_Y - r - 8,
-                      archetype: archetype
-                        ? `${noteShort} — ${archetype}`
-                        : noteShort,
-                      action: t(`action.${pt.intensity}` as 'action.low'),
-                      affirmation: affirmationLine,
-                      count: pt.count,
-                    })
-                  }
-                  onMouseLeave={() => setTooltip(null)}
-                  onTouchStart={() =>
-                    setTooltip({
-                      x: pt.x,
-                      y: CENTER_Y - r - 8,
-                      archetype: archetype
-                        ? `${noteShort} — ${archetype}`
-                        : noteShort,
-                      action: t(`action.${pt.intensity}` as 'action.low'),
-                      affirmation: affirmationLine,
-                      count: pt.count,
-                    })
-                  }
-                  onTouchEnd={() => {
-                    setTimeout(() => setTooltip(null), 2400)
-                  }}
-                />
-              </g>
-            )
-          })}
-
-          {xScale && (() => {
-            const nowX = xScale(new Date())
-            return (
-              <line
-                x1={nowX}
-                y1={CENTER_Y - 10}
-                x2={nowX}
-                y2={CENTER_Y + 10}
-                stroke={noteHex}
-                strokeWidth={1.5}
-                strokeOpacity={0.18}
-                strokeLinecap="round"
-              />
-            )
-          })()}
-        </svg>
-
-        {tooltip && (
-          <div
-            className="pointer-events-none absolute z-10 max-w-[14rem] -translate-x-1/2 -translate-y-full rounded-lg border border-pearl-border/55 bg-white/97 px-3 py-2 shadow-md backdrop-blur-sm"
-            style={{ left: tooltip.x, top: tooltip.y }}
-          >
-            <p
-              className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.12em]"
-              style={{ color: noteHex }}
-            >
-              {tooltip.archetype}
-            </p>
-            <p className="mt-1 text-lora text-[0.78rem] leading-snug text-ink/85">
-              {tooltip.action}
-            </p>
-            {tooltip.affirmation && (
-              <p className="mt-1 text-lora text-[0.74rem] italic leading-snug text-ink/65 border-l-2 border-ink/15 pl-2">
-                “{tooltip.affirmation}”
-              </p>
-            )}
-            {tooltip.count > 1 && (
-              <p className="mt-1 font-mono text-[0.5rem] uppercase tracking-[0.16em] text-ink-muted/60">
-                {t('clustered', { n: tooltip.count })}
-              </p>
-            )}
-          </div>
+      {/* Breadcrumb */}
+      <div className="mb-2 flex min-h-[1.5rem] flex-wrap items-center justify-center gap-1 px-1">
+        {hoveredPath.length > 0 ? (
+          hoveredPath.map((c, i) => (
+            <span key={`${c.noteShort}-${i}`} className="flex items-center gap-1">
+              {i > 0 && (
+                <span className="font-mono text-[0.55rem] text-ink-muted/45">→</span>
+              )}
+              <span
+                className="rounded-full px-2 py-0.5 font-mono text-[0.58rem] font-semibold uppercase tracking-[0.1em]"
+                style={{
+                  backgroundColor: hexToRgba(c.noteHex, 0.12),
+                  color: c.noteHex,
+                  border: `1px solid ${hexToRgba(c.noteHex, 0.32)}`,
+                }}
+              >
+                {c.noteShort}
+              </span>
+            </span>
+          ))
+        ) : (
+          <span className="font-mono text-[0.5rem] uppercase tracking-[0.18em] text-ink-muted/45">
+            {t('hoverPath')}
+          </span>
         )}
+      </div>
+
+      {/* Sunburst */}
+      <div
+        className="relative mx-auto rounded-xl border border-pearl-border/35 bg-pearl-dark/22 p-3"
+        style={{ width: 'fit-content' }}
+        onMouseLeave={() => setHovered(null)}
+      >
+        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+          <g transform={`translate(${SIZE / 2}, ${SIZE / 2})`}>
+            {layout
+              .descendants()
+              .filter((d) => d.depth > 0)
+              .map((d) => {
+                const path = pathOf(d)
+                const pathKey = path.join('|')
+                const isHighlighted =
+                  !hoveredKey ||
+                  pathKey === hoveredKey ||
+                  hoveredKey.startsWith(`${pathKey}|`)
+                return (
+                  <path
+                    key={pathKey}
+                    d={arcGen(d) ?? ''}
+                    fill={d.data.noteHex ?? '#888'}
+                    fillOpacity={isHighlighted ? 0.88 : 0.18}
+                    stroke="white"
+                    strokeOpacity={0.55}
+                    strokeWidth={0.5}
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'fill-opacity 200ms ease',
+                    }}
+                    onMouseEnter={() => setHovered(path)}
+                  >
+                    <title>
+                      {`${d.data.noteShort} — ${d.data.noteName} · ${d.value ?? 0}/${totalSequences}`}
+                    </title>
+                  </path>
+                )
+              })}
+          </g>
+
+          {/* Center text */}
+          <text
+            x={SIZE / 2}
+            y={SIZE / 2 - 2}
+            textAnchor="middle"
+            fontFamily="var(--font-fraunces, serif)"
+            fontSize={percent ? 30 : 22}
+            fontWeight={500}
+            fill="rgb(15, 23, 42)"
+          >
+            {percent ? `${percent}%` : `${totalSequences}`}
+          </text>
+          <text
+            x={SIZE / 2}
+            y={SIZE / 2 + 16}
+            textAnchor="middle"
+            fontFamily="ui-monospace, monospace"
+            fontSize={9}
+            letterSpacing="0.16em"
+            fill="rgba(15, 23, 42, 0.5)"
+          >
+            {percent ? t('ofRituals', { n: totalSequences }) : t('rituals')}
+          </text>
+        </svg>
       </div>
     </div>
   )
