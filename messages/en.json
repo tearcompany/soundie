@@ -587,6 +587,11 @@
       "release":   { "title": "Let go",   "line": "The River meets The Storm. What was stuck begins to move." }
     }
   },
+  "noteTimeline": {
+    "minutesLabel": "min in resonance",
+    "minutesShort": "min",
+    "sessionsCount": "{n, plural, one {# session} other {# sessions}}"
+  },
   "ritualCard": {
     "title": "Note pairs",
     "subtitle": "Two notes, one movement.",

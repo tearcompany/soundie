@@ -515,6 +515,11 @@
       "release":   { "title": "Puszczenie", "line": "Rzeka spotyka Burzę. To, co utknęło, zaczyna płynąć." }
     }
   },
+  "noteTimeline": {
+    "minutesLabel": "min w rezonansie",
+    "minutesShort": "min",
+    "sessionsCount": "{n, plural, one {# sesja} few {# sesje} many {# sesji} other {# sesji}}"
+  },
   "ritualCard": {
     "title": "Pary nut",
     "subtitle": "Dwa dźwięki, jeden ruch.",

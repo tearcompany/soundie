@@ -301,3 +301,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes note-timeline-pulse-kf {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.5); opacity: 0.22; }
+}
+
+.note-timeline-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: note-timeline-pulse-kf 2.8s ease-in-out infinite;
+}

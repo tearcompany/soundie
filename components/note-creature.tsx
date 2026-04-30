@@ -37,6 +37,7 @@ import { CircleHelp } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { PostSessionModal } from '@/components/post-session-modal'
+import { NoteTimeline } from '@/components/note-timeline'
 import { deriveAffirmation, getTimeOfDay } from '@/lib/affirmation-engine'
 import type { RitualSealPayload } from '@/lib/soundie-rituals'
 import {
@@ -1906,6 +1907,16 @@ export function NoteCreature() {
           </div>
         </div>
       </div>
+
+      {sessionsQuery.data && sessionsQuery.data.sessions.length > 0 && (
+        <NoteTimeline
+          sessions={sessionsQuery.data.sessions}
+          totalSeconds={sessionsQuery.data.totalSeconds}
+          noteHex={c}
+          locale={locale}
+          className="mx-auto mt-5 w-full max-w-sm px-4"
+        />
+      )}
 
       <PostSessionModal
         open={whisperModalOpen}
