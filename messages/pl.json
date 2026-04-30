@@ -516,9 +516,14 @@
     }
   },
   "noteTimeline": {
-    "minutesLabel": "min w rezonansie",
-    "minutesShort": "min",
-    "sessionsCount": "{n, plural, one {# sesja} few {# sesje} many {# sesji} other {# sesji}}"
+    "title": "Co zostało",
+    "summary": "{minutes} min · {n, plural, one {# moment} few {# momenty} many {# momentów} other {# momentów}}",
+    "action": {
+      "low": "byłeś blisko.",
+      "medium": "zostałeś.",
+      "deep": "zostałeś niesiony."
+    },
+    "clustered": "+{n} powrotów blisko w czasie"
   },
   "ritualCard": {
     "title": "Pary nut",

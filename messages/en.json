@@ -588,9 +588,14 @@
     }
   },
   "noteTimeline": {
-    "minutesLabel": "min in resonance",
-    "minutesShort": "min",
-    "sessionsCount": "{n, plural, one {# session} other {# sessions}}"
+    "title": "What stayed",
+    "summary": "{minutes} min · {n, plural, one {# moment} other {# moments}}",
+    "action": {
+      "low": "you came close.",
+      "medium": "you stayed.",
+      "deep": "you were held."
+    },
+    "clustered": "+{n} returns close in time"
   },
   "ritualCard": {
     "title": "Note pairs",

@@ -1712,6 +1712,17 @@ export function NoteCreature() {
               </div>
             )}
             <p className="text-lora mb-3 text-sm italic text-ink/65">{t('remainWithNote', { note: def.short })}</p>
+            {sessionsQuery.data && sessionsQuery.data.sessions.length > 0 && (
+              <NoteTimeline
+                sessions={sessionsQuery.data.sessions}
+                totalSeconds={sessionsQuery.data.totalSeconds}
+                noteId={activeNoteId}
+                noteShort={def.short}
+                noteHex={c}
+                locale={locale as 'en' | 'pl'}
+                className="mb-4"
+              />
+            )}
             <button
               type="button"
               onClick={toggleAudio}
@@ -1907,16 +1918,6 @@ export function NoteCreature() {
           </div>
         </div>
       </div>
-
-      {sessionsQuery.data && sessionsQuery.data.sessions.length > 0 && (
-        <NoteTimeline
-          sessions={sessionsQuery.data.sessions}
-          totalSeconds={sessionsQuery.data.totalSeconds}
-          noteHex={c}
-          locale={locale}
-          className="mx-auto mt-5 w-full max-w-sm px-4"
-        />
-      )}
 
       <PostSessionModal
         open={whisperModalOpen}
