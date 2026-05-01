@@ -219,7 +219,6 @@
     "chordSequencer": {
       "kicker": "Resonance builder",
       "title": "Chord",
-      "subtitle": "Layer notes into a chord. All voices sound together — synchronized, as one breath.",
       "chordLabel": "Current chord",
       "emptyChord": "Pick a note below to begin",
       "paletteLabel": "Notes",

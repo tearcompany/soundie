@@ -289,9 +289,6 @@ export function ChordSequencer({ locale = 'pl', className }: Props) {
         <h3 className="mt-0.5 font-[family-name:var(--font-fraunces,serif)] text-lg font-semibold tracking-tight text-ink">
           {t('chordSequencer.title')}
         </h3>
-        <p className="mt-1 font-body-serif text-[0.75rem] italic text-ink/55">
-          {t('chordSequencer.subtitle')}
-        </p>
       </div>
 
       {/* Chord slots */}

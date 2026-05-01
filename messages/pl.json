@@ -219,7 +219,6 @@
     "chordSequencer": {
       "kicker": "Budowniczy rezonansu",
       "title": "Akord",
-      "subtitle": "Nakładaj nuty w akord. Wszystkie głosy brzmią razem — zsynchronizowane, jak jeden oddech.",
       "chordLabel": "Bieżący akord",
       "emptyChord": "Dotknij noty poniżej, by zacząć",
       "paletteLabel": "Nuty",
