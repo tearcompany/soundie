@@ -207,30 +207,44 @@ export function SoundieLanding() {
   const reducedMotion = usePrefersReducedMotion()
   const { play, stop, playingId } = useNotePreview()
   const [hovered, setHovered] = useState<string | null>(null)
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
+  /** Note driving the invite panel + Teardrop copy — only changes on tap, not on hover/preview. */
+  const [inviteNoteId, setInviteNoteId] = useState<string>(DEFAULT_NOTE_ID)
   const focusedNote = notes.find((n) => n.id === (playingId ?? hovered)) ?? null
   const { line, fade } = useCycledLine(lines, 3800, reducedMotion)
-  const selectedOrFallback = selectedNoteId ?? focusedNote?.id ?? DEFAULT_NOTE_ID
+  const inviteNote = useMemo(
+    () => notes.find((n) => n.id === inviteNoteId) ?? notes[0]!,
+    [notes, inviteNoteId],
+  )
   const foundationHref = useMemo(
     () => `/teraz?note=${encodeURIComponent(urlKeyForNoteId(DEFAULT_NOTE_ID))}`,
     [],
   )
   const playHref = useMemo(
-    () => `/teraz?note=${encodeURIComponent(urlKeyForNoteId(selectedOrFallback))}`,
-    [selectedOrFallback],
+    () => `/teraz?note=${encodeURIComponent(urlKeyForNoteId(inviteNoteId))}`,
+    [inviteNoteId],
   )
   const inviteCardQuery = trpc.teardrop.getMappedForNote.useQuery(
-    { noteId: selectedOrFallback, locale },
-    { staleTime: 60_000, retry: false },
+    { noteId: inviteNoteId, locale },
+    { staleTime: 0, gcTime: 120_000, retry: false },
   )
+  const shadowLinesQuery = trpc.teardrop.getLandingPrimaryShadowLines.useQuery(
+    { locale },
+    { staleTime: 300_000, retry: false },
+  )
+  const shadowByNoteId = useMemo(() => {
+    const rows = shadowLinesQuery.data ?? []
+    return Object.fromEntries(rows.map((r) => [r.noteId, r.shadowLine]))
+  }, [shadowLinesQuery.data])
   const inviteCard = inviteCardQuery.data?.cards?.[0] ?? null
   const inviteTagline = inviteCard?.texts.find((x) => x.field === 'tagline')?.content?.trim() ?? ''
   const inviteAffirmation =
     inviteCard?.texts.find((x) => x.field === 'affirmation')?.content?.trim() ?? ''
+  const inviteMeaningUpright =
+    inviteCard?.texts.find((x) => x.field === 'meaning_upright')?.content?.trim() ?? ''
 
   const handleSelect = useCallback(
     (note: LandingNote) => {
-      setSelectedNoteId(note.id)
+      setInviteNoteId(note.id)
       if (playingId === note.id) {
         stop()
       } else {
@@ -323,7 +337,7 @@ export function SoundieLanding() {
 
         <div
           id="notes-grid"
-          className="mt-6 grid w-full max-w-4xl grid-cols-2 justify-items-stretch gap-3 sm:grid-cols-3 md:grid-cols-6"
+          className="mt-6 grid w-full max-w-3xl grid-cols-3 justify-items-stretch gap-x-2 gap-y-3 sm:gap-x-3 sm:gap-y-4"
           role="group"
           aria-label={t('ariaNoteGroup')}
         >
@@ -331,6 +345,7 @@ export function SoundieLanding() {
             const isHovered = hovered === n.id
             const isPlaying = playingId === n.id
             const active = isHovered || isPlaying
+            const shadowLine = shadowByNoteId[n.id]?.trim() ?? ''
             return (
               <button
                 key={n.id}
@@ -341,8 +356,12 @@ export function SoundieLanding() {
                 onFocus={() => setHovered(n.id)}
                 onBlur={() => setHovered((cur) => (cur === n.id ? null : cur))}
                 aria-pressed={isPlaying}
-                aria-label={t('playAria', { name: n.name, freq: n.freq.toFixed(2) })}
-                className="group relative flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border px-3 py-3 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
+                aria-label={
+                  shadowLine
+                    ? `${t('playAria', { name: n.name, freq: n.freq.toFixed(2) })} · ${t('inShadowKicker')}: ${shadowLine}`
+                    : t('playAria', { name: n.name, freq: n.freq.toFixed(2) })
+                }
+                className="group relative flex min-w-0 flex-col items-center gap-1 rounded-2xl border px-2 py-3 sm:px-3 sm:py-3.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-pearl"
                 style={{
                   borderColor: active ? n.hex : 'var(--pearl-border)',
                   backgroundColor: active
@@ -358,24 +377,45 @@ export function SoundieLanding() {
                   reducedMotion={reducedMotion}
                 />
                 <span
-                  className="font-mono text-[0.65rem] font-semibold tracking-wide transition-colors duration-300"
+                  className="font-mono text-[0.62rem] font-semibold tracking-wide transition-colors duration-300 sm:text-[0.65rem]"
                   style={{ color: active ? n.hex : 'var(--ink-muted)' }}
                 >
                   {n.id}
                 </span>
-                <span className="max-w-[5rem] text-center font-body-serif text-[0.62rem] leading-tight text-ink-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                <span className="max-w-full px-0.5 text-center font-[family-name:var(--font-fraunces,serif)] text-[0.68rem] font-medium leading-snug text-ink/90 sm:text-[0.72rem]">
                   {n.name}
                 </span>
+                {shadowLine ? (
+                  <div className="mt-0.5 w-full min-w-0 border-t border-pearl-border/40 pt-1.5">
+                    <p className="text-center font-mono text-[0.48rem] uppercase tracking-[0.14em] text-ink-muted/75">
+                      {t('inShadowKicker')}
+                    </p>
+                    <p className="mt-1 line-clamp-3 text-center font-body-serif text-[0.58rem] italic leading-snug text-ink/60 sm:text-[0.6rem]">
+                      {shadowLine}
+                    </p>
+                  </div>
+                ) : null}
               </button>
             )
           })}
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-5">
-          <section className="w-full max-w-md rounded-2xl border border-pearl-border/60 bg-pearl/70 p-5 text-left shadow-sm backdrop-blur-sm">
+          <section
+            key={inviteNoteId}
+            className="w-full max-w-md rounded-2xl border border-pearl-border/60 bg-pearl/70 p-5 text-left shadow-sm backdrop-blur-sm"
+          >
             <p className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-coral">
               {t('inviteKicker')}
             </p>
+            <p className="mt-2 font-mono text-[0.58rem] uppercase tracking-[0.16em] text-ink-muted/85">
+              {t('selectedNoteLead', { short: inviteNote.id, name: inviteNote.name })}
+            </p>
+            {inviteCardQuery.isFetching && (
+              <p className="mt-1 font-mono text-[0.55rem] text-ink-muted/70" aria-live="polite">
+                {t('inviteLoading')}
+              </p>
+            )}
             <p className="mt-2 font-[family-name:var(--font-fraunces,serif)] text-xl text-ink">
               {inviteCard?.name ?? t('inviteFallbackTitle')}
             </p>
@@ -385,6 +425,16 @@ export function SoundieLanding() {
             <p className="mt-3 font-body-serif text-sm italic leading-relaxed text-ink/85">
               {inviteAffirmation || t('inviteFallbackAffirmation')}
             </p>
+            {inviteMeaningUpright ? (
+              <div className="mt-4 border-t border-pearl-border/45 pt-3">
+                <p className="font-mono text-[0.52rem] uppercase tracking-[0.16em] text-amber-800/80">
+                  {t('inTheLightKicker')}
+                </p>
+                <p className="mt-2 whitespace-pre-line font-body-serif text-[0.78rem] leading-relaxed text-ink/88 line-clamp-6">
+                  {inviteMeaningUpright}
+                </p>
+              </div>
+            ) : null}
             <div className="mt-4">
               <Link
                 href={playHref}

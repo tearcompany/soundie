@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   applyTeardropUnlocksAfterSession,
   sortedByPhaseOrder,
@@ -34,70 +34,76 @@ describe('sortedByPhaseOrder', () => {
 })
 
 describe('applyTeardropUnlocksAfterSession', () => {
-  it('does not create unlocks when no lore fragments are unlocked', async () => {
-    const unlockCreate = vi.fn()
-    const tx = {
-      noteTeardropCard: {
-        findMany: vi.fn().mockResolvedValue([
-          {
-            card: {
-              id: 'card1',
-              phase: 'p1',
-              phaseOrder: 1,
-            },
-          },
-        ]),
-      },
-      teardropDeck: {
-        findUnique: vi.fn().mockResolvedValue({ id: 'deck1' }),
-      },
+  const anchorVisit = vi.fn()
+  const playerBackup = vi.fn()
+
+  beforeEach(() => {
+    anchorVisit.mockReset()
+    anchorVisit.mockResolvedValue({ visitDate: '2026-05-01' })
+    playerBackup.mockReset()
+  })
+
+  function baseTx(overrides: Record<string, unknown> = {}) {
+    return {
+      dailyVisit: { findFirst: anchorVisit },
+      player: { findUnique: playerBackup },
+      noteTeardropCard: { findMany: vi.fn().mockResolvedValue([]) },
+      teardropDeck: { findUnique: vi.fn().mockResolvedValue({ id: 'deck1' }) },
       teardropPhase: {
         findMany: vi.fn().mockResolvedValue([
-          { slug: 'p1', unlockOrder: 1, xpPerUnlock: 10 },
+          { slug: 'roots', unlockOrder: 1, xpPerUnlock: 10 },
+          { slug: 'flow', unlockOrder: 2, xpPerUnlock: 10 },
         ]),
       },
       teardropCardUnlock: {
         findMany: vi.fn().mockResolvedValue([]),
-        create: unlockCreate,
+        create: vi.fn(),
       },
       teardropXpEvent: { create: vi.fn() },
       teardropProgress: { upsert: vi.fn() },
+      ...overrides,
     }
-    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', 0)
-    expect(unlockCreate).not.toHaveBeenCalled()
-  })
+  }
 
-  it('creates unlock rows when threshold met and slots remain', async () => {
-    const unlockCreate = vi.fn().mockResolvedValue({})
-    const upsert = vi.fn().mockResolvedValue({})
-    const tx = {
+  it('does not unlock when earliest allowed phase excludes card phase', async () => {
+    const unlockCreate = vi.fn()
+    const tx = baseTx({
       noteTeardropCard: {
         findMany: vi.fn().mockResolvedValue([
           {
             card: {
-              id: 'card1',
-              phase: 'p1',
+              id: 'c1',
+              phase: 'flow',
               phaseOrder: 1,
             },
           },
         ]),
       },
-      teardropDeck: {
-        findUnique: vi.fn().mockResolvedValue({ id: 'deck1' }),
-      },
-      teardropPhase: {
+      teardropCardUnlock: { findMany: vi.fn().mockResolvedValue([]), create: unlockCreate },
+    })
+    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', '2026-05-01')
+    expect(unlockCreate).not.toHaveBeenCalled()
+  })
+
+  it('creates unlock when card lies in phases allowed today', async () => {
+    const unlockCreate = vi.fn().mockResolvedValue({})
+    const upsert = vi.fn().mockResolvedValue({})
+    const tx = baseTx({
+      noteTeardropCard: {
         findMany: vi.fn().mockResolvedValue([
-          { slug: 'p1', unlockOrder: 1, xpPerUnlock: 12 },
+          {
+            card: {
+              id: 'card1',
+              phase: 'roots',
+              phaseOrder: 1,
+            },
+          },
         ]),
       },
-      teardropCardUnlock: {
-        findMany: vi.fn().mockResolvedValue([]),
-        create: unlockCreate,
-      },
-      teardropXpEvent: { create: vi.fn() },
+      teardropCardUnlock: { findMany: vi.fn().mockResolvedValue([]), create: unlockCreate },
       teardropProgress: { upsert },
-    }
-    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', 1)
+    })
+    await applyTeardropUnlocksAfterSession(tx as never, 'player1', 'note1', '2026-05-04')
     expect(unlockCreate).toHaveBeenCalledTimes(1)
     expect(upsert).toHaveBeenCalledTimes(1)
   })

@@ -5,6 +5,17 @@ import {
   TEARDROP_DECK_SLUG,
   sortedByPhaseOrder,
 } from '@/lib/teardrop-unlock'
+import { NOTE_LIST } from '@/lib/notes'
+
+function firstShadowLineFromTexts(
+  texts: Array<{ locale: string; field: string; content: string }>,
+  max: number,
+): string {
+  const raw = texts.find((x) => x.field === 'meaning_shadow')?.content?.trim() ?? ''
+  const line = raw.split(/\n/)[0]?.trim() ?? ''
+  if (line.length <= max) return line
+  return `${line.slice(0, max - 1).trimEnd()}…`
+}
 
 const localeInput = z.string().min(2).max(8).optional()
 const deckSlugInput = z.object({ deckSlug: z.string().min(1), locale: localeInput })
@@ -79,6 +90,11 @@ const unlockedCollectionOutput = z.object({
   phases: z.array(phaseInfoSchema),
   unlockedCards: z.number().int().nonnegative(),
   totalDeckCards: z.number().int().nonnegative(),
+})
+
+const landingShadowLineRow = z.object({
+  noteId: z.string(),
+  shadowLine: z.string(),
 })
 
 function pickLocaleTexts(
@@ -256,6 +272,60 @@ export const teardropRouter = router({
       })
       if (!card) throw new TRPCError({ code: 'NOT_FOUND', message: 'Card not found' })
       return { ...card, texts: pickLocaleTexts(card.texts, locale) }
+    }),
+
+  /** First Teardrop card per note (phase order) — one line of meaning_shadow for landing grid. */
+  getLandingPrimaryShadowLines: publicProcedure
+    .input(z.object({ locale: z.enum(['en', 'pl']) }))
+    .output(z.array(landingShadowLineRow))
+    .query(async ({ ctx, input }) => {
+      const locale = input.locale
+      const noteIds = NOTE_LIST.map((n) => n.id)
+
+      const deck = await ctx.db.teardropDeck.findUnique({
+        where: { slug: TEARDROP_DECK_SLUG },
+        select: { id: true },
+      })
+      const phaseOrderBySlug: Record<string, number> = {}
+      if (deck) {
+        const phases = await ctx.db.teardropPhase.findMany({
+          where: { deckId: deck.id },
+          select: { slug: true, unlockOrder: true },
+        })
+        for (const p of phases) {
+          phaseOrderBySlug[p.slug] = p.unlockOrder
+        }
+      }
+
+      const links = await ctx.db.noteTeardropCard.findMany({
+        where: { noteId: { in: noteIds } },
+        orderBy: [{ noteId: 'asc' }, { sortOrder: 'asc' }],
+        include: { card: { include: { texts: true } } },
+      })
+
+      const byNote = new Map<string, Array<{ phase: string | null; phaseOrder: number | null; texts: typeof links[number]['card']['texts'] }>>()
+      for (const link of links) {
+        const arr = byNote.get(link.noteId) ?? []
+        arr.push({
+          phase: link.card.phase,
+          phaseOrder: link.card.phaseOrder,
+          texts: link.card.texts,
+        })
+        byNote.set(link.noteId, arr)
+      }
+
+      return NOTE_LIST.map((n) => {
+        const rows = byNote.get(n.id) ?? []
+        const cards = rows.map((r) => ({
+          phase: r.phase,
+          phaseOrder: r.phaseOrder,
+          texts: pickLocaleTexts(r.texts, locale),
+        }))
+        const ordered = sortedByPhaseOrder(cards, phaseOrderBySlug)
+        const first = ordered[0]
+        const shadowLine = first ? firstShadowLineFromTexts(first.texts, 132) : ''
+        return { noteId: n.id, shadowLine }
+      })
     }),
 
   getMappedForNote: publicProcedure

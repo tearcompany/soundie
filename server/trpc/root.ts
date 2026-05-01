@@ -16,8 +16,10 @@ import { todayRouter } from './routers/today'
 import { resonanceRouter } from './routers/resonance'
 import { ritualRouter } from './routers/ritual'
 import { sessionReflectionRouter } from './routers/sessionReflection'
+import { chordRouter } from './routers/chord'
 
 export const appRouter = router({
+  chord: chordRouter,
   admin: adminRouter,
   echo: echoRouter,
   analytics: analyticsRouter,

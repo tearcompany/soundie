@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { SiteNav } from '@/components/site-nav'
+import { BackgroundPresenceRoot } from '@/components/background-presence-root'
 import { routing } from '@/i18n/routing'
 
 type Props = {
@@ -23,6 +24,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider messages={messages}>
+      <BackgroundPresenceRoot />
       <div className="flex min-h-dvh flex-col">
         <SiteNav />
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>

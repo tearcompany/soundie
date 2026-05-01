@@ -11,6 +11,7 @@ import {
   getNewlyUnlockedLoreFragmentIndices,
   loreUnlockedCountFromTotalMinutes,
 } from '@/lib/progress'
+import { utcCalendarDayString, isValidYyyyMmDd } from '@/lib/calendar-day'
 import { applyTeardropUnlocksAfterSession } from '@/lib/teardrop-unlock'
 
 const playerNoteInput = z.object({
@@ -299,6 +300,11 @@ export const soundieRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Note not found' })
       }
 
+      const calendarDate =
+        input.calendarDate && isValidYyyyMmDd(input.calendarDate)
+          ? input.calendarDate
+          : utcCalendarDayString()
+
       const updated = await ctx.db.$transaction(async (tx) => {
         let current = await tx.soundie.findUnique({
           where: {
@@ -360,7 +366,7 @@ export const soundieRouter = router({
           tx,
           input.playerId,
           input.noteId,
-          Math.min(5, newLoreLevel)
+          calendarDate,
         )
 
         const firstTeardropJustEarned = teardropCountBefore === 0 &&

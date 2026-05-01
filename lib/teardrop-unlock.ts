@@ -1,9 +1,15 @@
 import type { Prisma } from '@prisma/client'
 import { Prisma as PrismaNamespace } from '@prisma/client'
 import { MAX_LORE_FRAGMENTS } from '@/lib/progress'
+import {
+  countTeardropCardsAllowedByPhaseOrder,
+  maxTeardropPhaseUnlockOrderForCalendar,
+  resolveTeardropAnchorDayString,
+} from '@/lib/teardrop-phase-calendar'
 
 export const TEARDROP_DECK_SLUG = 'teardrop-oracle-deck-v0'
 
+/** Pozostaje dla lore (slajdy / copy); Teardrop karty są odblokowywane kalendarzem faz. */
 export function unlockedTeardropCount(loreUnlocked: number): number {
   return Math.max(0, Math.min(MAX_LORE_FRAGMENTS, loreUnlocked))
 }
@@ -27,7 +33,8 @@ export async function applyTeardropUnlocksAfterSession(
   tx: Prisma.TransactionClient,
   playerId: string,
   noteId: string,
-  loreUnlocked: number
+  /** Dzień kalendarza użytkownika `YYYY-MM-DD` (jak `DailyVisit.visitDate`). */
+  calendarTodayYyyyMmDd: string,
 ) {
   const links = await tx.noteTeardropCard.findMany({
     where: { noteId },
@@ -54,7 +61,14 @@ export async function applyTeardropUnlocksAfterSession(
   const cards = links.map((l) => l.card).filter(Boolean) as NonNullable<(typeof links)[number]['card']>[]
   const orderedCards = sortedByPhaseOrder(cards, phaseOrderBySlug)
 
-  const targetCount = Math.min(totalCards, unlockedTeardropCount(loreUnlocked))
+  const anchorDay = await resolveTeardropAnchorDayString(tx, playerId)
+  const maxPhaseDeckOrder = maxTeardropPhaseUnlockOrderForCalendar(anchorDay, calendarTodayYyyyMmDd)
+  const slotsForToday = countTeardropCardsAllowedByPhaseOrder(
+    orderedCards,
+    phaseOrderBySlug,
+    maxPhaseDeckOrder,
+  )
+  const targetCount = Math.min(totalCards, slotsForToday)
 
   const existingUnlocks = await tx.teardropCardUnlock.findMany({
     where: { playerId, noteId },

@@ -14,6 +14,7 @@ import { useEchoMomentTrigger } from '@/hooks/use-echo-moment-trigger'
 import { NoteHeatmap } from '@/components/sanctuary/note-heatmap'
 import { SanctuaryTodaySequence } from '@/components/sanctuary/sanctuary-today-sequence'
 import { SanctuaryPulse } from '@/components/sanctuary/sanctuary-pulse'
+import { EmotionBalance } from '@/components/emotion-balance'
 
 export function SanctuaryDashboard() {
   const t = useTranslations('sanctuary')
@@ -266,6 +267,15 @@ export function SanctuaryDashboard() {
         <div className="mt-10">
           <SanctuaryTodaySequence />
         </div>
+      )}
+
+      {playerId && q.data && bounds && (
+        <EmotionBalance
+          playerId={playerId}
+          locale={locale}
+          dayStartIso={bounds.dayStartIso}
+          className="mt-8"
+        />
       )}
 
       {q.data && (

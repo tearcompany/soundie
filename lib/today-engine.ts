@@ -1,4 +1,4 @@
-import { NOTE_LIST, type NoteEntry } from '@/lib/notes'
+import { DEFAULT_NOTE_ID, NOTE_LIST, type NoteEntry } from '@/lib/notes'
 
 export type TodaySlotId = 'morning' | 'relationships' | 'stress' | 'soul'
 
@@ -44,10 +44,11 @@ function takeAnyUnused(used: Set<string>, startIdx: number): NoteEntry {
     const n = NOTE_LIST[(startIdx + k) % NOTE_LIST.length]!
     if (!used.has(n.id)) return n
   }
-  return NOTE_LIST[0]!
+  return NOTE_LIST.find((n) => n.id === DEFAULT_NOTE_ID) ?? NOTE_LIST[0]!
 }
 
-const MORNING_BIAS = ['E', 'A', 'D', 'C']
+/** Morning invitations lean on the journey spine (F → A → C), then nearby anchors. */
+const MORNING_BIAS = ['F', 'A', 'C', 'E', 'D']
 const REL_POOL = byEmotions(['attachment', 'envy', 'shame'])
 const STRESS_POOL = byEmotions(['anxiety', 'anger', 'frustration', 'guilt'])
 const SOUL_POOL = byEmotions(['grief', 'sadness', 'guilt', 'dissatisfaction'])
@@ -68,7 +69,7 @@ export function computeTodaySlots(input: TodayEngineInput): { slotId: TodaySlotI
     (id) => NOTE_LIST.find((n) => n.id === id),
   ).filter(Boolean) as NoteEntry[]
   const mIdx = (input.weekday + input.streakNights + seed) % Math.max(1, morningPool.length)
-  let morning = morningPool[mIdx] ?? NOTE_LIST[0]!
+  let morning = morningPool[mIdx] ?? NOTE_LIST.find((n) => n.id === DEFAULT_NOTE_ID) ?? NOTE_LIST[0]!
   if (used.has(morning.id)) morning = takeAnyUnused(used, (seed + 1) % 12)
   used.add(morning.id)
   out.push({ slotId: 'morning', noteId: morning.id })
@@ -130,7 +131,7 @@ export function heroOrbHexFromSlots(slots: { noteId: string }[]): string {
     b += parseInt(hex.slice(4, 6), 16)
     n += 1
   }
-  if (n === 0) return NOTE_LIST[0]!.chromaHex
+  if (n === 0) return (NOTE_LIST.find((x) => x.id === DEFAULT_NOTE_ID) ?? NOTE_LIST[0]!).chromaHex
   const mix = (x: number) => Math.round(x / n).toString(16).padStart(2, '0')
   return `#${mix(r)}${mix(g)}${mix(b)}`
 }

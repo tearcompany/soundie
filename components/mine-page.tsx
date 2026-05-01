@@ -11,6 +11,9 @@ import { hexToRgba } from '@/lib/hex-rgba'
 import { cn } from '@/lib/utils'
 import { getNoteById } from '@/lib/notes'
 import { ALL_DUAL_RITUAL_IDS, DUAL_RITUAL_ENGINES, getDualRitualEngine, type RitualArchetypeKey } from '@/lib/soundie-rituals'
+import { ShadowLightField } from '@/components/shadow-light-field'
+import { HealingJourney } from '@/components/healing-journey'
+import { PlayerStats } from '@/components/player-stats'
 
 export function MinePage() {
   const router = useRouter()
@@ -85,6 +88,14 @@ export function MinePage() {
         <p className="mt-2 font-body-serif text-sm text-ink/72">{t('ritualsHint')}</p>
       </header>
 
+      {/* Player progress — streak, total time, per-note progress bars */}
+      <div className="relative mt-8">
+        <p className="mb-3 font-mono text-[0.5rem] uppercase tracking-[0.24em] text-ink-muted">
+          {t('statsTitle')}
+        </p>
+        <PlayerStats playerId={playerId} locale={locale} />
+      </div>
+
       <div className="relative mt-8 w-full">
         <Suspense fallback={null}>
           <SoundieRitualPanel
@@ -145,6 +156,20 @@ export function MinePage() {
           </div>
         </section>
       )}
+
+      <ShadowLightField
+        playerId={playerId}
+        locale={locale}
+        lookbackDays={30}
+        className="relative mt-14"
+      />
+
+      <HealingJourney
+        playerId={playerId}
+        locale={locale}
+        lookbackDays={60}
+        className="relative mt-12"
+      />
 
       <header className="relative mt-14">
         <h2 className="font-[family-name:var(--font-fraunces,serif)] text-xl font-semibold tracking-tight text-ink">

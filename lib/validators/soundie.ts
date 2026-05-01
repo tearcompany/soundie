@@ -15,6 +15,8 @@ export const completeSessionInput = z.object({
   playerId: z.string().cuid(),
   noteId: noteIdInput,
   durationSeconds: z.number().int().min(1).max(7200),
+  /** Kalendarz użytkownika `YYYY-MM-DD` (jak przy `logVisit`). Gdy brak lub niepoprawny → serwer użyje dnia UTC. */
+  calendarDate: z.string().min(10).max(10).optional(),
 })
 
 export const soundieRowSchema = z.object({

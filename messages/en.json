@@ -2,6 +2,14 @@
   "common": {
     "languageNav": "Language"
   },
+  "backgroundPresence": {
+    "indicatorActive": "Presence active",
+    "indicatorHint": "A very quiet bed beneath the note. It softens when you listen fully, then returns.",
+    "disable": "Turn off presence",
+    "ritualNudge": "A ritual might deepen this",
+    "ritualNudgeHint": "You have rested in presence for a while — rituals remember you.",
+    "ritualCta": "Open Moje"
+  },
   "auth": {
     "emailLabel": "Enter your email",
     "emailHint": "We will send a 6-digit code. No passwords.",
@@ -67,7 +75,7 @@
     "headlineLine1": "Soundie",
     "headlineLine2": "Every Sound Heals.",
     "subhead": "A meditative world where musical notes become living companions. Listen deeply, unlock lore, restore your nervous system.",
-    "primaryCta": "Begin with C — The Foundation",
+    "primaryCta": "Begin with F — The Keeper",
     "secondaryCta": "Explore the 12 Notes",
     "relief1": "less tension",
     "relief2": "more breath",
@@ -102,11 +110,12 @@
     "narrativeWorldP3": "Soundie is the rediscovery. You don't collect monsters. You awaken Acoustic Archetypes — living entities formed where frequency and human attention meet.",
     "narrativeStack": "Built with care.",
     "narrativeSignoff": "Soundie. It heals.",
+    "inShadowKicker": "In the shadow",
     "tapHint": "Tap a note and listen for a moment",
     "ariaNoteGroup": "Listen to a note from the Soundie scale",
     "playAria": "Play {name} ({freq} Hz)",
     "cta": "Begin Session",
-    "footnote": "C · The Foundation · 261.63 Hz",
+    "footnote": "F · The Keeper · 349.23 Hz",
     "howItWorks": "How Soundie works",
     "stepLabel": "Step {num}",
     "step1Title": "Listen",
@@ -116,6 +125,9 @@
     "step3Title": "Reveal",
     "step3Body": "Lore unlocks as time passes. The note tells you what it knows.",
     "inviteKicker": "Your first note",
+    "selectedNoteLead": "Chosen · {short} · {name}",
+    "inviteLoading": "Gathering the card…",
+    "inTheLightKicker": "In the light",
     "inviteFallbackTitle": "A card is waiting",
     "inviteFallbackTagline": "Touch the sound",
     "inviteFallbackAffirmation": "Step in gently. This note has a message for you today.",
@@ -170,6 +182,8 @@
     "sacredLine": "You stayed. The note remembers.",
     "stopListening": "Stop",
     "beginSession": "Listen",
+    "presenceToggleKicker": "Background",
+    "presenceToggleLabel": "Let this note hold a very quiet bed beneath everything else. It never competes with listening.",
     "sessionDoneShare": "Share your resonance",
     "sessionDoneShareDone": "Shared.",
     "sessionDoneShareCopied": "Link copied.",
@@ -178,6 +192,49 @@
     "tabTeardrop": "Teardrop",
     "tabSession": "Session",
     "tabJourney": "Journey",
+    "tabChord": "Chord",
+    "tabPulse": "Pulse",
+    "pulseNeedPlayer": "Stay a moment — the pulse appears once Soundie knows you.",
+    "pulse": {
+      "kicker": "Last {minutes} min · this note",
+      "intro": "Resonance you brought here, minute by minute — light beside shadow. The curve is a mirror, not a verdict.",
+      "seriesLight": "In the light — lift",
+      "seriesShadow": "In the shadow — weight in motion",
+      "legendLight": "Lift (sessions, focus, check-ins)",
+      "legendShadow": "Weight (where you began heavy)",
+      "axisStart": "−{n} min",
+      "axisNow": "Now",
+      "chartAria": "Light and shadow intensity over recent minutes",
+      "loading": "Listening for the last few minutes…",
+      "error": "The pulse could not load. Try again in a breath.",
+      "empty": "Still quiet in this window — one return, and the river remembers your shape.",
+      "forecastTitle": "What the line suggests next",
+      "likelyMood": "Soft guess at the next threshold",
+      "forecast": {
+        "toward_light": "The arc leans toward warmth — a little more room ahead.",
+        "toward_shadow": "Shadow gathers mass — go gently; no need to fix it in one breath.",
+        "steady": "The rhythm holds. Nothing asks you to rush what is still unfolding."
+      }
+    },
+    "chordSequencer": {
+      "kicker": "Resonance builder",
+      "title": "Chord",
+      "subtitle": "Layer notes into a chord. All voices sound together — synchronized, as one breath.",
+      "chordLabel": "Current chord",
+      "emptyChord": "Pick a note below to begin",
+      "paletteLabel": "Notes",
+      "paletteHint": "Tap a note to add · tap again to remove",
+      "slotsLeft": "more",
+      "play": "Sound chord",
+      "stop": "Silence",
+      "clear": "Clear",
+      "voices": "voices",
+      "presetRecognized": "This combination is named",
+      "suggestions": "Add to reveal",
+      "seedQuality": "In the record",
+      "teardropInLight": "In the light",
+      "teardropInShadow": "In the shadow"
+    },
     "loreAwakened": "Story awakened",
     "openMeaning": "Read more",
     "remainWithNote": "Remain with {note}",
@@ -416,6 +473,29 @@
       "affirmation": "I allow the wave to pass through."
     }
   },
+  "emotionBalance": {
+    "title": "Balance of light and shadow",
+    "subtitle": "Where each inner climate met more light — and where shadow still held space. Neither is wrong.",
+    "todayLabel": "Today",
+    "weekLabel": "This week",
+    "legendShadow": "Shadow",
+    "legendLight": "Light",
+    "loading": "Listening for the balance…",
+    "needPlayer": "Stay a moment — the balance appears once Soundie knows you.",
+    "weeklyShiftKicker": "Weekly movement",
+    "weeklyShift": {
+      "toward_light": "The week moved toward more light. Something found room to open.",
+      "toward_shadow": "Shadow gathered weight this week. That is not failure — it is where you were.",
+      "steady": "The week held its balance. You stayed.",
+      "new_arrival": "The field is new. Listen, and it will begin to remember."
+    },
+    "weeklyShiftWithEmotion": {
+      "toward_light": "Especially in {emotion} — more light moved through by the end.",
+      "toward_shadow": "Especially in {emotion} — shadow held more space this week.",
+      "steady": "In {emotion} as in the rest — the week stayed close to balance.",
+      "new_arrival": "The field is new. Listen, and it will begin to remember."
+    }
+  },
   "sanctuary": {
     "greeting": "Echo",
     "sub": "A mirror of your listening — not a score, not a verdict. Patterns here are invitations, not pressure.",
@@ -541,6 +621,7 @@
   },
   "minePage": {
     "kicker": "Your space",
+    "statsTitle": "Your presence",
     "ritualsTitle": "Rituals",
     "ritualsHint": "The highlighted ritual follows your last note from Now. Arm it here, then continue in Now to listen. Or jump to any archetype below.",
     "ritualShortcutsAria": "Open each archetype in Now",
@@ -561,6 +642,61 @@
       "energy": { "title": "Motion" },
       "release": { "title": "Let go" }
     }
+  },
+  "playerStats": {
+    "loading": "Reading your path…",
+    "noData": "Your first session will begin your story here.",
+    "streak": "Return rhythm",
+    "streakNight": "night",
+    "streakNights": "nights",
+    "totalMins": "In resonance",
+    "minLabel": "min",
+    "notesLabel": "Notes",
+    "notesDiscovered": "touched",
+    "levelLabel": "Lv {n}",
+    "loreLabel": "lore",
+    "nextUnlock": "next layer at {min} min",
+    "fullyUnlocked": "story complete",
+    "sectionTitle": "Your presence"
+  },
+  "healingJourney": {
+    "kicker": "Your healing path",
+    "title": "Shadow & Light by Note",
+    "summary": "{minutes} min in resonance · {healed} healing moments",
+    "loading": "Reading your path…",
+    "noData": "Your journey will appear here after your first sessions.",
+    "sessions": "sessions",
+    "healedMoments": "{n} healed",
+    "shadowBrought": "Shadow you carried in",
+    "shadowsTreated": "What this note addresses",
+    "lightReceived": "Light you left with",
+    "lightAura": "Aura this note brings",
+    "transforms": "Transformations",
+    "mood": {
+      "anxious": "anxious",
+      "numb": "numb",
+      "heavy": "heavy",
+      "scattered": "scattered",
+      "hopeful": "hopeful"
+    }
+  },
+  "shadowLightField": {
+    "kicker": "Your emotional field",
+    "title": "Shadow & Light",
+    "subtitle": "Minutes in resonance — shaped by the mood you carried in, and the presence you offered.",
+    "legendShadow": "shadow",
+    "legendShadowDesc": "heavy mood before session",
+    "legendLight": "light",
+    "legendLightDesc": "presence, calm, or healing",
+    "modeStacked": "layers",
+    "modeStream": "flow",
+    "tooltipTotal": "total",
+    "unitMin": "min",
+    "unitSessions": "×",
+    "loading": "Reading the field…",
+    "noData": "The field will fill as you return.",
+    "noDataSub": "shape previewed — data arrives with sessions",
+    "footnote": "Last {days} days · minutes in each state"
   },
   "today": {
     "heroTitle": "Your Frequency Today",
@@ -607,6 +743,20 @@
     "durationLabel": "{n, plural, one {# min in resonance} other {# min in resonance}}",
     "unknownUnlock": "resistance",
     "unknownHeal": "inner steadiness"
+  },
+  "emotionField": {
+    "hover": {
+      "anxiety":        "something stills",
+      "sadness":        "a heaviness, held",
+      "dissatisfaction":"a longing, softening",
+      "attachment":     "warmth, loosening",
+      "anger":          "fire finding its shape",
+      "envy":           "the other horizon",
+      "shame":          "a shadow, witnessed",
+      "frustration":    "tension releasing",
+      "grief":          "loss, gently carried",
+      "guilt":          "a weight, breathing"
+    }
   },
   "ritualCard": {
     "title": "Note pairs",

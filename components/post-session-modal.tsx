@@ -74,6 +74,7 @@ export function PostSessionModal({
       setSaved(true)
       toast.success(t('saved'))
       void trpcUtils.resonance.getTrace.invalidate()
+      void trpcUtils.resonance.getMoodPulse.invalidate()
     },
     onError: () => {
       toast.error(t('saveError'))

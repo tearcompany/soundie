@@ -66,6 +66,12 @@ type PersistedSoundieState = Pick<
 
 interface SoundieStore extends SoundieState {
   hasHydrated: boolean
+  /** Continuous low-volume note bed — not persisted (no surprise autoplay after reload). */
+  presenceEnabled: boolean
+  setPresenceEnabled: (v: boolean) => void
+  /** True while the main Teraz player holds the sound field (session or listen tone). */
+  mainListenActive: boolean
+  setMainListenActive: (v: boolean) => void
   pendingLoreFocusIndex: number | null
   startSession: (durationSeconds?: number) => void
   stopSession: () => void
@@ -148,6 +154,17 @@ export const useSoundieStore = create<SoundieStore>()(
     (set, get) => ({
       ...INITIAL_STATE,
       hasHydrated: false,
+      presenceEnabled: false,
+      mainListenActive: false,
+
+      setPresenceEnabled: (v: boolean) => {
+        set({ presenceEnabled: v })
+      },
+
+      setMainListenActive: (v: boolean) => {
+        set({ mainListenActive: v })
+      },
+
       pendingLoreFocusIndex: null,
 
       setPendingLoreFocusIndex: (idx: number | null) => {
@@ -434,6 +451,8 @@ export const useSoundieStore = create<SoundieStore>()(
           moodEntranceCleared: true,
           sessionMoodReaction: null,
           activeRitualId: null,
+          presenceEnabled: false,
+          mainListenActive: false,
         })
       },
     }),

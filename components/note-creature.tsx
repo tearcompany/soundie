@@ -14,6 +14,7 @@ import { EMPTY_NOTE_PROGRESS, useSoundieStore } from '@/lib/soundie-store'
 import { DEFAULT_NOTE_ID, getEmotionById, getNoteById } from '@/lib/notes'
 import { hexToRgba } from '@/lib/hex-rgba'
 import { trpc } from '@/lib/trpc/react'
+import { localCalendarStringFromDate } from '@/lib/calendar-day'
 import { getTeardropVesselBookPrimarySlug } from '@/lib/teardrop-ksiega'
 import { LockedNotes } from '@/components/locked-notes'
 import {
@@ -37,8 +38,9 @@ import { CircleHelp } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { PostSessionModal } from '@/components/post-session-modal'
-import { NoteTimeline } from '@/components/note-timeline'
 import { PixiNoteOrb } from '@/components/pixi-note-orb'
+import { ChordSequencer } from '@/components/chord-sequencer'
+import { MoodPulsePanel } from '@/components/mood-pulse-panel'
 import { deriveAffirmation, getTimeOfDay } from '@/lib/affirmation-engine'
 import {
   getCosmicAudioFrequencyHz,
@@ -139,6 +141,9 @@ export function NoteCreature() {
 
   const activeRitualId = useSoundieStore((s) => s.activeRitualId)
   const activeNoteId = useSoundieStore((s) => s.activeNoteId)
+  const presenceEnabled = useSoundieStore((s) => s.presenceEnabled)
+  const setPresenceEnabled = useSoundieStore((s) => s.setPresenceEnabled)
+  const setMainListenActive = useSoundieStore((s) => s.setMainListenActive)
   const currentSession = useSoundieStore((s) => s.currentSession)
   const progressByNoteIdAll = useSoundieStore((s) => s.progressByNoteId)
   const ritualSeal = useSoundieStore((s) => s.ritualSeal)
@@ -252,10 +257,6 @@ export function NoteCreature() {
     { playerId: playerId!, noteId: listeningNoteId },
     { enabled: !!playerId, staleTime: 10_000, retry: false, refetchInterval: 45_000 },
   )
-  const streamQuery = trpc.soundie.getRecentAcrossNotes.useQuery(
-    { playerId: playerId!, windowHours: 72 },
-    { enabled: !!playerId, staleTime: 10_000, retry: false, refetchInterval: 45_000 },
-  )
   const teardropPlaylistQuery = trpc.teardrop.getMappedForNote.useQuery(
     { noteId: listeningNoteId, locale, playerId: playerId ?? undefined },
     { enabled: Boolean(playerId), staleTime: 30_000, retry: false },
@@ -264,10 +265,14 @@ export function NoteCreature() {
   const { mutate: trackSessionStart } = trpc.analytics.record.useMutation()
   const { mutate: trackAnalytics } = trpc.analytics.record.useMutation()
   const { mutate: trackLoreSlideView } = trpc.analytics.record.useMutation()
-  const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation()
+  const trpcUtils = trpc.useUtils()
+  const { mutate: recordTeardropFocus } = trpc.teardrop.recordFocus.useMutation({
+    onSuccess: () => {
+      void trpcUtils.resonance.getMoodPulse.invalidate()
+    },
+  })
   const { mutate: persistRitualEcho } = trpc.echo.save.useMutation()
   const { mutateAsync: createSessionReflection } = trpc.sessionReflection.createForSession.useMutation()
-  const trpcUtils = trpc.useUtils()
   const onRemoteSessionSynced = useCallback(
     (result: {
       soundie: {
@@ -288,19 +293,28 @@ export function NoteCreature() {
       )
       void sessionsQuery.refetch()
       void trpcUtils.resonance.getTrace.invalidate()
+      void trpcUtils.resonance.getMoodPulse.invalidate()
     },
-    [syncFromRemote, sessionsQuery.refetch, trpcUtils.resonance.getTrace],
+    [syncFromRemote, sessionsQuery.refetch, trpcUtils.resonance.getTrace, trpcUtils.resonance.getMoodPulse],
   )
 
   const { mutateAsync: pushRemoteListenSession } = trpc.soundie.completeSession.useMutation()
 
   const completeRemoteSession = useCallback(
     (
-      input: { playerId: string; noteId: string; durationSeconds: number },
+      input: {
+        playerId: string
+        noteId: string
+        durationSeconds: number
+        calendarDate?: string
+      },
       moodBefore: import('@/lib/mood-reaction-texts').MoodId | null,
       onReflection: (sessionId: string | null, reflectionId: string | null) => void,
     ) => {
-      void pushRemoteListenSession(input)
+      void pushRemoteListenSession({
+        ...input,
+        calendarDate: input.calendarDate ?? localCalendarStringFromDate(new Date()),
+      })
         .then(async (result) => {
           onRemoteSessionSynced(result)
           if (!moodBefore) {
@@ -443,13 +457,13 @@ export function NoteCreature() {
   const [selectedTeardropCardId, setSelectedTeardropCardId] = useState<string | null>(null)
   const [dealerRevealCount, setDealerRevealCount] = useState(0)
   const [cardSection, setCardSection] = useState<
-    'lore' | 'teardrop' | 'session' | 'journey'
+    'lore' | 'teardrop' | 'session' | 'journey' | 'chord' | 'pulse'
   >('lore')
   const soundiePresenceRef = useRef<HTMLDivElement | null>(null)
   const [teardropSheetOpen, setTeardropSheetOpen] = useState(false)
   const teardropFocusStartAtRef = useRef<number | null>(null)
   const teardropFocusCardIdRef = useRef<string | null>(null)
-  const prevCardSectionRef = useRef<'lore' | 'teardrop' | 'session' | 'journey'>('lore')
+  const prevCardSectionRef = useRef<'lore' | 'teardrop' | 'session' | 'journey' | 'chord' | 'pulse'>('lore')
   const teardropFocusNoteIdRef = useRef<string | null>(null)
   const loreStatus = useMemo(
     () => loreUnlockStatusFromTotalListenSeconds(effectiveTotalListenTime),
@@ -794,6 +808,11 @@ export function NoteCreature() {
     isPlayingRef.current = isPlaying
   }, [isPlaying])
 
+  useEffect(() => {
+    setMainListenActive(isPlaying || currentSession.active)
+    return () => setMainListenActive(false)
+  }, [isPlaying, currentSession.active, setMainListenActive])
+
   const toggleAudio = () => {
     if (isPlaying) {
       pauseAudio()
@@ -1083,6 +1102,7 @@ export function NoteCreature() {
                     playerId: pidR,
                     noteId: seg.noteId,
                     durationSeconds: seg.seconds,
+                    calendarDate: localCalendarStringFromDate(new Date()),
                   })
                   onRemoteSessionSynced(result)
                   if (moodBeforeForSession) {
@@ -1151,13 +1171,18 @@ export function NoteCreature() {
         const pid = st.playerId
         const nid = st.activeNoteId
         if (pid && credited > 0) {
-          completeRemoteSession({
-            playerId: pid,
-            noteId: nid,
-            durationSeconds: credited,
-          }, moodBeforeForSession, (sessionId, reflectionId) => {
+          completeRemoteSession(
+            {
+              playerId: pid,
+              noteId: nid,
+              durationSeconds: credited,
+              calendarDate: localCalendarStringFromDate(new Date()),
+            },
+            moodBeforeForSession,
+            (sessionId, reflectionId) => {
             setLastSessionReflection(sessionId, reflectionId)
-          })
+          },
+          )
         }
         const storeSnap = useSoundieStore.getState()
         const streakCount = storeSnap.progressByNoteId[nid]
@@ -1425,6 +1450,8 @@ export function NoteCreature() {
                 [
                   ['lore', t('tabLore')],
                   ['teardrop', t('tabTeardrop')],
+                  ['chord', t('tabChord')],
+                  ['pulse', t('tabPulse')],
                   ['session', t('tabSession')],
                   ['journey', t('tabJourney')],
                 ] as const
@@ -1677,6 +1704,19 @@ export function NoteCreature() {
             </div>
             )}
 
+          {cardSection === 'chord' && (
+            <ChordSequencer locale={locale} className="px-1 py-2" />
+          )}
+
+          {cardSection === 'pulse' &&
+            (playerId ? (
+              <MoodPulsePanel playerId={playerId} noteId={listeningNoteId} locale={locale} />
+            ) : (
+              <p className="px-1 py-3 text-center font-body-serif text-sm text-ink/70">
+                {t('pulseNeedPlayer')}
+              </p>
+            ))}
+
           {cardSection === 'session' && (
           <div className="border-t border-pearl-border/50 pt-5 text-center">
             <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-ink-muted mb-4">{t('listeningSession')}</p>
@@ -1732,24 +1772,6 @@ export function NoteCreature() {
               </div>
             )}
             <p className="font-body-serif mb-3 text-sm italic text-ink/65">{t('remainWithNote', { note: def.short })}</p>
-            {streamQuery.data && streamQuery.data.sessions.length > 0 && (
-              <NoteTimeline
-                sessions={streamQuery.data.sessions}
-                totalSeconds={streamQuery.data.totalSeconds}
-                windowHours={streamQuery.data.windowHours}
-                sessionElapsedSeconds={currentSession.elapsed}
-                sessionActive={currentSession.active}
-                isPlaying={isPlaying}
-                frequencyHz={def.frequency}
-                pulseDepth={pulseDepth}
-                sacredClimax={sacredClimax}
-                activeNoteHex={c}
-                activeNoteShort={def.short}
-                inTheLightLine={def.synestheticLinePl}
-                locale={locale as 'en' | 'pl'}
-                className="mb-4"
-              />
-            )}
             <button
               type="button"
               onClick={toggleAudio}
@@ -1762,6 +1784,25 @@ export function NoteCreature() {
             >
               {isPlaying ? t('stopListening') : t('beginSession')}
             </button>
+
+            <div className="mt-6 rounded-2xl border border-pearl-border/40 bg-pearl-dark/20 px-4 py-3.5 text-left">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={presenceEnabled}
+                  onChange={(e) => setPresenceEnabled(e.target.checked)}
+                  className="mt-1 h-3.5 w-3.5 shrink-0 rounded border-pearl-border text-ink focus:ring-ink/25"
+                />
+                <span className="min-w-0">
+                  <span className="block font-mono text-[0.55rem] uppercase tracking-[0.18em] text-ink-muted">
+                    {t('presenceToggleKicker')}
+                  </span>
+                  <span className="mt-1 block font-body-serif text-[0.78rem] leading-snug text-ink/75">
+                    {t('presenceToggleLabel')}
+                  </span>
+                </span>
+              </label>
+            </div>
           </div>
           )}
 

@@ -15,6 +15,8 @@ import noteHealingProfilesEn from '../data/note-healing-profiles.json'
 import noteHealingProfilesPl from '../data/note-healing-profiles-pl.json'
 import { noteHealingProfileListSchema } from '../lib/validators/note-healing-profile'
 import { seedRituals } from './seed-rituals'
+import { seedChordPresets } from './seed-chord-presets'
+import { NOTE_TEARDROP_PLAYLIST } from '../lib/teardrop-note-playlist'
 
 const prisma = new PrismaClient()
 
@@ -84,21 +86,6 @@ const TEARDROP_PHASES = [
   { slug: 'light', titlePl: 'Światło', titleEn: 'Light', unlockOrder: 4, xpPerUnlock: 25 },
   { slug: 'archetypes', titlePl: 'Archetypy', titleEn: 'Archetypes', unlockOrder: 5, xpPerUnlock: 35 },
 ] as const
-
-const NOTE_TEARDROP_PLAYLIST: Record<string, string[]> = {
-  C:   ['the-vessel', 'the-seed', 'the-core', 'the-anchor', 'the-path'],
-  'C#': ['the-echo', 'the-crossing', 'the-whisper', 'the-veil', 'the-return'],
-  D:   ['the-path', 'the-seed', 'the-stream', 'the-pulse', 'the-bridge'],
-  'D#': ['the-seed', 'the-vessel', 'the-silence', 'the-abyss', 'the-shadow'],
-  E:   ['the-lightkeeper', 'the-flame', 'the-glow', 'the-beam', 'the-sun'],
-  F:   ['the-spiral', 'the-guardian', 'the-anchor', 'the-soil', 'the-sanctuary'],
-  'F#': ['the-watcher', 'the-mirror', 'the-prism', 'the-echo', 'the-witness'],
-  G:   ['the-wave', 'the-stream', 'the-tide', 'the-drift', 'the-surge'],
-  'G#': ['the-pulse', 'the-flame', 'the-breaker', 'the-shadow', 'the-spiral'],
-  A:   ['the-beam', 'the-star', 'the-sun', 'the-path', 'the-lightkeeper'],
-  'A#': ['the-drift', 'the-whisper', 'the-silence', 'the-fog', 'the-vessel'],
-  B:   ['the-return', 'the-veil', 'the-pause', 'the-abyss', 'the-teardrop-bearer'],
-}
 
 {
   const vesselBook = TEARDROP_VESSEL_BOOK_PRIMARY_SLUG as Record<string, string>
@@ -301,8 +288,15 @@ async function main() {
     )
   }
 
+  /** Unlock / carousel order: F → A → C (story spine), then remaining notes in chromatic order. */
+  const JOURNEY_SORT_HEAD = ['F', 'A', 'C'] as const
+  const journeyOrderedNotes = [
+    ...JOURNEY_SORT_HEAD.map((id) => NOTE_LIST.find((n) => n.id === id)!),
+    ...NOTE_LIST.filter((n) => !JOURNEY_SORT_HEAD.includes(n.id as (typeof JOURNEY_SORT_HEAD)[number])),
+  ]
+
   let order = 0
-  for (const n of NOTE_LIST) {
+  for (const n of journeyOrderedNotes) {
     const profileEn = healingEnByNoteId.get(n.id)
     const profilePl = healingPlByNoteId.get(n.id)
     if (!profileEn || !profilePl) {
@@ -393,6 +387,7 @@ async function main() {
   }
 
   await seedRituals(prisma)
+  await seedChordPresets(prisma)
 
   console.log(`[seed] done — ${TEARDROP_CARDS.length} cards, ${linked} note-card links`)
 }

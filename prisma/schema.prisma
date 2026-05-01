@@ -504,6 +504,27 @@ model DailyMission {
   @@index([missionDate])
 }
 
+model ChordPreset {
+  id             String   @id
+  noteKey        String   @unique
+  noteIds        String[]
+  /** Systemowe role (rdzeń + ewentualna warstwa emocji/procesu) — puste przy samych nutach */
+  archetypes     String[] @default([])
+  category       String?
+  intent         String?
+  namePl         String
+  nameEn         String
+  descriptionPl  String
+  descriptionEn  String
+  quality        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([noteKey])
+  @@index([category])
+  @@index([intent])
+}
+
 model DailyMissionItem {
   id              String    @id @default(cuid())
   missionId       String

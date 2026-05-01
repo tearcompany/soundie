@@ -2,6 +2,14 @@
   "common": {
     "languageNav": "Język"
   },
+  "backgroundPresence": {
+    "indicatorActive": "Obecność włączona",
+    "indicatorHint": "Bardzo ciche łoże pod nutą. Cichnie, gdy wchodzisz w pełne słuchanie — i wraca potem.",
+    "disable": "Wyłącz obecność",
+    "ritualNudge": "Rytuał może to pogłębić",
+    "ritualNudgeHint": "Jakiś czas jesteś w cichej obecności — rytuały pamiętają o tobie.",
+    "ritualCta": "Otwórz Moje"
+  },
   "auth": {
     "emailLabel": "Wpisz swój adres email",
     "emailHint": "Wyślemy Ci 6-cyfrowy kod. Bez haseł.",
@@ -67,7 +75,7 @@
     "headlineLine1": "Soundie",
     "headlineLine2": "Każdy dźwięk leczy.",
     "subhead": "Medytacyjny świat, w którym nuty muzyczne stają się żywymi towarzyszami. Słuchaj głęboko, odblokowuj lore, przywracaj spokój układowi nerwowemu.",
-    "primaryCta": "Zacznij od C — Fundament",
+    "primaryCta": "Zacznij od F — Strażnik",
     "secondaryCta": "Poznaj 12 nut",
     "relief1": "mniej napięcia",
     "relief2": "więcej oddechu",
@@ -102,11 +110,12 @@
     "narrativeWorldP3": "Soundie to ponowne odkrycie. Nie zbierasz potworów. Budzisz akustyczne archetypy — byty tam, gdzie spotykają się częstotliwość i ludzka uwaga.",
     "narrativeStack": "Zbudowane z dbałością o każdy detal.",
     "narrativeSignoff": "Soundie. Leczy.",
+    "inShadowKicker": "W cieniu",
     "tapHint": "Stuknij nutę i posłuchaj przez chwilę",
     "ariaNoteGroup": "Wybierz nutę ze skali Soundie",
     "playAria": "Odtwórz {name} ({freq} Hz)",
     "cta": "Rozpocznij sesję",
-    "footnote": "C · Fundament · 261,63 Hz",
+    "footnote": "F · Strażnik · 349,23 Hz",
     "howItWorks": "Jak działa Soundie",
     "stepLabel": "Krok {num}",
     "step1Title": "Słuchaj",
@@ -116,6 +125,9 @@
     "step3Title": "Odsłoń",
     "step3Body": "Lore odblokowuje się w czasie. Nuta mówi, co wie.",
     "inviteKicker": "Twoja pierwsza nuta",
+    "selectedNoteLead": "Wybrana · {short} · {name}",
+    "inviteLoading": "Karta się zbiera…",
+    "inTheLightKicker": "W świetle",
     "inviteFallbackTitle": "Karta czeka",
     "inviteFallbackTagline": "Dotknij dźwięku",
     "inviteFallbackAffirmation": "Wejdź spokojnie. Ta nuta ma dziś dla Ciebie wiadomość.",
@@ -170,6 +182,8 @@
     "sacredLine": "Zostałeś. Nuta pamięta.",
     "stopListening": "Stop",
     "beginSession": "Słuchaj",
+    "presenceToggleKicker": "W tle",
+    "presenceToggleLabel": "Niech ta nuta trzyma bardzo ciche łoże pod wszystkim innym. Nie wchodzi w drogę słuchaniu.",
     "sessionDoneShare": "Podziel się rezonansem",
     "sessionDoneShareDone": "Udostępniono.",
     "sessionDoneShareCopied": "Link skopiowany.",
@@ -178,6 +192,49 @@
     "tabTeardrop": "Teardrop",
     "tabSession": "Sesja",
     "tabJourney": "Podróż",
+    "tabChord": "Akord",
+    "tabPulse": "Puls",
+    "pulseNeedPlayer": "Zostań chwilę — puls pojawi się, gdy Soundie Cię rozpozna.",
+    "pulse": {
+      "kicker": "Ostatnie {minutes} min · ta nuta",
+      "intro": "Rezonans, który tu przyniosłaś — minuta po minucie: światło obok cienia. Krzywa to lustro, nie wyrok.",
+      "seriesLight": "W świetle — uniesienie",
+      "seriesShadow": "W cieniu — ruch ciężaru",
+      "legendLight": "Uniesienie (sesje, fokus, zapisy nastroju)",
+      "legendShadow": "Ciężar (skąd weszłaś w cień)",
+      "axisStart": "−{n} min",
+      "axisNow": "Teraz",
+      "chartAria": "Intensywność światła i cienia w ostatnich minutach",
+      "loading": "Słucham ostatnich minut…",
+      "error": "Puls nie wczytał się — spróbuj po jednym oddechu.",
+      "empty": "Jeszcze cisza w tym oknie — jeden powrót i rzeka zapamięta Twój kształt.",
+      "forecastTitle": "Co sugeruje linia dalej",
+      "likelyMood": "Delikatna domysłka przy progu",
+      "forecast": {
+        "toward_light": "Łuk nachyla się ku cieple — trochę więcej przestrzeni przed Tobą.",
+        "toward_shadow": "Cień zbiera masę — idź łagodnie; nie trzeba naprawiać tego jednym oddechem.",
+        "steady": "Rytm się trzyma. Nie trzeba śpieszyć tego, co się jeszcze otwiera."
+      }
+    },
+    "chordSequencer": {
+      "kicker": "Budowniczy rezonansu",
+      "title": "Akord",
+      "subtitle": "Nakładaj nuty w akord. Wszystkie głosy brzmią razem — zsynchronizowane, jak jeden oddech.",
+      "chordLabel": "Bieżący akord",
+      "emptyChord": "Dotknij noty poniżej, by zacząć",
+      "paletteLabel": "Nuty",
+      "paletteHint": "Dotknij, by dodać · dotknij ponownie, by usunąć",
+      "slotsLeft": "więcej",
+      "play": "Zagraj akord",
+      "stop": "Cisza",
+      "clear": "Wyczyść",
+      "voices": "głosy",
+      "presetRecognized": "Ta kombinacja ma imię",
+      "suggestions": "Dodaj, by odkryć",
+      "seedQuality": "W zapisie",
+      "teardropInLight": "W świetle",
+      "teardropInShadow": "W cieniu"
+    },
     "loreAwakened": "Historia się przebudza",
     "openMeaning": "Czytaj więcej",
     "remainWithNote": "Zostań przy {note}",
@@ -344,6 +401,29 @@
     "caption": "Kolejna nuta ukazuje się tylko temu, kto jest w bezruchu.",
     "captionRitual": "Rytuał trzyma skalę — nuty wracają, gdy się skończy."
   },
+  "emotionBalance": {
+    "title": "Balans światła i cienia",
+    "subtitle": "Gdzie każdy klimat wewnętrzny spotkał więcej światła — a gdzie cień wciąż trzymał przestrzeń. Żadne nie jest błędem.",
+    "todayLabel": "Dziś",
+    "weekLabel": "W tym tygodniu",
+    "legendShadow": "Cień",
+    "legendLight": "Światło",
+    "loading": "Słucham balansu…",
+    "needPlayer": "Zostań chwilę — balans pojawi się, gdy Soundie Cię rozpozna.",
+    "weeklyShiftKicker": "Ruch tygodnia",
+    "weeklyShift": {
+      "toward_light": "Tydzień przesunął się ku więcej światła. Coś znalazło przestrzeń, by się otworzyć.",
+      "toward_shadow": "Cień nabrał ciężaru w tym tygodniu. To nie jest błąd — to miejsce, w którym byłaś.",
+      "steady": "Tydzień trzymał balans. Pozostałaś.",
+      "new_arrival": "Pole jest nowe. Słuchaj — zacznie pamiętać Twój kształt."
+    },
+    "weeklyShiftWithEmotion": {
+      "toward_light": "Szczególnie w obszarze: {emotion} — więcej światła przepłynęło przez koniec tygodnia.",
+      "toward_shadow": "Szczególnie w obszarze: {emotion} — cień trzymał więcej przestrzeni w tym tygodniu.",
+      "steady": "W {emotion} jak i w reszcie — tydzień pozostał blisko balansu.",
+      "new_arrival": "Pole jest nowe. Słuchaj — zacznie pamiętać Twój kształt."
+    }
+  },
   "sanctuary": {
     "greeting": "Echo",
     "sub": "Lustro słuchania — nie wynik, nie wyrok. Wzorce tutaj to zaproszenia, nie pęd.",
@@ -469,6 +549,7 @@
   },
   "minePage": {
     "kicker": "Twoja przestrzeń",
+    "statsTitle": "Twoja obecność",
     "ritualsTitle": "Rytuały",
     "ritualsHint": "Wyróżniony rytuał zależy od ostatniej nuty wybranej w Teraz. Załaduj go tu, potem słuchaj w Teraz. Albo skocz od razu do archetypu poniżej.",
     "ritualShortcutsAria": "Skróty — każdy archetyp w Teraz",
@@ -489,6 +570,61 @@
       "energy": { "title": "Ruch" },
       "release": { "title": "Puszczenie" }
     }
+  },
+  "playerStats": {
+    "loading": "Czytam twoją drogę…",
+    "noData": "Pierwsza sesja zacznie tu twoją historię.",
+    "streak": "Rytm powrotów",
+    "streakNight": "noc",
+    "streakNights": "nocy",
+    "totalMins": "W rezonansie",
+    "minLabel": "min",
+    "notesLabel": "Nuty",
+    "notesDiscovered": "odkryte",
+    "levelLabel": "Poz {n}",
+    "loreLabel": "lore",
+    "nextUnlock": "następna warstwa: {min} min",
+    "fullyUnlocked": "historia kompletna",
+    "sectionTitle": "Twoja obecność"
+  },
+  "healingJourney": {
+    "kicker": "Twoja droga uzdrowienia",
+    "title": "Cień i Światło według nuty",
+    "summary": "{minutes} min w rezonansie · {healed} chwil uzdrowienia",
+    "loading": "Czytam twoją drogę…",
+    "noData": "Twoja podróż pojawi się tutaj po pierwszych sesjach.",
+    "sessions": "sesje",
+    "healedMoments": "{n} uzdrowionych",
+    "shadowBrought": "Cień który przyniosłeś",
+    "shadowsTreated": "Co ta nuta leczy",
+    "lightReceived": "Światło z którym wyszedłeś",
+    "lightAura": "Aura którą niesie ta nuta",
+    "transforms": "Transformacje",
+    "mood": {
+      "anxious": "niepokój",
+      "numb": "odrętwienie",
+      "heavy": "ciężar",
+      "scattered": "rozproszenie",
+      "hopeful": "nadzieja"
+    }
+  },
+  "shadowLightField": {
+    "kicker": "Pole emocjonalne",
+    "title": "Cień i Światło",
+    "subtitle": "Minuty w rezonansie — kształtowane nastrojem z którym przyszedłeś i obecnością którą dałeś.",
+    "legendShadow": "cień",
+    "legendShadowDesc": "ciężki nastrój przed sesją",
+    "legendLight": "światło",
+    "legendLightDesc": "obecność, spokój lub uzdrowienie",
+    "modeStacked": "warstwy",
+    "modeStream": "przepływ",
+    "tooltipTotal": "suma",
+    "unitMin": "min",
+    "unitSessions": "×",
+    "loading": "Czytam pole…",
+    "noData": "Pole wypełni się gdy wrócisz.",
+    "noDataSub": "podgląd kształtu — dane pojawią się z sesjami",
+    "footnote": "Ostatnie {days} dni · minuty w każdym stanie"
   },
   "today": {
     "heroTitle": "Twoja częstotliwość dziś",
@@ -535,6 +671,20 @@
     "durationLabel": "{n, plural, one {# min w rezonansie} few {# min w rezonansie} many {# min w rezonansie} other {# min w rezonansie}}",
     "unknownUnlock": "opór",
     "unknownHeal": "wewnętrzną stabilność"
+  },
+  "emotionField": {
+    "hover": {
+      "anxiety":        "coś cichnie",
+      "sadness":        "ciężar, obecny",
+      "dissatisfaction":"tęsknota, mięknąca",
+      "attachment":     "ciepło, puszczające",
+      "anger":          "ogień szukający kształtu",
+      "envy":           "inny horyzont",
+      "shame":          "cień, widziany",
+      "frustration":    "napięcie, odpływające",
+      "grief":          "strata, niesiona łagodnie",
+      "guilt":          "ciężar, który oddycha"
+    }
   },
   "ritualCard": {
     "title": "Pary nut",

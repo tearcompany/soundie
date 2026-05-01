@@ -431,7 +431,9 @@ const BY_ID = new Map(ENTRIES.map((e) => [e.id, e] as const))
 const BY_URL = new Map(ENTRIES.map((e) => [e.urlKey, e.id] as const))
 
 export const NOTE_LIST = ENTRIES
-export const DEFAULT_NOTE_ID = 'E' as const
+
+/** First note in Teraz / store — journey opens on the Keeper (F), then Heart (A), then Foundation (C) in DB sortOrder. */
+export const DEFAULT_NOTE_ID = 'F' as const
 
 export function getNoteById(id: string): NoteEntry | undefined {
   return BY_ID.get(id)
@@ -446,7 +448,7 @@ export function noteIdFromUrlKey(key: string): string | null {
 }
 
 export function urlKeyForNoteId(id: string): string {
-  return getNoteById(id)?.urlKey ?? getNoteById(DEFAULT_NOTE_ID)?.urlKey ?? 'E'
+  return getNoteById(id)?.urlKey ?? getNoteById(DEFAULT_NOTE_ID)?.urlKey ?? 'F'
 }
 
 export function getSynestheticChroma(noteId: string): string {

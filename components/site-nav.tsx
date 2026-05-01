@@ -76,7 +76,10 @@ export function SiteNav() {
           <img src="/icon.svg" alt="Soundie" width={24} height={24} aria-hidden className="h-12 w-12 shrink-0" />
           {navText('brand')}
         </Link>
-        <nav className="hidden min-w-0 items-center gap-1.5 sm:flex sm:gap-3" aria-label={navText('mainNav')}>
+        <nav
+          className="flex min-w-0 items-center gap-1.5 overflow-x-auto sm:gap-3"
+          aria-label={navText('mainNav')}
+        >
           {HREFS.map((href) => {
             const on = pathMatches(pathname, href)
             return (
@@ -124,28 +127,21 @@ export function SiteNav() {
           {navText('echo')}
         </Link>
 
-        {status !== 'loading' && (
-          isLoggedIn ? (
-            <button
-              type="button"
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="hidden shrink-0 font-mono text-[0.65rem] tracking-wide text-ink/45 transition-colors hover:text-ink/80 sm:inline sm:text-xs"
-            >
-              {navText('signOut')}
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className={cn(
-                'hidden shrink-0 font-mono text-[0.65rem] tracking-wide transition-colors sm:inline sm:text-xs',
-                pathMatches(pathname, '/' as Href)
-                  ? 'text-ink/55 hover:text-ink/90'
-                  : 'text-ink/55 hover:text-ink/90',
-              )}
-            >
-              {navText('signIn')}
-            </Link>
-          )
+        {isLoggedIn ? (
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="shrink-0 font-mono text-[0.65rem] tracking-wide text-ink/45 transition-colors hover:text-ink/80 sm:text-xs"
+          >
+            {navText('signOut')}
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="mr-1 shrink-0 font-mono text-[0.65rem] tracking-wide text-ink/55 transition-colors hover:text-ink/90 sm:text-xs"
+          >
+            {navText('signIn')}
+          </Link>
         )}
 
         <LanguageSwitcher className="shrink-0" />

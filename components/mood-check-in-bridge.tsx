@@ -33,7 +33,12 @@ export function MoodCheckInBridge() {
   const setMoodEntranceCleared = useSoundieStore((s) => s.setMoodEntranceCleared)
   const setSessionMoodReaction = useSoundieStore((s) => s.setSessionMoodReaction)
   const setSessionMoodBefore = useSoundieStore((s) => s.setSessionMoodBefore)
-  const saveEntry = trpc.mood.saveEntry.useMutation()
+  const trpcUtils = trpc.useUtils()
+  const saveEntry = trpc.mood.saveEntry.useMutation({
+    onSuccess: () => {
+      void trpcUtils.resonance.getMoodPulse.invalidate()
+    },
+  })
   const day = useMemo(() => localCalendarStringFromDate(new Date()), [])
   const [sessionRead, setSessionRead] = useState(false)
   const [step, setStep] = useState<1 | 2>(1)
